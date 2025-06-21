@@ -1,0 +1,27 @@
+const mongoose = require("mongoose");
+
+const userSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    match: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
+  },
+  phone: {
+    type: String,
+    required: true,
+    match: /^[6-9]\d{9}$/
+  },
+  passwordHash: { type: String, required: true },
+  address: {
+    street: String,
+    city: String,
+    pincode: String
+  },
+  favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: "Chef" }],
+  createdAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model("User", userSchema);
