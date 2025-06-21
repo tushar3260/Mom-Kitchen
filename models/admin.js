@@ -5,5 +5,5 @@ const adminSchema = new mongoose.Schema({
   passwordHash: { type: String, required: true },
   role: { type: String, enum: ["superadmin", "support"], default: "superadmin" },
 });
-
+console.log("hello from admin model");
 module.exports = mongoose.model("Admin", adminSchema);
