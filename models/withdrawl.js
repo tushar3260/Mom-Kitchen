@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const withdrawalSchema = new mongoose.Schema({
   chefId: { type: mongoose.Schema.Types.ObjectId, ref: "Chef" },
@@ -10,6 +10,11 @@ const withdrawalSchema = new mongoose.Schema({
   },
   requestedAt: { type: Date, default: Date.now },
   processedAt: { type: Date }
+},
+{
+  timestamps: true 
+
+
 });
 
-module.exports = mongoose.model("Withdrawal", withdrawalSchema);
+export default mongoose.model("Withdrawal", withdrawalSchema);

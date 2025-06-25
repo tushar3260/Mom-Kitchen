@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const mealSchema = new mongoose.Schema({
   chefId: { type: mongoose.Schema.Types.ObjectId, ref: "Chef", required: true },
@@ -11,6 +11,9 @@ const mealSchema = new mongoose.Schema({
   price: { type: Number, required: true },
   isActive: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now }
+},
+{
+  timestamps: true  
 });
 
-module.exports = mongoose.model("Meal", mealSchema);
+export default mongoose.model("Meal", mealSchema);

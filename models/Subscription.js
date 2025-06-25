@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const subscriptionSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
@@ -20,6 +20,9 @@ const subscriptionSchema = new mongoose.Schema({
   },
   autoRenew: { type: Boolean, default: false },
   totalAmount: { type: Number }
+},
+{
+  timestamps: true  
 });
 
-module.exports = mongoose.model("Subscription", subscriptionSchema);
+export default mongoose.model("Subscription", subscriptionSchema);
