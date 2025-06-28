@@ -27,6 +27,7 @@ app.use('/api/user', userRouter);
 app.use("/api/admins", adminRoutes);
 app.use("/api/chefs", chefRoutes);
 app.use("/api/meals", mealRoutes);
+app.use("/api/subscriptions", subscriptionRoutes);
 connectDB()
 app.get('/', (req, res) => {
     res.send('Hello duniyaa');
