@@ -29,7 +29,7 @@ app.use("/api/meals", mealRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/orders", orderRoutes);
-app.use("/api/withdrawals", witthdrawlRoutes);
+app.use("/api/withdrawls", witthdrawlRoutes);
 
 connectDB()
 app.get('/', (req, res) => {
