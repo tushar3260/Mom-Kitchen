@@ -1,6 +1,9 @@
-import Subscription from '../models/subscription.js';
+import Subscription from "../models/subscription.js";
+import User from "../models/User.js";
+import Chef from "../models/Chef.js";
+import Meal from "../models/Meal.js";
 
-// 👉 Create Subscription
+// ✅ Create Subscription
 export const createSubscription = async (req, res) => {
   try {
     const {
@@ -15,26 +18,42 @@ export const createSubscription = async (req, res) => {
       totalAmount
     } = req.body;
 
-    // Required fields validation
+    // ✅ Required fields validation
     if (!userId || !chefId || !plan || !startDate) {
       return res.status(400).json({
-        message: "Missing required fields: userId, chefId, plan, startDate are required"
+        message: "Missing required fields",
+        required: ["userId", "chefId", "plan", "startDate"]
       });
     }
 
-    // Validate plan enum
+    // ✅ Enum validation
     if (!["Weekly", "Monthly"].includes(plan)) {
       return res.status(400).json({ message: "Invalid plan. Allowed: Weekly, Monthly" });
     }
 
-    // Validate status enum if provided
     if (status && !["Active", "Paused", "Cancelled", "Expired"].includes(status)) {
       return res.status(400).json({ message: "Invalid status" });
     }
 
-    // Validate selectedMeals structure (basic)
     if (selectedMeals && !Array.isArray(selectedMeals)) {
       return res.status(400).json({ message: "selectedMeals must be an array" });
+    }
+
+    // ✅ Validate user and chef existence
+    const user = await User.findById(userId);
+    const chef = await Chef.findById(chefId);
+    if (!user || !chef) {
+      return res.status(404).json({ message: "Invalid userId or chefId" });
+    }
+
+    // ✅ Validate each mealId (if selectedMeals provided)
+    if (selectedMeals?.length > 0) {
+      for (let meal of selectedMeals) {
+        const exists = await Meal.findById(meal.mealId);
+        if (!exists) {
+          return res.status(404).json({ message: `Meal not found: ${meal.mealId}` });
+        }
+      }
     }
 
     const subscription = new Subscription({
@@ -61,7 +80,7 @@ export const createSubscription = async (req, res) => {
   }
 };
 
-// 👉 Get All Subscriptions
+// ✅ Get All Subscriptions
 export const getAllSubscriptions = async (req, res) => {
   try {
     const subscriptions = await Subscription.find()
@@ -70,13 +89,12 @@ export const getAllSubscriptions = async (req, res) => {
       .populate("selectedMeals.mealId", "title description price");
 
     res.status(200).json(subscriptions);
-
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch subscriptions", error: err.message });
   }
 };
 
-// 👉 Get Subscription by ID
+// ✅ Get Subscription by ID
 export const getSubscriptionById = async (req, res) => {
   try {
     const subscription = await Subscription.findById(req.params.id)
@@ -89,17 +107,17 @@ export const getSubscriptionById = async (req, res) => {
     }
 
     res.status(200).json(subscription);
-
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch subscription", error: err.message });
   }
 };
 
-// 👉 Update Subscription
+// ✅ Update Subscription
 export const updateSubscription = async (req, res) => {
   try {
     const updates = req.body;
 
+    // ✅ Enum validations
     if (updates.plan && !["Weekly", "Monthly"].includes(updates.plan)) {
       return res.status(400).json({ message: "Invalid plan" });
     }
@@ -131,7 +149,7 @@ export const updateSubscription = async (req, res) => {
   }
 };
 
-// 👉 Delete Subscription
+// ✅ Delete Subscription
 export const deleteSubscription = async (req, res) => {
   try {
     const deleted = await Subscription.findByIdAndDelete(req.params.id);

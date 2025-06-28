@@ -1,65 +1,100 @@
 import Order from "../models/Order.js";
 
-// 👉 Create new order
+// ✅ Place a New Order
 export const placeOrder = async (req, res) => {
   try {
-    const order = new Order(req.body);
+    const { userId, chefId, meals, totalAmount, deliveryAddress, paymentMethod } = req.body;
+
+    // ✅ Required fields validation
+    if (!userId || !chefId || !Array.isArray(meals) || meals.length === 0 || !totalAmount || !deliveryAddress) {
+      return res.status(400).json({
+        message: "Missing required fields",
+        required: ["userId", "chefId", "meals", "totalAmount", "deliveryAddress"]
+      });
+    }
+
+    // ✅ Create and save the order
+    const order = new Order({
+      userId,
+      chefId,
+      meals,
+      totalAmount,
+      deliveryAddress,
+      paymentMethod,
+      status: "Pending", // optional default
+      paymentStatus: "Unpaid" // optional default
+    });
+
     await order.save();
-    res.status(201).json(order);
+    res.status(201).json({ message: "Order placed successfully", order });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(500).json({ message: "Error placing order", error: err.message });
   }
 };
 
-// 👉 Get all orders (optional: for admin/support)
+// ✅ Get All Orders (Admin/Support)
 export const getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find()
       .populate("userId", "name")
       .populate("chefId", "name")
       .populate("meals.mealId", "title price");
-    res.json(orders);
+
+    res.status(200).json(orders);
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch orders" });
+    res.status(500).json({ message: "Failed to fetch orders", error: err.message });
   }
 };
 
-// 👉 Get orders by user ID
+// ✅ Get Orders by User ID
 export const getOrdersByUser = async (req, res) => {
   try {
     const orders = await Order.find({ userId: req.params.userId })
       .populate("meals.mealId", "title price")
       .sort({ createdAt: -1 });
-    res.json(orders);
+
+    res.status(200).json(orders);
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch user orders" });
+    res.status(500).json({ message: "Failed to fetch user orders", error: err.message });
   }
 };
 
-// 👉 Get single order by ID
+// ✅ Get Single Order by ID
 export const getOrderById = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id)
       .populate("userId", "name")
       .populate("chefId", "name")
       .populate("meals.mealId", "title price");
-    if (!order) return res.status(404).json({ error: "Order not found" });
-    res.json(order);
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res.status(200).json(order);
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch order" });
+    res.status(500).json({ message: "Failed to fetch order", error: err.message });
   }
 };
 
-// 👉 Update order status
+// ✅ Update Order Status (Admin/Chef use)
 export const updateOrderStatus = async (req, res) => {
   try {
-    const updated = await Order.findByIdAndUpdate(
+    const { status, paymentStatus } = req.body;
+
+    // Optional: Validate status values if you use enums
+    const updatedOrder = await Order.findByIdAndUpdate(
       req.params.id,
-      { status: req.body.status, paymentStatus: req.body.paymentStatus },
+      { status, paymentStatus },
       { new: true }
     );
-    res.json(updated);
+
+    if (!updatedOrder) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res.status(200).json({ message: "Order updated", order: updatedOrder });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(500).json({ message: "Error updating order", error: err.message });
   }
 };
