@@ -1,4 +1,4 @@
-import Subscription from '../models/subscription.model.js';
+import Subscription from '../models/subscription.js';
 
 // 👉 Create Subscription
 export const createSubscription = async (req, res) => {
