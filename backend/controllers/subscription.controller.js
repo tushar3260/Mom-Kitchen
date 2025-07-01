@@ -1,4 +1,4 @@
-import Subscription from "../models/subscription.js";
+import Subscription from "../models/Subscription.js";
 import User from "../models/User.js";
 import Chef from "../models/Chef.js";
 import Meal from "../models/Meal.js";
