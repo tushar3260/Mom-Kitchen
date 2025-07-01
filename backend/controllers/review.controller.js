@@ -1,4 +1,4 @@
-import Review from "../models/Review.js";
+import Review from "../models/review.js";
 import User from "../models/User.js";
 import Chef from "../models/Chef.js";
 import Order from "../models/Order.js";
