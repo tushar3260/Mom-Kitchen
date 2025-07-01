@@ -44,8 +44,8 @@ const chefSchema = new mongoose.Schema({
   },
   location: {
     area: { type: String, required: [true, "Area is required"] },
-    lat: { type: Number, required: [true, "Latitude is required"] },
-    lng: { type: Number, required: [true, "Longitude is required"] }
+    lat: { type: String, required: [true, "Latitude is required"] },
+    lng: { type: String, required: [true, "Longitude is required"] }
   },
   isVerified: {
     type: Boolean,

@@ -122,7 +122,7 @@ export const loginChef = async (req, res) => {
 
 export const getAllChefs = async (req, res) => {
   try {
-    const chefs = await Chef.find({ isVerified: true }).select("-passwordHash");
+    const chefs = await Chef.find();
     res.status(200).json(chefs);
   } catch (err) {
     res.status(500).json({ message: "Error fetching chefs", error: err.message });

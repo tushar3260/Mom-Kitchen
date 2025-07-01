@@ -3,13 +3,28 @@ import Order from "../models/Order.js";
 // ✅ Place a New Order
 export const placeOrder = async (req, res) => {
   try {
-    const { userId, chefId, meals, totalAmount, deliveryAddress, paymentMethod } = req.body;
+    const {
+      userId,
+      chefId,
+      meals,
+      totalPrice,
+      deliveryAddress,
+      paymentMode,
+      timeSlot
+    } = req.body;
 
     // ✅ Required fields validation
-    if (!userId || !chefId || !Array.isArray(meals) || meals.length === 0 || !totalAmount || !deliveryAddress) {
+    if (
+      !userId ||
+      !chefId ||
+      !Array.isArray(meals) ||
+      meals.length === 0 ||
+      !totalPrice ||
+      !deliveryAddress
+    ) {
       return res.status(400).json({
         message: "Missing required fields",
-        required: ["userId", "chefId", "meals", "totalAmount", "deliveryAddress"]
+        required: ["userId", "chefId", "meals", "totalPrice", "deliveryAddress"]
       });
     }
 
@@ -18,11 +33,12 @@ export const placeOrder = async (req, res) => {
       userId,
       chefId,
       meals,
-      totalAmount,
-      deliveryAddress,
-      paymentMethod,
-      status: "Pending", // optional default
-      paymentStatus: "Unpaid" // optional default
+      totalPrice, // ✅ correct casing
+      deliveryAddress, // ✅ expects: { street, city, pincode }
+      paymentMode,     // ✅ correct field name from schema
+      timeSlot,        // ✅ optional: Lunch / Dinner
+      status: "Placed",         // ✅ enum: Placed, Preparing, Delivered, Cancelled
+      paymentStatus: "Pending"  // ✅ enum: Pending, Paid, Failed
     });
 
     await order.save();
@@ -36,8 +52,8 @@ export const placeOrder = async (req, res) => {
 export const getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find()
-      .populate("userId", "name")
-      .populate("chefId", "name")
+      .populate("userId", "name email")
+      .populate("chefId", "name email")
       .populate("meals.mealId", "title price");
 
     res.status(200).json(orders);
@@ -63,8 +79,8 @@ export const getOrdersByUser = async (req, res) => {
 export const getOrderById = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id)
-      .populate("userId", "name")
-      .populate("chefId", "name")
+      .populate("userId", "name email")
+      .populate("chefId", "name email")
       .populate("meals.mealId", "title price");
 
     if (!order) {
@@ -82,7 +98,7 @@ export const updateOrderStatus = async (req, res) => {
   try {
     const { status, paymentStatus } = req.body;
 
-    // Optional: Validate status values if you use enums
+    // ✅ Validate enums if needed
     const updatedOrder = await Order.findByIdAndUpdate(
       req.params.id,
       { status, paymentStatus },
