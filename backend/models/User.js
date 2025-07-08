@@ -14,6 +14,7 @@ const userSchema = new mongoose.Schema({
     required: true,
     match: /^[6-9]\d{9}$/
   },
+  role: { type: String, enum: ['user'], default: 'user' },
   passwordHash: { type: String, required: true },
   address: {
     street: String,

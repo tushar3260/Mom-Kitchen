@@ -60,7 +60,7 @@ function SignupPage() {
           window.location.href = "/dashboard";
         }, 2000);
       }
-    } catch (err) {
+    } catch (error) {
       setError("Signup failed. Please try again.");
       setLoading(false);
     }

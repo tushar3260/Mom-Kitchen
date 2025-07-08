@@ -1,65 +1,68 @@
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
-export const UserSignUp = async(req,res) =>{
-    const {fullName,email,passwordHash,phone,address} = req.body;
-    if(!fullName || !email || !passwordHash || !phone){
-        return res.status(400).json({message: "All fields are required"});
-    }
-   const newPassword = await bcrypt.hash(passwordHash, 10);
 
-   const newUser = new User({
-       fullName,
-       email,
-       passwordHash: newPassword,
-       phone,
-       address
-   });
-   try {
-         const user = await newUser.save();
-         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-         res.status(201).json({message: "User created successfully", user, token});
-    
-   } catch (error) {
-      res.status(500).json({message: "Error in user signup"});
-      console.log(error)
-   }
+export const UserSignUp = async (req, res) => {
+  const { fullName, email, passwordHash, phone, address } = req.body;
+  if (!fullName || !email || !passwordHash || !phone) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
 
-    
-}
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    return res.status(400).json({ message: "User already exists" });
+  }
 
-export const UserLogin = async(req,res) =>{
-    const {email, passwordHash} = req.body;
-    if(!email || !passwordHash){
-        return res.status(400).json({message: "Email and password are required"});
-    }
-    
-    try {
-        const user = await User.findOne({ email });
+  const hashedPassword = await bcrypt.hash(passwordHash, 10);
 
-        const passwordMatch = await bcrypt.compare(passwordHash, user.passwordHash);
-        if (!user || !passwordMatch) {
-            return res.status(401).json({message: "Invalid email or password"});
-        }
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        res.status(200).json({message: "User logged in successfully", user, token});
+  const user = new User({ fullName, email, passwordHash: hashedPassword, phone, address });
+  await user.save();
 
+  const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-    } catch (error) {
-        res.status(500).json({message: "Error in user login"});
-    }
+  res.cookie('token', token, {
+    httpOnly: true,
+    sameSite: 'strict',
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 7 * 24 * 60 * 60 * 1000
+  });
 
-    
+  res.status(201).json({ message: "User registered", user: { id: user._id, email: user.email, role: user.role }, token });
+};
 
-    
-}
+export const UserLogin = async (req, res) => {
+  const { email, passwordHash } = req.body;
+  if (!email || !passwordHash) {
+    return res.status(400).json({ message: "Email and password are required" });
+  }
 
-export const getallUsers = async(req,res) =>{
-    try {
-        const users = await User.find();
-        res.status(200).json({message: "Users fetched successfully", users});
-    } catch (error) {
-        res.status(500).json({message: "Error in fetching users"});
-    }
-}
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  const isMatch = await bcrypt.compare(passwordHash, user.passwordHash);
+  if (!isMatch) {
+    return res.status(401).json({ message: "Invalid credentials" });
+  }
+
+  const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+  res.cookie('token', token, {
+    httpOnly: true,
+    sameSite: 'strict',
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 7 * 24 * 60 * 60 * 1000
+  });
+
+  res.status(200).json({ message: "Login successful", user: { id: user._id, email: user.email, role: user.role }, token });
+};
+
+export const getallUsers = async (req, res) => {
+  try {
+    const users = await User.find().select("-passwordHash");
+    res.status(200).json(users);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch users", error: err.message });
+  }
+};

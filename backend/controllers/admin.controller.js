@@ -1,55 +1,47 @@
-
-// controllers/adminController.js
 import Admin from "../models/admin.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 export const registerAdmin = async (req, res) => {
-  try {
-    const { username, password, role } = req.body;
+  const { username, password } = req.body;
+  const existing = await Admin.findOne({ username });
+  if (existing) return res.status(400).json({ message: "Admin already exists" });
 
-    const existing = await Admin.findOne({ username });
-    if (existing) {
-      return res.status(400).json({ message: "Admin already exists" });
-    }
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const admin = new Admin({ username, passwordHash: hashedPassword });
 
-    const passwordHash = await bcrypt.hash(password, 10);
+  await admin.save();
 
-    const admin = new Admin({ username, passwordHash, role });
-    await admin.save();
+  const token = jwt.sign({ id: admin._id, role: admin.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-    res.status(201).json({ message: "Admin registered", admin: { username: admin.username, role: admin.role } });
-  } catch (err) {
-    res.status(500).json({ message: "Error in register", error: err.message });
-  }
+  res.cookie('token', token, {
+    httpOnly: true,
+    sameSite: 'strict',
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 7 * 24 * 60 * 60 * 1000
+  });
+
+  res.status(201).json({ message: "Admin registered", admin: { username: admin.username, role: admin.role }, token });
 };
 
 export const loginAdmin = async (req, res) => {
-  try {
-    const { username, password } = req.body;
+  const { username, password } = req.body;
+  const admin = await Admin.findOne({ username });
+  if (!admin) return res.status(404).json({ message: "Admin not found" });
 
-    const admin = await Admin.findOne({ username });
-    if (!admin) {
-      return res.status(404).json({ message: "Admin not found" });
-    }
+  const isMatch = await bcrypt.compare(password, admin.passwordHash);
+  if (!isMatch) return res.status(401).json({ message: "Invalid password" });
 
-    const isMatch = await bcrypt.compare(password, admin.passwordHash);
-    if (!isMatch) {
-      return res.status(401).json({ message: "Invalid password" });
-    }
+  const token = jwt.sign({ id: admin._id, role: admin.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-    const token = jwt.sign({ id: admin._id, role: admin.role }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+  res.cookie('token', token, {
+    httpOnly: true,
+    sameSite: 'strict',
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 7 * 24 * 60 * 60 * 1000
+  });
 
-    res.status(200).json({
-      message: "Login successful",
-      token,
-      admin: { username: admin.username, role: admin.role }
-    });
-  } catch (err) {
-    res.status(500).json({ message: "Error in login", error: err.message });
-  }
+  res.status(200).json({ message: "Login successful", admin: { username: admin.username, role: admin.role }, token });
 };
 
 export const getAllAdmins = async (req, res) => {

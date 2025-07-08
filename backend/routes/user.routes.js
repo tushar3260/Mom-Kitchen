@@ -1,16 +1,11 @@
-import {UserLogin,UserSignUp,getallUsers} from '../controllers/user.controller.js';
 import express from 'express';
-const Router = express.Router();
+import { UserLogin, UserSignUp, getallUsers } from '../controllers/user.controller.js';
+import authorize from "../middlewares/Authmiddleware.js";
 
+const router = express.Router();
 
-Router.post('/login', UserLogin);
-Router.post('/signup', UserSignUp);
-Router.get('/getallusers', getallUsers);
+router.post('/login', UserLogin);
+router.post('/signup', UserSignUp);
+router.get('/getallusers', authorize('admin'), getallUsers); // Only admin can view all users
 
-export default Router;
-
-
-
-
-
- 
+export default router;

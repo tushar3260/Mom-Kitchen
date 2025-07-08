@@ -10,7 +10,7 @@ import reviewRoutes from "./routes/review.routes.js";
 import orderRoutes from "./routes/order.routes.js";
 import subscriptionRoutes from "./routes/subscription.routes.js";
 import witthdrawlRoutes from "./routes/withdrawl.routes.js";
-
+import AuthMiddleware from './middlewares/Authmiddleware.js';
 import connectDB from './models/db.js';
 import dotenv from 'dotenv';
 dotenv.config();

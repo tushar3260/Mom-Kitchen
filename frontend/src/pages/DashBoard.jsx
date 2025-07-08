@@ -1,9 +1,17 @@
-import React from 'react'
+import React from 'react';
+import TopNav from '../components/TopNav.jsx';
+import Herosection from '../components/Herosection.jsx';
+import Howitworks from '../components/Howitworks.jsx';
+
 
 const DashBoard = () => {
   return (
-    <div>Welcome user!</div>
-  )
-}
+    <>
+      <TopNav />
+      <Herosection />
+      <Howitworks />
+         </>
+  );
+};
 
-export default DashBoard
+export default DashBoard;
