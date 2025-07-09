@@ -11,6 +11,7 @@ import orderRoutes from "./routes/order.routes.js";
 import subscriptionRoutes from "./routes/subscription.routes.js";
 import witthdrawlRoutes from "./routes/withdrawl.routes.js";
 import AuthMiddleware from './middlewares/Authmiddleware.js';
+import otpRoutes from './routes/otp.routes.js';
 import connectDB from './models/db.js';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -33,7 +34,7 @@ app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/withdrawls", witthdrawlRoutes);
-
+app.use('/api/otp', otpRoutes); // OTP routes
 connectDB()
 app.get('/', (req, res) => {
     res.send('Hello duniyaa');

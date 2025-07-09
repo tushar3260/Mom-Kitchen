@@ -103,7 +103,9 @@ const FeaturedRestaurants = () => {
         ))}
       </div>
       <div className="flex justify-center mt-10">
-        <button className="bg-gradient-to-r from-orange-400 to-yellow-400 text-white px-6 py-2 rounded-full font-semibold hover:scale-105 transition-transform">
+        <button
+        onClick={() => window.location.href = '/allchef'} 
+        className="bg-gradient-to-r from-orange-400 to-yellow-400 text-white px-6 py-2 rounded-full font-semibold hover:scale-105 transition-transform">
           View All 
         </button>
       </div>
