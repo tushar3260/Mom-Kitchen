@@ -1,6 +1,6 @@
 import React from "react";
 
-function App() {
+function Footer() {
   return (
     <div>
       <footer className="bg-zinc-900 text-white px-8 pt-16 pb-8">
@@ -120,4 +120,4 @@ function App() {
   );
 }
 
-export default App;
+export default Footer;

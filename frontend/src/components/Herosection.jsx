@@ -99,18 +99,7 @@ function Herosection() {
             </div>
           </div>
 
-<div className="bg-white shadow rounded overflow-hidden">
-            <div className="relative">
-              <img src="https://media.istockphoto.com/id/626060648/photo/gobi-paratha-or-cauliflower-parotha.webp?a=1&b=1&s=612x612&w=0&k=20&c=4VkgibXC_bYYjv_vKMU_qFgiEQ_axWLEYweLVbgRNSE=" />
-              <span className="absolute bottom-2 left-2 bg-orange-400 text-white text-xs px-2 py-1 rounded font-semibold">
-                15% Off
-              </span>
-            </div>
-            <div className="p-3">
-              <h3 className="text-sm font-semibold">Greys Vage</h3>
-              <p className="text-xs text-orange-500 font-semibold mt-1">6 Days Remaining</p>
-            </div>
-          </div>
+
 
 
           {/* You can duplicate the card above 3 times or map through items if you want dynamic later */}

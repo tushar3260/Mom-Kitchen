@@ -21,7 +21,10 @@ app.use(express.json());
 //urlencoded parser for incoming requests
 app.use(express.urlencoded({ extended: true }));
 //cors for security purposes 
-app.use(cors())
+app.use(cors({
+  origin: 'http://localhost:5173',  // ✅ yahi frontend ka port daalna h
+  credentials: true                 // ✅ cookies allow karo
+}));
 app.use('/api/user', userRouter);
 app.use("/api/admins", adminRoutes);
 app.use("/api/chefs", chefRoutes);
