@@ -45,6 +45,10 @@ function LoginPage() {
       if (res.status === 200) {
         setSuccess(res.data.message || "Login successful! Redirecting...");
         setLoading(false);
+        // After successful login:
+localStorage.setItem('chefEmail', email);  // <- Yeh line jaruri hai
+
+
 
         // Auto-clear success and redirect after 2 sec
         setTimeout(() => {

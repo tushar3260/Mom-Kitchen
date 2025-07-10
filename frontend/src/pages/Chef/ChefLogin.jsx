@@ -30,7 +30,7 @@ const ChefLogin = () => {
         return;
       }
 
-      window.location.href = 'chefdashboard'; // Redirect to Chef Dashboard or Home
+      window.location.href = '/chef/otp'; // Redirect to Chef Dashboard or Home
       localStorage.setItem('chefToken', token);  // Store token in localStorage
 
      

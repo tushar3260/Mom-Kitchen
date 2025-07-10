@@ -1,5 +1,5 @@
 import React from "react";
-import TiffinTalesLogo from "../assets/tiffintaleslogo.jpg"
+import TiffinTalesLogo from "../assets/tiffintaleslogo.png"
 
 function TopNav() {
   return (
@@ -7,13 +7,13 @@ function TopNav() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
         
         {/* LOGO SECTION */}
-        <div className="flex items-center">
-          <img
-            src={ti}
-            alt="Tiffin Tales Logo"
-            className="h-10 w-auto object-contain"
-          />
-        </div>
+        <div className="flex items-center pl-2 min-w-[120px]">
+  <img
+    src={TiffinTalesLogo}
+    alt="Tiffin Tales Logo"
+    className="h-50 w-auto object-contain"
+  />
+</div>
 
         {/* LOCATION SECTION */}
         <div className="hidden md:block text-sm text-gray-600">
