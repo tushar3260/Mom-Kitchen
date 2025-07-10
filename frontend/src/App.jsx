@@ -9,11 +9,13 @@ import ChefApp from './pages/Chef/ChefApp.jsx';
 import Cart from './pages/Cart.jsx';
 import Allchef from './pages/Allchef.jsx';
 import AddLocation from './pages/Addlocation.jsx';
+import { UserProvider } from './context/userContext.jsx';
 // import LandingPage from './pages/LandingPage.jsx';
 
 function App(){
   return (
     <div>
+      <UserProvider>
       <BrowserRouter>
         <Routes>
          
@@ -27,6 +29,7 @@ function App(){
           <Route path="/addlocation" element={<AddLocation />} />
         </Routes>
       </BrowserRouter>
+      </UserProvider>
     </div>
   )
 }

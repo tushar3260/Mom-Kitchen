@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { FaSpinner, FaEye, FaEyeSlash } from 'react-icons/fa';
-
+import UserContext from '../context/userContext.jsx'; // Import UserContext
+import { useContext } from 'react';
 function SignupPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -15,7 +16,7 @@ function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
+  const { setUser } = useContext(UserContext); // Use UserContext to access setUser
   const checkPasswordStrength = (pwd) => {
     if (!pwd) return '';
     if (pwd.length < 6) return 'Weak';
@@ -55,6 +56,9 @@ function SignupPage() {
       if (res.status === 201) {
         setSuccess("Signup successful! Redirecting...");
         setLoading(false);
+
+        setUser(res.data.user); // Update user state in context
+        localStorage.setItem("userData", JSON.stringify(res.data.user));
 
         setTimeout(() => {
           window.location.href = "/dashboard";

@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { FaSpinner } from 'react-icons/fa';  // Spinner icon added
-
+import { useContext } from 'react';
+import UserContext from '../context/userContext.jsx'; // Import UserContext
 function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -10,7 +11,9 @@ function LoginPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const { user, setUser } = useContext(UserContext); // Use UserContext to access user state
 
+  // Destructure user and setUser
   const checkPasswordStrength = (pwd) => {
     if (!pwd) return '';
     if (pwd.length < 6) return 'Weak';
@@ -40,22 +43,27 @@ function LoginPage() {
     setLoading(true);
 
     try {
-  const res = await axios.post(`${import.meta.env.VITE_API_URL}/user/login`, userData);
-  console.log(res.data);
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/user/login`, userData);
+      
+      if (res.status === 200) {
+        setSuccess(res.data.message || "Login successful! Redirecting...");
+        setLoading(false);
+        setUser(res.data.user); // Update user state in context
+        localStorage.setItem("userData", JSON.stringify(res.data.user));
+        // After successful login:
+// <- Yeh line jaruri hai
 
- 
 
-  if (res.status === 200) {
-    setSuccess(res.data.message || "Login successful! Redirecting...");
-    setLoading(false);
 
-    setTimeout(() => {
-      setSuccess('');
-      setError('');
-      window.location.href = "/dashboard";
-    }, 2000);
-  }
-}     catch (error) {
+
+        // Auto-clear success and redirect after 2 sec
+        setTimeout(() => {
+          setSuccess('');
+          setError('');
+          window.location.href = "/dashboard";
+        }, 2000);
+      }
+    } catch (error) {
       setLoading(false);
       setError(error?.response?.data?.message || "Login failed. Please try again.");
       
