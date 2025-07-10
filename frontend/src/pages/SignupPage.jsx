@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { FaSpinner, FaEye, FaEyeSlash } from 'react-icons/fa';
-import UserContext from '../context/userContext.jsx'; // Import UserContext
-import { useContext } from 'react';
+import UserContext from '../context/userContext.jsx';
+
 function SignupPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -16,7 +16,9 @@ function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { setUser } = useContext(UserContext); // Use UserContext to access setUser
+
+  const { setUser, setToken } = useContext(UserContext);  // ✅ Added setToken here
+
   const checkPasswordStrength = (pwd) => {
     if (!pwd) return '';
     if (pwd.length < 6) return 'Weak';
@@ -26,7 +28,6 @@ function SignupPage() {
 
   const handleSignup = async (e) => {
     e.preventDefault();
-
     setError('');
     setSuccess('');
 
@@ -48,24 +49,35 @@ function SignupPage() {
     }
 
     const userData = { fullName: name, email, passwordHash: password, phone };
-
     setLoading(true);
 
     try {
       const res = await axios.post(`${import.meta.env.VITE_API_URL}/user/signup`, userData);
+      console.log("Signup Response:", res.data);
+
       if (res.status === 201) {
-        setSuccess("Signup successful! Redirecting...");
-        setLoading(false);
+        const { user, token } = res.data;
 
-        setUser(res.data.user); // Update user state in context
-        localStorage.setItem("userData", JSON.stringify(res.data.user));
+        if (user && token) {
+          setUser(user);           // ✅ Context
+          setToken(token);         // ✅ Context
+          localStorage.setItem("userData", JSON.stringify(user));
+          localStorage.setItem("usertoken", token);
 
-        setTimeout(() => {
-          window.location.href = "/dashboard";
-        }, 2000);
+          setSuccess("Signup successful! Redirecting...");
+          setLoading(false);
+
+          setTimeout(() => {
+            window.location.href = "/dashboard";
+          }, 1500);
+        } else {
+          setError("Signup failed: Missing user or token");
+          setLoading(false);
+        }
       }
     } catch (error) {
-      setError("Signup failed. Please try again.");
+      console.error("Signup Error:", error);
+      setError(error?.response?.data?.message || "Signup failed. Please try again.");
       setLoading(false);
     }
   };
@@ -111,25 +123,25 @@ function SignupPage() {
             <button
               type="button"
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-              onClick={() => setShowPassword((prev) => !prev)}
+              onClick={() => setShowPassword(prev => !prev)}
               tabIndex={-1}
             >
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </button>
           </div>
+
           {password && (
-            <p
-              className={`text-sm mb-4 ${
-                passwordStrength === 'Strong'
-                  ? 'text-green-500'
-                  : passwordStrength === 'Medium'
-                  ? 'text-yellow-500'
-                  : 'text-red-500'
-              }`}
-            >
+            <p className={`text-sm mb-4 ${
+              passwordStrength === 'Strong'
+                ? 'text-green-500'
+                : passwordStrength === 'Medium'
+                ? 'text-yellow-500'
+                : 'text-red-500'
+            }`}>
               Password Strength: {passwordStrength}
             </p>
           )}
+
           <div className="relative mb-6">
             <input
               type={showConfirmPassword ? "text" : "password"}
@@ -141,12 +153,13 @@ function SignupPage() {
             <button
               type="button"
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-              onClick={() => setShowConfirmPassword((prev) => !prev)}
+              onClick={() => setShowConfirmPassword(prev => !prev)}
               tabIndex={-1}
             >
               {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
             </button>
           </div>
+
           <input
             type="text"
             placeholder="Phone"
@@ -165,9 +178,7 @@ function SignupPage() {
             className="w-full py-3 bg-yellow-500 hover:bg-yellow-400 text-white rounded-2xl text-lg shadow-lg flex items-center justify-center"
             disabled={loading}
           >
-            {loading ? (
-              <FaSpinner className="animate-spin mr-2" />
-            ) : null}
+            {loading && <FaSpinner className="animate-spin mr-2" />}
             {loading ? 'Signing Up...' : 'Sign Up'}
           </motion.button>
         </form>

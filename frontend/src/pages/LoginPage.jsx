@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import { FaSpinner } from 'react-icons/fa';  // Spinner icon added
-import { useContext } from 'react';
-import UserContext from '../context/userContext.jsx'; // Import UserContext
+import { FaSpinner } from 'react-icons/fa';
+import UserContext from '../context/userContext.jsx'; 
+
 function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -11,9 +11,9 @@ function LoginPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
-  const { user, setUser } = useContext(UserContext); // Use UserContext to access user state
 
-  // Destructure user and setUser
+  const { setUser, setToken } = useContext(UserContext);  // ✅ Added setToken also
+
   const checkPasswordStrength = (pwd) => {
     if (!pwd) return '';
     if (pwd.length < 6) return 'Weak';
@@ -44,29 +44,33 @@ function LoginPage() {
 
     try {
       const res = await axios.post(`${import.meta.env.VITE_API_URL}/user/login`, userData);
-      
+      console.log("Login response:", res.data);
+
       if (res.status === 200) {
-        setSuccess(res.data.message || "Login successful! Redirecting...");
-        setLoading(false);
-        setUser(res.data.user); // Update user state in context
-        localStorage.setItem("userData", JSON.stringify(res.data.user));
-        // After successful login:
-// <- Yeh line jaruri hai
+        const { user, token, message } = res.data;
 
+        if (user && token) {
+          setUser(user);             // ✅ Update context
+          setToken(token);           // ✅ Update context
+          localStorage.setItem("userData", JSON.stringify(user));
+          localStorage.setItem("usertoken", token);
 
+          setSuccess(message || "Login successful! Redirecting...");
+          setLoading(false);
 
-
-        // Auto-clear success and redirect after 2 sec
-        setTimeout(() => {
-          setSuccess('');
-          setError('');
-          window.location.href = "/dashboard";
-        }, 2000);
+          setTimeout(() => {
+            window.location.href = "/dashboard";  // Or use navigate if you prefer
+          }, 1500);
+        } else {
+          setError("Invalid response: Missing user or token");
+          setLoading(false);
+        }
       }
     } catch (error) {
       setLoading(false);
+      console.error("Login Error:", error);
       setError(error?.response?.data?.message || "Login failed. Please try again.");
-      
+
       setTimeout(() => {
         setError('');
       }, 2500);

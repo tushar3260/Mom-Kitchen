@@ -1,31 +1,31 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-// 1️⃣ Create the context
 const UserContext = createContext();
 
-// 2️⃣ Create the provider
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    // Check localStorage when app loads
     const storedUser = localStorage.getItem('userData');
     return storedUser ? JSON.parse(storedUser) : null;
   });
 
-  // 3️⃣ Keep localStorage in sync with context state
+  const [token, setToken] = useState(() => {
+    return localStorage.getItem('usertoken') || null;
+  });
+
   useEffect(() => {
-    if (user) {
-      localStorage.setItem('userData', JSON.stringify(user));
-    } else {
-      localStorage.removeItem('userData');
-    }
-  }, [user]);
+    if (user) localStorage.setItem('userData', JSON.stringify(user));
+    else localStorage.removeItem('userData');
+
+    if (token) localStorage.setItem('usertoken', token);
+    else localStorage.removeItem('usertoken');
+  }, [user, token]);
 
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ user, setUser, token, setToken }}>
       {children}
     </UserContext.Provider>
   );
 };
-export default UserContext;
-// 4️⃣ Custom hook to use anywhere in the app
+
 export const useUser = () => useContext(UserContext);
+export default UserContext;
