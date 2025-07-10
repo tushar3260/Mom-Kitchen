@@ -12,6 +12,7 @@ function LoginPage() {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
+
   const { setUser, setToken } = useContext(UserContext);  // ✅ Added setToken also
 
   const checkPasswordStrength = (pwd) => {
@@ -22,22 +23,49 @@ function LoginPage() {
   };
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
+  e.preventDefault();
+  setError('');
+  setSuccess('');
 
-    if (!email || !password) {
-      setError("Please fill all fields");
-      return;
+  if (!email || !password) {
+    setError("Please fill all fields");
+    return;
+  }
+  if (!email.includes("@")) {
+    setError("Please enter a valid email");
+    return;
+  }
+  if (password.length < 6) {
+    setError("Password must be at least 6 characters long");
+    return;
+  }
+
+  const userData = { email, passwordHash: password };
+  setLoading(true);
+
+  try {
+    const res = await axios.post(`${import.meta.env.VITE_API_URL}/user/login`, userData);
+
+    if (res.status === 200) {
+      setSuccess(res.data.message || "Login successful! Redirecting...");
+      setLoading(false);
+      setUser(res.data.user); // Update user in context
+      localStorage.setItem("userData", JSON.stringify(res.data.user));
+
+      // ✅ Redirect to the original page (saved in localStorage)
+      const redirectPath = localStorage.getItem("redirectAfterLogin") || "/";
+      localStorage.removeItem("redirectAfterLogin");
+      window.location.href = redirectPath;
     }
-    if (!email.includes("@")) {
-      setError("Please enter a valid email");
-      return;
-    }
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters long");
-      return;
-    }
+  } catch (error) {
+    setLoading(false);
+    setError(error?.response?.data?.message || "Login failed. Please try again.");
+    setTimeout(() => {
+      setError('');
+    }, 2500);
+  }
+};
+
 
     const userData = { email, passwordHash: password };
     setLoading(true);
@@ -76,6 +104,7 @@ function LoginPage() {
       }, 2500);
     }
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-orange-100 to-orange-200 p-6">
