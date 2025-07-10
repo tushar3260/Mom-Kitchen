@@ -25,13 +25,15 @@ const ChefLogin = () => {
         { withCredentials: true }
       );
       const token = res.data.token;
+      localStorage.setItem('chefEmail', email);
+      localStorage.setItem('chefToken', token);
       if (!token) {
         toast.error('❌ Login failed! No token received');
         return;
       }
 
       window.location.href = '/chef/otp'; // Redirect to Chef Dashboard or Home
-      localStorage.setItem('chefToken', token);  // Store token in localStorage
+        // Store token in localStorage
 
      
       toast.success(res.data.message || 'Chef logged in successfully!');
