@@ -4,7 +4,11 @@ const DashBoard = () => {
   const { user } = useUser(); // Use the custom hook to access user state
   console.log("User in Dashboard:", user); // Log the user data to verify it's being accessed correctly
   return (
-    <div>DashBoard</div>
+    <div>
+      <div>{user._id}</div>
+      DashBoard
+      </div>
+    
   )
 }
 
