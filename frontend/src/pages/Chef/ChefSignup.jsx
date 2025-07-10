@@ -95,8 +95,9 @@ const ChefSignup = () => {
     try {
       const res = await axios.post(`${import.meta.env.VITE_API_URL}/chefs/register`, formData, { withCredentials: true });
       toast.success(res.data.message || "Chef registered successfully!");
-      window.location.href = 'chef/chefdashboard'; // Redirect to Chef Dashboard
-
+      window.location.href = 'chef/otp'; // Redirect to Chef Dashboard
+      localStorage.setItem('chefEmail', email);
+      localStorage.setItem('chefToken', res.data.token); // Store token in localStorage
       // Reset form
       setFormData({
         name: '', email: '', phone: '', passwordHash: '', bio: '', cuisine: '',
