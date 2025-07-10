@@ -18,12 +18,13 @@ const Subscription = ({ currentUser, currentChef }) => {
   const [coupon, setCoupon] = useState("");
   const [discount, setDiscount] = useState(0);
   const [couponMessage, setCouponMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
-    if (currentUser) {
+    if (currentUser?._id) {
       setForm((prev) => ({ ...prev, userId: currentUser._id }));
     }
-    if (currentChef) {
+    if (currentChef?._id) {
       setForm((prev) => ({ ...prev, chefId: currentChef._id }));
     }
   }, [currentUser, currentChef]);
@@ -31,8 +32,8 @@ const Subscription = ({ currentUser, currentChef }) => {
   const handlePlanSelect = (planId, price) => {
     setForm({ ...form, plan: planId, totalAmount: price });
     setDiscount(0);
-    setCouponMessage("");
     setCoupon("");
+    setCouponMessage("");
   };
 
   const handleChange = (e) => {
@@ -56,16 +57,43 @@ const Subscription = ({ currentUser, currentChef }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const today = new Date();
+      const startDate = today.toISOString().split("T")[0];
+
+      const endDate = new Date(today);
+      if (form.plan === "Weekly") endDate.setDate(today.getDate() + 7);
+      if (form.plan === "Monthly") endDate.setDate(today.getDate() + 30);
+      const endDateStr = endDate.toISOString().split("T")[0];
+
       const finalData = {
         ...form,
+        startDate,
+        endDate: endDateStr,
+        status: "Active",
         totalAmount: form.totalAmount - discount,
+        selectedMeals: [],
       };
-      const res = await axios.post("/api/subscriptions", finalData);
-      alert("Subscription Created Successfully!");
-      console.log(res.data);
+
+      const res = await axios.post("http://localhost:5000/api/subscriptions", finalData);
+
+      setSuccessMessage("✅ Subscription Created Successfully!");
+
+      setForm({
+        userId: currentUser?._id || "",
+        chefId: currentChef?._id || "",
+        plan: "Weekly",
+        autoRenew: false,
+        totalAmount: 700,
+      });
+
+      setCoupon("");
+      setDiscount(0);
+      setCouponMessage("");
+
+      setTimeout(() => setSuccessMessage(""), 5000);
     } catch (err) {
-      console.error(err);
-      alert("Failed to create subscription");
+      console.error("❌ Subscription Error:", err.response?.data || err.message);
+      alert("❌ Failed to create subscription");
     }
   };
 
@@ -74,10 +102,18 @@ const Subscription = ({ currentUser, currentChef }) => {
   return (
     <section className="bg-[#fffaf1] min-h-screen w-screen py-16 px-4">
       <div className="max-w-5xl mx-auto">
-        <h2 className="text-4xl font-bold text-center text-orange-600 mb-6">Choose a Subscription Plan</h2>
+        <h2 className="text-4xl font-bold text-center text-orange-600 mb-6">
+          Choose a Subscription Plan
+        </h2>
+
+        {successMessage && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6 text-center font-medium">
+            {successMessage}
+          </div>
+        )}
+
         <p className="text-center text-gray-600 mb-10">Enjoy delicious meals delivered daily.</p>
 
-        {/* Plans */}
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 mb-12">
           {plans.map((plan) => (
             <div
@@ -97,9 +133,7 @@ const Subscription = ({ currentUser, currentChef }) => {
           ))}
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow p-8 space-y-6">
-          {/* Auto Renew */}
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -111,7 +145,6 @@ const Subscription = ({ currentUser, currentChef }) => {
             <label className="text-sm text-gray-700">Enable Auto Renew</label>
           </div>
 
-          {/* Coupon Input */}
           <div className="space-y-2">
             <label className="text-sm text-gray-700 font-medium">Have a coupon? (Optional)</label>
             <div className="flex gap-2">
@@ -137,7 +170,6 @@ const Subscription = ({ currentUser, currentChef }) => {
             )}
           </div>
 
-          {/* Total */}
           <div className="text-lg font-semibold mt-4">
             Total Payable: ₹{finalAmount}
           </div>

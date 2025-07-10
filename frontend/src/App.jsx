@@ -10,6 +10,7 @@ import Cart from './pages/Cart.jsx';
 import Allchef from './pages/Allchef.jsx';
 import AddLocation from './pages/Addlocation.jsx';
 import { UserProvider } from './context/userContext.jsx';
+import SubscriptionPage from "./pages/SubscriptionPage.jsx";
 // import LandingPage from './pages/LandingPage.jsx';
 
 function App(){
@@ -27,6 +28,7 @@ function App(){
            <Route path="/cart" element={<Cart />} />
           <Route path="/allchef" element={<Allchef />} />
           <Route path="/addlocation" element={<AddLocation />} />
+          <Route path="/subscription" element={<SubscriptionPage />} />
         </Routes>
       </BrowserRouter>
       </UserProvider>
