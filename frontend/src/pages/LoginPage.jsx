@@ -40,24 +40,22 @@ function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/user/login`, userData);
+  const res = await axios.post(`${import.meta.env.VITE_API_URL}/user/login`, userData);
+  console.log(res.data);
 
-      if (res.status === 200) {
-        setSuccess(res.data.message || "Login successful! Redirecting...");
-        setLoading(false);
-        // After successful login:
-localStorage.setItem('chefEmail', email);  // <- Yeh line jaruri hai
+ 
 
+  if (res.status === 200) {
+    setSuccess(res.data.message || "Login successful! Redirecting...");
+    setLoading(false);
 
-
-        // Auto-clear success and redirect after 2 sec
-        setTimeout(() => {
-          setSuccess('');
-          setError('');
-          window.location.href = "/dashboard";
-        }, 2000);
-      }
-    } catch (error) {
+    setTimeout(() => {
+      setSuccess('');
+      setError('');
+      window.location.href = "/dashboard";
+    }, 2000);
+  }
+}     catch (error) {
       setLoading(false);
       setError(error?.response?.data?.message || "Login failed. Please try again.");
       

@@ -35,10 +35,12 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/withdrawls", witthdrawlRoutes);
 app.use('/api/otp', otpRoutes); // OTP routes
+
 connectDB()
 app.get('/', (req, res) => {
     res.send('Hello duniyaa');
 });
+
 
 
 export default app;
