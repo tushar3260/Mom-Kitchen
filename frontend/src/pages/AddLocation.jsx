@@ -1,35 +1,42 @@
 import { useState } from "react";
-
+import axios from "axios";
+import { toast, Toaster } from "react-hot-toast";
+import { useUser } from '../context/userContext.jsx'
 function AddLocation() {
   const [pincode, setPincode] = useState("");
   const [city, setCity] = useState("");
   const [street, setStreet] = useState("");
   const [tag, setTag] = useState("Home");
-
-  const userId = localStorage.getItem("userId");
+ const { user } = useUser();
+  const userId = user?._id; // Assuming user object has _id property
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const res = await fetch(`http://localhost:5000/api/user/${userId}/address`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ pincode, city, street, tag })
-      });
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/user/${userId}/address`,
+        { pincode, city, street, tag },
+        { headers: { "Content-Type": "application/json" }, withCredentials: true }
+      );
 
-      const data = await res.json();
-      alert("Address added successfully!");
-      console.log(data);
+      toast.success("✅ Address added successfully!");
+      console.log(res.data);
+      // Optionally clear the form after success
+      setPincode("");
+      setCity("");
+      setStreet("");
+      setTag("Home");
     } catch (err) {
-      console.error("Error:", err);
+      console.error("❌ Error:", err);
+      toast.error(err.response?.data?.message || "Failed to add address!");
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="max-w-md mx-auto bg-white p-6 mt-6 rounded-lg shadow">
+      <Toaster position="top-center" />
       <h2 className="text-xl font-bold mb-4">Add New Address</h2>
 
       <input
@@ -75,4 +82,5 @@ function AddLocation() {
     </form>
   );
 }
+
 export default AddLocation;

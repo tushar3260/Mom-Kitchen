@@ -25,7 +25,7 @@ const OTPPage = () => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [email]);
 
   const autoSendOtp = async () => {
     try {

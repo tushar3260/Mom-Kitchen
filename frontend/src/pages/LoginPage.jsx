@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { FaSpinner } from 'react-icons/fa';
-import UserContext from '../context/userContext.jsx'; 
+import UserContext from '../context/userContext.jsx';
 
 function LoginPage() {
   const [email, setEmail] = useState('');
@@ -12,8 +12,7 @@ function LoginPage() {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
-
-  const { setUser, setToken } = useContext(UserContext);  // ✅ Added setToken also
+  const { setUser, setToken } = useContext(UserContext); // ✅ Using both setUser & setToken
 
   const checkPasswordStrength = (pwd) => {
     if (!pwd) return '';
@@ -23,49 +22,22 @@ function LoginPage() {
   };
 
   const handleLogin = async (e) => {
-  e.preventDefault();
-  setError('');
-  setSuccess('');
+    e.preventDefault();
+    setError('');
+    setSuccess('');
 
-  if (!email || !password) {
-    setError("Please fill all fields");
-    return;
-  }
-  if (!email.includes("@")) {
-    setError("Please enter a valid email");
-    return;
-  }
-  if (password.length < 6) {
-    setError("Password must be at least 6 characters long");
-    return;
-  }
-
-  const userData = { email, passwordHash: password };
-  setLoading(true);
-
-  try {
-    const res = await axios.post(`${import.meta.env.VITE_API_URL}/user/login`, userData);
-
-    if (res.status === 200) {
-      setSuccess(res.data.message || "Login successful! Redirecting...");
-      setLoading(false);
-      setUser(res.data.user); // Update user in context
-      localStorage.setItem("userData", JSON.stringify(res.data.user));
-
-      // ✅ Redirect to the original page (saved in localStorage)
-      const redirectPath = localStorage.getItem("redirectAfterLogin") || "/";
-      localStorage.removeItem("redirectAfterLogin");
-      window.location.href = redirectPath;
+    if (!email || !password) {
+      setError("Please fill all fields");
+      return;
     }
-  } catch (error) {
-    setLoading(false);
-    setError(error?.response?.data?.message || "Login failed. Please try again.");
-    setTimeout(() => {
-      setError('');
-    }, 2500);
-  }
-};
-
+    if (!email.includes("@")) {
+      setError("Please enter a valid email");
+      return;
+    }
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      return;
+    }
 
     const userData = { email, passwordHash: password };
     setLoading(true);
@@ -78,8 +50,8 @@ function LoginPage() {
         const { user, token, message } = res.data;
 
         if (user && token) {
-          setUser(user);             // ✅ Update context
-          setToken(token);           // ✅ Update context
+          setUser(user);             
+          setToken(token);           
           localStorage.setItem("userData", JSON.stringify(user));
           localStorage.setItem("usertoken", token);
 
@@ -87,7 +59,7 @@ function LoginPage() {
           setLoading(false);
 
           setTimeout(() => {
-            window.location.href = "/dashboard";  // Or use navigate if you prefer
+            window.location.href = "/"; // 🔄 Redirect after login
           }, 1500);
         } else {
           setError("Invalid response: Missing user or token");
@@ -98,13 +70,11 @@ function LoginPage() {
       setLoading(false);
       console.error("Login Error:", error);
       setError(error?.response?.data?.message || "Login failed. Please try again.");
-
       setTimeout(() => {
         setError('');
       }, 2500);
     }
   };
-
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-orange-100 to-orange-200 p-6">

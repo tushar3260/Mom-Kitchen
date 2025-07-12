@@ -10,6 +10,7 @@ import AddLocation from './pages/Addlocation.jsx';
 import { UserProvider } from './context/userContext.jsx';
 import UserProtect from './ProtectWrapper/UserProtect.jsx';  // 👈 Import protect component
 
+
 function App() {
   return (
     <div>
@@ -39,6 +40,7 @@ function App() {
               path="/chef/*" 
               element={
                 <UserProtect>
+                  
                   <ChefApp />
                 </UserProtect>
               } 
