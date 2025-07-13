@@ -2,27 +2,28 @@ import React, { useState } from "react";
 import { FaEllipsisV } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { useUser } from "../context/userContext.jsx"; // Custom hook for user context
-
+import { useUser } from "../context/userContext.jsx";
 
 const Threedot = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
   const { user, setUser } = useUser();
-
 
   const handleOptionClick = (label) => {
     setIsMenuOpen(false);
-
-    if (label === "Profile") {
-      navigate("/dashboard");
-    } else if (label === "Orders") {
-      navigate("/orders");
-    } else if (label === "Logout") {
-      alert("Logging out...");
-    }
+    if (label === "Profile") navigate("/dashboard");
+    else if (label === "Orders") navigate("/orders");
   };
+
+  const handleChefClick = () => {
+    setIsMenuOpen(false);
+    setLoading(true);
+    setTimeout(() => {
+      navigate("chef/");
+    }, 600); // spinner delay
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("userData");
     setUser(null);
@@ -31,7 +32,6 @@ const Threedot = () => {
 
   return (
     <>
-      {/* Three Dot Icon */}
       <button
         onClick={() => setIsMenuOpen(true)}
         className="text-gray-600 hover:text-black p-2"
@@ -40,7 +40,19 @@ const Threedot = () => {
         <FaEllipsisV size={18} />
       </button>
 
-      {/* Side Drawer */}
+      {/* Full screen loader */}
+      {loading && (
+        <div className="fixed inset-0 bg-[#fff8ee]/60 backdrop-blur-sm z-50 flex flex-col justify-center items-center">
+          <div className="relative w-16 h-16">
+            <div className="absolute inset-0 border-4 border-dashed border-[#ff7e00] rounded-full animate-spin"></div>
+            <div className="absolute inset-2 border-4 border-solid border-white rounded-full"></div>
+          </div>
+          <p className="mt-4 text-[#ff7e00] font-semibold animate-pulse text-lg">
+            Redirecting to Chef...
+          </p>
+        </div>
+      )}
+
       {isMenuOpen && (
         <motion.div
           initial={{ x: "100%" }}
@@ -71,7 +83,13 @@ const Threedot = () => {
               Orders
             </button>
             <button
-              onClick={() => handleLogout("Logout")}
+              onClick={handleChefClick}
+              className="w-full px-4 py-2 bg-orange-100 text-orange-800 rounded hover:bg-orange-200"
+            >
+              🍳 Become a Chef
+            </button>
+            <button
+              onClick={handleLogout}
               className="w-full px-4 py-2 bg-red-100 text-red-700 rounded hover:bg-red-200"
             >
               Logout

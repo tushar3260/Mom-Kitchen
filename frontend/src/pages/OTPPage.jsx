@@ -1,21 +1,45 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
+import Loading from '../Loading'; // 🔧 Adjust if path differs
 
 const OTPPage = () => {
   const [otp, setOtp] = useState(new Array(6).fill(''));
   const [loading, setLoading] = useState(false);
   const [attemptsLeft, setAttemptsLeft] = useState(5);
   const [timer, setTimer] = useState(300);
-  const email = localStorage.getItem('chefEmail');
   const inputsRef = useRef([]);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // 🔍 Get role from query param
+  const queryParams = new URLSearchParams(location.search);
+  const role = queryParams.get('role') || 'user';
+
+  // 🔍 Fetch email based on role
+  let email = null;
+  if (role === 'chef') {
+    email = localStorage.getItem('chefEmail');
+  } else if (role === 'user') {
+    const user = JSON.parse(localStorage.getItem('userData'));
+    email = user?.email;
+  } 
+
+  // 📍 LOGIN REDIRECT
+  let loginRedirect = '/login';
+  if (role === 'chef') loginRedirect = '/chef/login';
+  
+
+  // 📍 DASHBOARD REDIRECT
+  let dashboardRedirect = '/';
+  if (role === 'chef') dashboardRedirect = '/chef/chefdashboard';
+  
 
   useEffect(() => {
     if (!email) {
       toast.error('Please login first!');
-      navigate('/chef/login');
+      navigate(loginRedirect);
     } else {
       autoSendOtp();
     }
@@ -82,12 +106,15 @@ const OTPPage = () => {
 
     try {
       setLoading(true);
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/otp/verify-otp`, { email, otp: enteredOtp });
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/otp/verify-otp`, {
+        email,
+        otp: enteredOtp,
+      });
 
       if (res.data.message.toLowerCase().includes('verify')) {
         toast.success('OTP verified! Redirecting...');
         setTimeout(() => {
-          window.location.href = '/chef/chefdashboard';
+          window.location.href = dashboardRedirect;
         }, 1500);
       } else {
         toast.error(res.data.message || 'Invalid OTP.');
@@ -108,14 +135,19 @@ const OTPPage = () => {
   return (
     <div className="min-h-screen bg-[#fff8ee] flex flex-col justify-center items-center p-5 font-sans relative">
       <Toaster position="top-center" reverseOrder={false} />
-      <h1 className="text-4xl font-bold text-orange-500 mb-2">Chef OTP Verification</h1>
+      {loading && <Loading message="Verifying OTP..." />}
+
+      <h1 className="text-4xl font-bold text-orange-500 mb-2">
+        {role.charAt(0).toUpperCase() + role.slice(1)} OTP Verification
+      </h1>
 
       <p className="text-sm text-gray-600 mb-4">
         {email ? `OTP has been sent to ${email}` : 'No email found. Please login again.'}
       </p>
 
       <p className="text-xs text-gray-500 mb-4">
-        Attempts left: <span className="font-semibold">{attemptsLeft}</span> | Timer: <span className="font-semibold">{formatTime(timer)}</span>
+        Attempts left: <span className="font-semibold">{attemptsLeft}</span> | Timer:{" "}
+        <span className="font-semibold">{formatTime(timer)}</span>
       </p>
 
       <div className="flex gap-2 mb-6">
@@ -147,7 +179,9 @@ const OTPPage = () => {
         onClick={handleSendOtp}
         disabled={loading || timer > 0 || attemptsLeft <= 0}
         className={`mt-4 px-6 py-2 rounded-md font-semibold transition-all duration-200 ${
-          (loading || timer > 0 || attemptsLeft <= 0) ? 'bg-gray-300 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600 text-white'
+          loading || timer > 0 || attemptsLeft <= 0
+            ? 'bg-gray-300 cursor-not-allowed'
+            : 'bg-orange-500 hover:bg-orange-600 text-white'
         }`}
       >
         {timer > 0 ? `Resend OTP in ${formatTime(timer)}` : 'Resend OTP'}

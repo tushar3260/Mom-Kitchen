@@ -25,7 +25,9 @@ const userSchema = new mongoose.Schema({
     }
   ],
   favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: "Chef" }],
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  isVerified: { type: Boolean, default: false }
+  
 }, {
   timestamps: true
 });

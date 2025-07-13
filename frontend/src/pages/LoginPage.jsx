@@ -59,7 +59,7 @@ function LoginPage() {
           setLoading(false);
 
           setTimeout(() => {
-            window.location.href = "/"; // 🔄 Redirect after login
+            window.location.href = '/otp?role=user'; // 🔄 Redirect after login
           }, 1500);
         } else {
           setError("Invalid response: Missing user or token");

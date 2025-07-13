@@ -3,12 +3,14 @@ import axios from "axios";
 import TiffinTalesLogo from "../assets/tiffintaleslogo.png";
 import { useUser } from "../context/userContext.jsx"; // Custom hook for user context
 import ThreeDotMenu from "./Threedot.jsx";
+import Loading from "../Loading.jsx";
 
 function TopNav() {
   const { user, setUser } = useUser();
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
-
+  const [redirectLoading, setRedirectLoading] = useState(false); // ✅ NEW
+  const [logoutLoading, setLogoutLoading] = useState(false)
   const userId = user?._id;
 
   // ✅ Fetch addresses on user login
@@ -19,7 +21,9 @@ function TopNav() {
       try {
         console.log("Fetching addresses for userId:", userId);
 
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/user/${userId}/address`);
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/user/${userId}/address`
+        );
         const data = res.data;
 
         console.log("Fetched addresses:", data);
@@ -49,19 +53,29 @@ function TopNav() {
     }
   };
 
-  // ✅ Login Click with Redirect
+  // ✅ Login Click with Redirect and Loading
   const handleLoginRedirect = () => {
+    setRedirectLoading(true);
     localStorage.setItem("redirectAfterLogin", window.location.pathname);
-    window.location.href = "/login";
+    setTimeout(() => {
+      window.location.href = "/login";
+    }, 800); // for smooth UX
   };
 
   // ✅ Logout
   const handleLogout = () => {
+    setLogoutLoading(true);
     localStorage.removeItem("userData");
+    setTimeout(()=>{
+      window.location.href = "/"
+    },800)
     setUser(null);
-    window.location.href = "/";
+   
   };
 
+  // ✅ Show loading screen when redirecting
+  if (redirectLoading) return <Loading message="Redirecting to login..." />;
+  if (logoutLoading)   return <Loading message="Logging Out....." />;
   return (
     <header className="bg-white shadow-sm border-b-2 border-orange-500">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
@@ -129,7 +143,6 @@ function TopNav() {
             >
               Logout
             </button>
-
           )}
           <ThreeDotMenu />
         </div>

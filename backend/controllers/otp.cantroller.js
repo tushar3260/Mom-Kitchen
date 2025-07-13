@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-
+import Chef from '../models/Chef.js'; // Chef model import
 // In-memory store for OTPs (demo ke liye, production me DB use karna)
 const otpStore = {};
 
@@ -37,7 +37,9 @@ export const sendOTP = async (req, res) => {
   }
 };
 
-export const verifyOTP = (req, res) => {
+
+
+export const verifyOTP = async (req, res) => {
   const { email, otp } = req.body;
   if (!email || !otp) return res.status(400).json({ message: 'Email aur OTP dono chahiye!' });
 
@@ -51,6 +53,30 @@ export const verifyOTP = (req, res) => {
 
   if (record.otp !== otp) return res.status(400).json({ message: 'OTP galat hai!' });
 
-  delete otpStore[email]; // success pe OTP hata do
-  res.status(200).json({ message: 'OTP verify ho gaya bhai!' });
+  delete otpStore[email];
+
+  try {
+    const chef = await Chef.findOne({ email });
+    if (!chef) return res.status(404).json({ message: 'Chef mila hi nahi!' });
+
+    const token = jwt.sign(
+      { id: chef._id, email: chef.email, role: chef.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.status(200).json({
+      message: 'OTP verify ho gaya bhai!',
+      token,
+      chef: {
+        id: chef._id,
+        name: chef.name,
+        email: chef.email,
+        role: chef.role,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server me kuch gadbad hai bhai.' });
+  }
 };

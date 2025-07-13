@@ -1,0 +1,124 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Toaster } from 'react-hot-toast';
+// import chefHero from '../assets/chef-hero.png'; // uncomment and add image
+
+const ChefLanding = () => {
+  const navigate = useNavigate();
+
+  return (
+    <div className="min-h-screen bg-[#fff8ee] text-gray-800 font-sans overflow-x-hidden">
+      <Toaster />
+
+      {/* Hero Section */}
+      <section className="flex flex-col md:flex-row items-center justify-between px-6 md:px-20 py-10 bg-[#fff3da]">
+        <motion.div
+          className="md:w-1/2 mb-6 md:mb-0"
+          initial={{ x: -80, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ duration: 0.8 }}
+        >
+          <h1 className="text-4xl md:text-5xl font-bold text-orange-500 leading-tight">
+            Bring Your Tiffin Tales to Life 🍱
+          </h1>
+          <p className="mt-4 text-lg text-gray-600">
+            Join hundreds of home chefs building their food journey with Tiffin Tales.
+          </p>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => navigate('/chef/signup')}
+            className="mt-6 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg shadow-lg transition-all duration-200"
+          >
+            Become a Chef
+          </motion.button>
+        </motion.div>
+
+        <motion.div
+          className="md:w-1/2 flex justify-center"
+          initial={{ x: 100, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ duration: 0.8 }}
+        >
+          <img
+            src="https://media.istockphoto.com/id/626998740/photo/beautiful-woman-cooking.webp?a=1&b=1&s=612x612&w=0&k=20&c=Pueokr4dGzRmU-WsM2cfyBC7vnTOB1dnQRlB3YJBP5o=" // Replace with your image path
+            alt="Chef Cooking"
+            className="max-w-[90%] md:max-w-[70%] rounded-xl shadow-md"
+          />
+        </motion.div>
+      </section>
+
+      {/* Why Join Section */}
+      <section className="px-6 md:px-20 py-14 bg-white">
+        <h2 className="text-3xl font-bold text-center text-orange-500 mb-6">
+          Why Join Tiffin Tales as a Chef?
+        </h2>
+        <div className="grid md:grid-cols-3 gap-8">
+          {[
+            {
+              title: 'Flexible Timings',
+              desc: 'Cook and deliver on your own schedule. Perfect for home-based chefs.',
+            },
+            {
+              title: 'Zero Commission',
+              desc: 'We don’t take a cut. Your earnings are 100% yours.',
+            },
+            {
+              title: 'Verified Customers',
+              desc: 'Serve real customers who love homemade food.',
+            },
+            {
+              title: 'Support Team',
+              desc: 'Got questions? Our support is just a call away.',
+            },
+            {
+              title: 'Chef Community',
+              desc: 'Connect and grow with other passionate home chefs.',
+            },
+            {
+              title: 'Personal Dashboard',
+              desc: 'Track your orders, income, and feedback all in one place.',
+            },
+          ].map((feature, idx) => (
+            <motion.div
+              key={idx}
+              className="bg-[#fff8ee] rounded-lg p-6 shadow hover:shadow-md transition"
+              whileHover={{ scale: 1.03 }}
+              transition={{ type: 'spring', stiffness: 200 }}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <h3 className="text-xl font-semibold text-orange-600">{feature.title}</h3>
+              <p className="text-sm text-gray-700 mt-2">{feature.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA Footer */}
+      <motion.section
+        className="text-center py-12 bg-orange-50 border-t border-orange-100"
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        viewport={{ once: true }}
+      >
+        <h2 className="text-2xl font-semibold text-orange-500 mb-4">
+          Ready to Serve Your Tiffin Tales?
+        </h2>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => navigate('/chef/signup')}
+          className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-full transition-all duration-200"
+        >
+          Join as a Chef Now
+        </motion.button>
+      </motion.section>
+    </div>
+  );
+};
+
+export default ChefLanding;
