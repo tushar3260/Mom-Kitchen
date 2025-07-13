@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
-import Loading from '../Loading'; // 🔧 Adjust if path differs
+import Loading from '../Loading'; // Adjust path if needed
 
 const OTPPage = () => {
   const [otp, setOtp] = useState(new Array(6).fill(''));
@@ -13,28 +13,34 @@ const OTPPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 🔍 Get role from query param
   const queryParams = new URLSearchParams(location.search);
   const role = queryParams.get('role') || 'user';
 
-  // 🔍 Fetch email based on role
+  // Email fetching
   let email = null;
   if (role === 'chef') {
     email = localStorage.getItem('chefEmail');
   } else if (role === 'user') {
     const user = JSON.parse(localStorage.getItem('userData'));
     email = user?.email;
-  } 
+  }
 
-  // 📍 LOGIN REDIRECT
-  let loginRedirect = '/login';
-  if (role === 'chef') loginRedirect = '/chef/login';
-  
+  const loginRedirect = role === 'chef' ? '/chef/login' : '/login';
+  const dashboardRedirect = role === 'chef' ? '/chef/chefdashboard' : '/';
 
-  // 📍 DASHBOARD REDIRECT
-  let dashboardRedirect = '/';
-  if (role === 'chef') dashboardRedirect = '/chef/chefdashboard';
-  
+  // ✅ Memoized autoSendOtp
+  const autoSendOtp = useCallback(async () => {
+    try {
+      setLoading(true);
+      await axios.post(`${import.meta.env.VITE_API_URL}/otp/send-otp`, { email });
+      toast.success(`OTP sent to ${email}`);
+      setTimer(300);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to send OTP.');
+    } finally {
+      setLoading(false);
+    }
+  }, [email]);
 
   useEffect(() => {
     if (!email) {
@@ -49,20 +55,7 @@ const OTPPage = () => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [email]);
-
-  const autoSendOtp = async () => {
-    try {
-      setLoading(true);
-      await axios.post(`${import.meta.env.VITE_API_URL}/otp/send-otp`, { email });
-      toast.success(`OTP sent to ${email}`);
-      setTimer(300);
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to send OTP.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [email, navigate, loginRedirect, autoSendOtp]);
 
   const handleSendOtp = async () => {
     if (attemptsLeft <= 0) {

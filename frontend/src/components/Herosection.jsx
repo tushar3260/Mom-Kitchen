@@ -1,9 +1,14 @@
 import React, { useState } from "react";
-import girlPizzaImg from "../assets/girleatingpizza.jpg";
+import { useNavigate } from "react-router-dom";
+import girlPizzaImg from "../assets/eating.jpg";
 
 function Herosection() {
   const [mode, setMode] = useState("delivery");
-
+   const [searchInput, setSearchInput] = useState("");
+  const navigate = useNavigate();
+ const handleSearch = () => {
+    navigate("/meals", { state: { query: searchInput.trim() } });
+ };
   return (
     <div className="font-sans">
       {/* Hero Section */}
@@ -54,10 +59,14 @@ function Herosection() {
               <div className="flex">
                 <input
                   type="text"
-                  placeholder="Enter Your Address"
+                  placeholder="Enter Your Food"
                   className="flex-grow bg-gray-100 px-4 py-2 rounded-l-md outline-none text-sm"
+                  value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
                 />
-                <button className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 text-sm font-medium rounded-r-md">
+                <button 
+                onClick={handleSearch}
+                className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 text-sm font-medium rounded-r-md">
                   🔍 Find Food
                 </button>
               </div>
@@ -68,10 +77,12 @@ function Herosection() {
 
         <div className="mt-10 md:mt-0 z-10">
           <img
-            src={girlPizzaImg}
-            alt="Girl Eating Pizza"
-            className="w-80 md:w-96"
-          />
+  src={girlPizzaImg}
+  alt="Happy girl enjoying a slice of pizza"
+  className="w-full max-w-[600px] h-auto rounded-3xl shadow-xl object-cover transition-transform duration-300 hover:scale-105"
+/>
+
+
         </div>
       </div>
     </div>

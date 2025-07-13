@@ -84,7 +84,7 @@ function TopNav() {
           <img
             src={TiffinTalesLogo}
             alt="Tiffin Tales Logo"
-            className="h-12 w-auto object-contain"
+            className="h-50 w-auto object-contain"
           />
         </div>
 

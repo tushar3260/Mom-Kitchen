@@ -6,6 +6,9 @@ import DashBoard from "./pages/DashBoard.jsx";
 import ChefApp from "./pages/Chef/ChefApp.jsx";
 import Cart from "./pages/Cart.jsx";
 import Allchef from "./pages/Allchef.jsx";
+import AllMeals from "./pages/AllMeals";
+import ChefDetail from "./pages/Chef/ChefDetail.jsx";
+
 import AddLocation from "./pages/Addlocation.jsx";
 import { UserProvider } from "./context/userContext.jsx";
 import UserProtect from "./ProtectWrapper/UserProtect.jsx"; // 👈 Import protect component
@@ -28,12 +31,14 @@ function App() {
             <Route path="/allchef" element={<Allchef />} />
             <Route path="/addlocation" element={<AddLocation />} />
             <Route path="/otp" element={<OTPPage />} />
+            <Route path="/meals" element={<AllMeals />} />
+            <Route path="/chef-detail/:id" element={<ChefDetail />} />
             {/* Protected Routes */}
             <Route
               path="/dashboard"
               element={
                 <UserProtect>
-                  <DashboardApp />
+                  <DashBoard />
                 </UserProtect>
               }
             />
