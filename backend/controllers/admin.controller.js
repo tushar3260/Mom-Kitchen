@@ -3,12 +3,12 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 export const registerAdmin = async (req, res) => {
-  const { username, password } = req.body;
-  const existing = await Admin.findOne({ username });
+  const { username, password ,email, phone } = req.body;
+  const existing = await Admin.findOne({ email });
   if (existing) return res.status(400).json({ message: "Admin already exists" });
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const admin = new Admin({ username, passwordHash: hashedPassword });
+  const admin = new Admin({ username, passwordHash: hashedPassword,email, phone });
 
   await admin.save();
 
@@ -21,12 +21,12 @@ export const registerAdmin = async (req, res) => {
     maxAge: 7 * 24 * 60 * 60 * 1000
   });
 
-  res.status(201).json({ message: "Admin registered", admin: { username: admin.username, role: admin.role }, token });
+  res.status(201).json({ message: "Admin registered", admin, token });
 };
 
 export const loginAdmin = async (req, res) => {
-  const { username, password } = req.body;
-  const admin = await Admin.findOne({ username });
+  const { email, password } = req.body;
+  const admin = await Admin.findOne({ email });
   if (!admin) return res.status(404).json({ message: "Admin not found" });
 
   const isMatch = await bcrypt.compare(password, admin.passwordHash);
@@ -41,7 +41,7 @@ export const loginAdmin = async (req, res) => {
     maxAge: 7 * 24 * 60 * 60 * 1000
   });
 
-  res.status(200).json({ message: "Login successful", admin: { username: admin.username, role: admin.role }, token });
+  res.status(200).json({ message: "Login successful", admin , token });
 };
 
 export const getAllAdmins = async (req, res) => {
