@@ -16,7 +16,10 @@ const Sidebar = () => (
     </div>
     <button
     onClick={() => {
-      localStorage.removeItem('chefToken'); // Clear token from localStorage
+      localStorage.removeItem('chefToken');
+      localStorage.removeItem('chefData');
+      localStorage.removeItem("chefEmail");
+       // Clear token from localStorage
       window.location.href = '/'; // Redirect to home page or login
     }}
      className="bg-[#ff7e00] text-white py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-orange-600 mt-10">

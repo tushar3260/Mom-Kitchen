@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Bell, Wallet, MapPin, User } from "lucide-react";
-import TopNav from "../components/topnav";
+import TopNav from "../components/TopNav";
 
 export default function Dashboard() {
   const [user, setUser] = useState({ name: "", city: "", phone: "", address: "" });

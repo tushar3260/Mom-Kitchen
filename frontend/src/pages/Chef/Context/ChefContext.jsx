@@ -10,7 +10,7 @@ export const ChefProvider = ({ children }) => {
 
   // 3️⃣ Auto-load chef data from localStorage
   useEffect(() => {
-    const storedChef = localStorage.getItem('chefEmail');
+    const storedChef = localStorage.getItem('chefData');
     const storedToken = localStorage.getItem('chefToken');
 
     if (storedChef) setChef(storedChef);

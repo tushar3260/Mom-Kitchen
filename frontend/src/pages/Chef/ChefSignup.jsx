@@ -1,39 +1,56 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { toast, Toaster } from 'react-hot-toast';
+import React, { useState } from "react";
+import axios from "axios";
+import { toast, Toaster } from "react-hot-toast";
+import { Link } from "react-router-dom";
 // import {useNavigate } from 'react-router-dom';
+import ChefContext from "./context/ChefContext";
+import { useContext } from "react";
+import Loading from "../../Loading";
 const ChefSignup = () => {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    passwordHash: '',
-    bio: '',
-    cuisine: '',
-    kitchenImages: '',
-    documents: { aadhaar: '', pan: '' },
-    bankDetails: { accNo: '', ifsc: '', holderName: '' },
-    location: { area: '', lat: '', lng: '' },
+    name: "",
+    email: "",
+    phone: "",
+    passwordHash: "",
+    bio: "",
+    cuisine: "",
+    kitchenImages: "",
+    documents: { aadhaar: "", pan: "" },
+    bankDetails: { accNo: "", ifsc: "", holderName: "" },
+    location: { area: "", lat: "", lng: "" },
   });
+  const { setChef, setChefToken } = useContext(ChefContext);
 
   const [loading, setLoading] = useState(false);
   const [locationFetched, setLocationFetched] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name.startsWith('bankDetails.')) {
-      const key = name.split('.')[1];
-      setFormData(prev => ({ ...prev, bankDetails: { ...prev.bankDetails, [key]: value } }));
-    } else if (name.startsWith('documents.')) {
-      const key = name.split('.')[1];
-      setFormData(prev => ({ ...prev, documents: { ...prev.documents, [key]: value } }));
-    } else if (name.startsWith('location.')) {
-      const key = name.split('.')[1];
-      setFormData(prev => ({ ...prev, location: { ...prev.location, [key]: value } }));
-    } else if (name === 'cuisine' || name === 'kitchenImages') {
-      setFormData(prev => ({ ...prev, [name]: value.split(',').map(v => v.trim()) }));
+    if (name.startsWith("bankDetails.")) {
+      const key = name.split(".")[1];
+      setFormData((prev) => ({
+        ...prev,
+        bankDetails: { ...prev.bankDetails, [key]: value },
+      }));
+    } else if (name.startsWith("documents.")) {
+      const key = name.split(".")[1];
+      setFormData((prev) => ({
+        ...prev,
+        documents: { ...prev.documents, [key]: value },
+      }));
+    } else if (name.startsWith("location.")) {
+      const key = name.split(".")[1];
+      setFormData((prev) => ({
+        ...prev,
+        location: { ...prev.location, [key]: value },
+      }));
+    } else if (name === "cuisine" || name === "kitchenImages") {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value.split(",").map((v) => v.trim()),
+      }));
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
@@ -49,18 +66,20 @@ const ChefSignup = () => {
         const lng = position.coords.longitude;
 
         try {
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
+          );
           const data = await res.json();
 
-          const address = data.display_name || 'Address not found';
+          const address = data.display_name || "Address not found";
 
-          setFormData(prev => ({
+          setFormData((prev) => ({
             ...prev,
             location: {
               area: address,
               lat: lat.toString(),
-              lng: lng.toString()
-            }
+              lng: lng.toString(),
+            },
           }));
 
           setLocationFetched(true);
@@ -82,7 +101,7 @@ const ChefSignup = () => {
     e.preventDefault();
 
     if (!validatePhone(formData.phone)) {
-      toast.error('❌ Invalid Indian phone number');
+      toast.error("❌ Invalid Indian phone number");
       return;
     }
 
@@ -93,17 +112,43 @@ const ChefSignup = () => {
 
     setLoading(true);
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/chefs/register`, formData, { withCredentials: true });
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/chefs/register`,
+        formData,
+        { withCredentials: true }
+      );
       toast.success(res.data.message || "Chef registered successfully!");
-      window.location.href = 'chef/otp'; // Redirect to Chef Dashboard
-      localStorage.setItem('chefEmail', email);
-      localStorage.setItem('chefToken', res.data.token); // Store token in localStorage
+      setTimeout(() => {
+        setLoading(true);
+        window.location.href = "/otp";
+      }, 800);
+
+      const token = res.data.token;
+      const chef = res.data.chef;
+
+      if (!token) {
+        toast.error("❌ Login failed! No token received");
+        return;
+      }
+
+      localStorage.setItem("chefToken", token);
+      localStorage.setItem("chefData", JSON.stringify(chef));
+      localStorage.setItem("chefEmail", chef.email);
+      setChef(chef);
+      setChefToken(token);
+      // Store token in localStorage
       // Reset form
       setFormData({
-        name: '', email: '', phone: '', passwordHash: '', bio: '', cuisine: '',
-        kitchenImages: '', documents: { aadhaar: '', pan: '' },
-        bankDetails: { accNo: '', ifsc: '', holderName: '' },
-        location: { area: '', lat: '', lng: '' },
+        name: "",
+        email: "",
+        phone: "",
+        passwordHash: "",
+        bio: "",
+        cuisine: "",
+        kitchenImages: "",
+        documents: { aadhaar: "", pan: "" },
+        bankDetails: { accNo: "", ifsc: "", holderName: "" },
+        location: { area: "", lat: "", lng: "" },
       });
       setLocationFetched(false);
     } catch (err) {
@@ -277,9 +322,9 @@ const ChefSignup = () => {
             {loading ? "Registering..." : "Register as Chef"}
           </button>
           already have an account?{" "}
-          <a href="chef/login" className="text-[#ff7e00] underline">
+          <Link to="/chef/login" className="text-[#ff7e00] underline">
             Login here
-          </a>
+          </Link>
         </form>
       </div>
     </div>
@@ -287,5 +332,3 @@ const ChefSignup = () => {
 };
 
 export default ChefSignup;
-
-

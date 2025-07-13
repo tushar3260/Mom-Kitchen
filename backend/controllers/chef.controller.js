@@ -34,7 +34,7 @@ export const registerChef = async (req, res) => {
     maxAge: 7 * 24 * 60 * 60 * 1000
   });
 
-  res.status(201).json({ message: "Chef registered", chef: { id: chef._id, email: chef.email, role: chef.role }, token });
+  res.status(201).json({ message: "Chef registered", chef, token });
 };
 
 export const loginChef = async (req, res) => {
@@ -54,7 +54,7 @@ export const loginChef = async (req, res) => {
     maxAge: 7 * 24 * 60 * 60 * 1000
   });
 
-  res.status(200).json({ message: "Login successful", chef: { id: chef._id, email: chef.email, role: chef.role }, token });
+  res.status(200).json({ message: "Login successful", chef, token });
 };
 
 export const getAllChefs = async (req, res) => {
