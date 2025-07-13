@@ -2,7 +2,7 @@ import LandingPage from './pages/LandingPage.jsx';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Login from './pages/LoginPage.jsx';
 import Signup from './pages/SignupPage.jsx';
-import DashBoard from './pages/DashBoard.jsx';
+import DashboardApp from './pages/DashboardApp.jsx';
 import ChefApp from './pages/Chef/ChefApp.jsx';
 import Cart from './pages/Cart.jsx';
 import Allchef from './pages/Allchef.jsx';
@@ -31,7 +31,7 @@ function App() {
               path="/dashboard" 
               element={
                 <UserProtect>
-                  <DashBoard />
+                  <DashboardApp />
                 </UserProtect>
               } 
             />
