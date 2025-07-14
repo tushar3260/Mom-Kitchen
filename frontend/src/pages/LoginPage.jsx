@@ -11,8 +11,9 @@ function LoginPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showForgotLink, setShowForgotLink] = useState(false); // 👈 new state
 
-  const { setUser, setToken } = useContext(UserContext); // ✅ Using both setUser & setToken
+  const { setUser, setToken } = useContext(UserContext);
 
   const checkPasswordStrength = (pwd) => {
     if (!pwd) return '';
@@ -25,6 +26,7 @@ function LoginPage() {
     e.preventDefault();
     setError('');
     setSuccess('');
+    setShowForgotLink(false); // Reset on new attempt
 
     if (!email || !password) {
       setError("Please fill all fields");
@@ -50,8 +52,8 @@ function LoginPage() {
         const { user, token, message } = res.data;
 
         if (user && token) {
-          setUser(user);             
-          setToken(token);           
+          setUser(user);
+          setToken(token);
           localStorage.setItem("userData", JSON.stringify(user));
           localStorage.setItem("usertoken", token);
 
@@ -59,7 +61,7 @@ function LoginPage() {
           setLoading(false);
 
           setTimeout(() => {
-            window.location.href = '/otp?role=user'; // 🔄 Redirect after login
+            window.location.href = '/otp?role=user';
           }, 1500);
         } else {
           setError("Invalid response: Missing user or token");
@@ -68,11 +70,22 @@ function LoginPage() {
       }
     } catch (error) {
       setLoading(false);
-      console.error("Login Error:", error);
-      setError(error?.response?.data?.message || "Login failed. Please try again.");
+      const errorMsg = error?.response?.data?.message || "Login failed. Please try again.";
+      setError(errorMsg);
+
+      if (
+    errorMsg.toLowerCase().includes("password") ||
+    errorMsg.toLowerCase().includes("invalid credentials") ||
+    errorMsg.toLowerCase().includes("incorrect")
+  ) {
+    setShowForgotLink(true); // 👈 Now it'll show even if backend says "invalid credentials"
+  } else {
+    setShowForgotLink(false);
+  }
+
       setTimeout(() => {
         setError('');
-      }, 2500);
+      }, 3000);
     }
   };
 
@@ -124,6 +137,17 @@ function LoginPage() {
 
           {error && <p className="text-red-500 text-center mb-4">{error}</p>}
           {success && <p className="text-green-500 text-center mb-4">{success}</p>}
+
+          {showForgotLink && (
+            <p className="text-center mb-4">
+              <a
+                href="/forgot-password?role=user"
+                className="text-sm text-orange-500 hover:underline font-medium"
+              >
+                Forgot Password?
+              </a>
+            </p>
+          )}
 
           <motion.button
             whileHover={{ scale: 1.05 }}

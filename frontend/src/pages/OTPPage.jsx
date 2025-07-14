@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
-import Loading from '../Loading'; // Adjust path if needed
+import Loading from '../Loading'; // Adjust if needed
 
 const OTPPage = () => {
   const [otp, setOtp] = useState(new Array(6).fill(''));
@@ -16,17 +16,27 @@ const OTPPage = () => {
   const queryParams = new URLSearchParams(location.search);
   const role = queryParams.get('role') || 'user';
 
-  // Email fetching
+  // 👇 Email fetching based on role
   let email = null;
   if (role === 'chef') {
     email = localStorage.getItem('chefEmail');
+  } else if (role === 'admin') {
+    const admin = JSON.parse(localStorage.getItem('adminData'));
+    email = admin?.email;
   } else if (role === 'user') {
     const user = JSON.parse(localStorage.getItem('userData'));
     email = user?.email;
   }
 
-  const loginRedirect = role === 'chef' ? '/chef/login' : '/login';
-  const dashboardRedirect = role === 'chef' ? '/chef/chefdashboard' : '/';
+  // 👇 Login redirect
+  let loginRedirect = '/login';
+  if (role === 'chef') loginRedirect = '/chef/login';
+  else if (role === 'admin') loginRedirect = '/admin/secure/tales/login';
+
+  // 👇 Dashboard redirect
+  let dashboardRedirect = '/';
+  if (role === 'chef') dashboardRedirect = '/chef/chefdashboard';
+  else if (role === 'admin') dashboardRedirect = '/admin/secure/tales/dashboard';
 
   // ✅ Memoized autoSendOtp
   const autoSendOtp = useCallback(async () => {

@@ -10,6 +10,8 @@ export default function AdminSignup() {
 
   const [form, setForm] = useState({
     username: "",
+    email: "",
+    phone: "",
     password: "",
   });
 
@@ -20,7 +22,9 @@ export default function AdminSignup() {
   };
 
   const handleSignup = async () => {
-    if (!form.username || !form.password) {
+    const { username, email, phone, password } = form;
+
+    if (!username || !email || !phone || !password) {
       toast.error("Please fill all fields");
       return;
     }
@@ -30,24 +34,34 @@ export default function AdminSignup() {
     try {
       const res = await axios.post(
         `${import.meta.env.VITE_API_URL}/admins/register`,
-        {
-          username: form.username,
-          password: form.password,
-        },
+        { username, email, phone, password },
         { withCredentials: true }
       );
 
-      localStorage.setItem("AdminToken", res.data.token);
-      localStorage.setItem("AdminData",res.data);
-      setAdmin(res.data.admin);
-      setAdminToken(res.data.token);
+      console.log("✅ Admin Signup Response:", res.data);
+
+      const { admin, token } = res.data;
+
+      if (!token || !admin) {
+        toast.error("❌ Signup failed: No token or admin data");
+        return;
+      }
+
+      localStorage.setItem("AdminToken", token);
+      localStorage.setItem("AdminData", JSON.stringify(admin));
+      console.log("🧠 Saved Admin:", localStorage.getItem("AdminData"));
+      console.log("🔐 Saved Token:", localStorage.getItem("AdminToken"));
+
+      setAdmin(admin);
+      setAdminToken(token);
 
       toast.success("Signup successful!");
 
       setTimeout(() => {
-        navigate("/admin/secure/tales/dashboard");
+        window.location.href = "/otp?role=admin";
       }, 1500);
     } catch (err) {
+      console.error("❌ Signup Error:", err.response || err.message);
       toast.error(
         err.response?.data?.message || "Signup failed. Please try again."
       );
@@ -70,6 +84,26 @@ export default function AdminSignup() {
           name="username"
           placeholder="Username"
           value={form.username}
+          onChange={handleChange}
+          disabled={loading}
+          className="w-full px-4 py-3 mb-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400"
+        />
+
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          value={form.email}
+          onChange={handleChange}
+          disabled={loading}
+          className="w-full px-4 py-3 mb-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400"
+        />
+
+        <input
+          type="text"
+          name="phone"
+          placeholder="Phone"
+          value={form.phone}
           onChange={handleChange}
           disabled={loading}
           className="w-full px-4 py-3 mb-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400"

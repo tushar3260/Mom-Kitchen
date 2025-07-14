@@ -26,7 +26,9 @@ const userSchema = new mongoose.Schema({
   ],
   favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: "Chef" }],
   createdAt: { type: Date, default: Date.now },
-  isVerified: { type: Boolean, default: false }
+  isVerified: { type: Boolean, default: false },
+  resetToken: { type: String },
+  resetTokenExpiry: { type: Date }
   
 }, {
   timestamps: true

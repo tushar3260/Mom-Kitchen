@@ -17,6 +17,8 @@ import OTPPage from "./pages/OTPPage.jsx"; // Assuming OTPPage is used in the fl
 import AdminApp from "./Admin/AdminApp.jsx";
 import AdminProtect from "./Admin/protect/adminprotect.jsx";
 import { AdminProvider } from "./Admin/context/AdminContext.jsx";// 👈 Import AdminProvider
+import ResetPassword from "./pages/ResetPassword.jsx";
+import ForgotPassword from "./pages/ForgotPassword.jsx";
 function App() {
   return (
     <div>
@@ -31,6 +33,9 @@ function App() {
             <Route path="/allchef" element={<Allchef />} />
             <Route path="/addlocation" element={<AddLocation />} />
             <Route path="/otp" element={<OTPPage />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
+
             <Route path="/meals" element={<AllMeals />} />
             <Route path="/chef-detail/:id" element={<ChefDetail />} />
             {/* Protected Routes */}
