@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import Chef from '../models/Chef.js'; // Chef model import
+import jwt from 'jsonwebtoken';
 // In-memory store for OTPs (demo ke liye, production me DB use karna)
 const otpStore = {};
 
