@@ -1,27 +1,29 @@
-import { useContext, useEffect, useState, useRef } from 'react';
-import { Navigate } from 'react-router-dom';
-import { toast } from 'react-hot-toast';
-import AdminContext from '../context/AdminContext';
+import { useContext, useEffect, useState, useRef } from "react";
+import { Navigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
+import AdminContext from "../context/AdminContext";
 
 const AdminProtect = ({ children }) => {
   const { admin, adminToken } = useContext(AdminContext);
+
   const [checking, setChecking] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
   const [redirect, setRedirect] = useState(false);
 
-  const toastShownRef = useRef(false); // Prevent double toasts
+  const toastShownRef = useRef(false);
 
   useEffect(() => {
     const checkAuth = async () => {
-      await new Promise((res) => setTimeout(res, 300)); // Delay for animation feel
+      await new Promise((res) => setTimeout(res, 300)); // lil animation buffer
 
-      const storedAdmin = JSON.parse(localStorage.getItem('AdminData'));
-      const storedToken = localStorage.getItem('AdminToken');
-      const role = admin?.role || storedAdmin?.role;
+      const storedAdmin = JSON.parse(localStorage.getItem("AdminData"));
+      const storedToken = localStorage.getItem("AdminToken");
 
-      if (!storedToken || role !== 'admin') {
+      const role = admin?.role || storedAdmin?.role || null;
+
+      if (!storedToken || role !== "admin") {
         if (!toastShownRef.current) {
-          toast.error('⛔ Admin access denied. Please login first.');
+          toast.error("⛔ Admin access denied. Please login first.");
           toastShownRef.current = true;
         }
         setRedirect(true);
@@ -33,9 +35,9 @@ const AdminProtect = ({ children }) => {
     };
 
     checkAuth();
-  }, [admin, adminToken]);
+  }, [adminToken]); // Only re-run if token changes
 
-  if (checking) {
+  if (checking || (!admin && !localStorage.getItem("AdminData"))) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-[#fff8ee] backdrop-blur-sm">
         <div className="flex flex-col justify-center items-center bg-white bg-opacity-80 p-8 rounded-xl shadow-2xl animate-fadeIn">

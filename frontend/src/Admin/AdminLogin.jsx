@@ -1,17 +1,16 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast, Toaster } from "react-hot-toast";
-import AdminContext from "./context/AdminContext"; 
-import { useContext } from "react";// ✅ Check this path based on your folder
+import AdminContext from "./context/AdminContext";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
-  const { setAdmin, setAdminToken } = useContext(AdminContext); 
-  // ✅ From custom hook
+  const { setAdmin, setAdminToken } = useContext(AdminContext);
 
   const [form, setForm] = useState({
     username: "",
+    email: "",
     password: "",
   });
 
@@ -22,7 +21,11 @@ export default function AdminLogin() {
   };
 
   const handleLogin = async () => {
-    if (!form.username || !form.password) {
+    const username = form.username.trim();
+    const email = form.email.trim();
+    const password = form.password.trim();
+
+    if (!username || !email || !password) {
       toast.error("Please fill all fields");
       return;
     }
@@ -32,25 +35,25 @@ export default function AdminLogin() {
     try {
       const res = await axios.post(
         `${import.meta.env.VITE_API_URL}/admins/login`,
-        {
-          username: form.username,
-          password: form.password,
-        },
+        { username, email, password },
         { withCredentials: true }
       );
 
       const { admin, token } = res.data;
 
+      console.log("✅ Full Admin Received:", admin);
+
       if (admin && token) {
         setAdmin(admin);
         setAdminToken(token);
+
         localStorage.setItem("AdminToken", token);
         localStorage.setItem("AdminData", JSON.stringify(admin));
+
         toast.success("Login successful!");
 
         setTimeout(() => {
-          window.location.href = '/admin/secure/tales/dashboard'; // 🔄 Redirect after login
-
+          window.location.href = "/otp?role=admin";
         }, 1500);
       } else {
         throw new Error("Invalid response from server.");
@@ -77,6 +80,16 @@ export default function AdminLogin() {
           name="username"
           placeholder="Username"
           value={form.username}
+          onChange={handleChange}
+          disabled={loading}
+          className="w-full px-4 py-3 mb-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400"
+        />
+
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          value={form.email}
           onChange={handleChange}
           disabled={loading}
           className="w-full px-4 py-3 mb-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400"
