@@ -9,6 +9,10 @@ import Allchef from './pages/Allchef.jsx';
 import AddLocation from './pages/Addlocation.jsx';
 import { UserProvider } from './context/userContext.jsx';
 import UserProtect from './ProtectWrapper/UserProtect.jsx';  // 👈 Import protect component
+import AdminApp from './Admin/AdminApp.jsx';
+import { AdminProvider } from './Admin/context/AdminContext.jsx';
+import AdminProtect from './Admin/protect/adminprotect.jsx';
+
 
 function App() {
   return (
@@ -24,6 +28,19 @@ function App() {
             <Route path="/cart" element={<Cart />} />
             <Route path="/allchef" element={<Allchef />} />
             <Route path="/addlocation" element={<AddLocation />} />
+            <Route path="/admin/secure/tales/*" element={
+              
+              <AdminProvider>
+                <AdminProtect>
+                
+                <AdminApp />
+                </AdminProtect>
+              </AdminProvider>
+            } />
+            
+            
+
+
 
             {/* Protected Routes */}
             <Route 

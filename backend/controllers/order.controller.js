@@ -52,9 +52,10 @@ export const placeOrder = async (req, res) => {
 export const getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find()
-      .populate("userId", "name email")
-      .populate("chefId", "name email")
-      .populate("meals.mealId", "title price");
+  .populate("userId", "_id fullName name email")
+  .populate("chefId", "_id name email")
+  .populate("meals.mealId", "title price");
+
 
     res.status(200).json(orders);
   } catch (err) {
@@ -79,9 +80,10 @@ export const getOrdersByUser = async (req, res) => {
 export const getOrderById = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id)
-      .populate("userId", "name email")
-      .populate("chefId", "name email")
-      .populate("meals.mealId", "title price");
+  .populate("userId", "name email")
+  .populate("chefId", "name email") // ✅ fixed here
+  .populate("meals.mealId", "title price");
+
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
