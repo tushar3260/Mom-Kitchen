@@ -1,3 +1,4 @@
+// ✅ AdminAllChefs.jsx (Frontend)
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
@@ -41,24 +42,29 @@ export default function AdminAllChefs() {
     }
   };
 
-  const toggleApproval = (id) => {
-    setChefs((prev) =>
-      prev.map((chef) =>
-        chef._id === id ? { ...chef, isVerified: !chef.isVerified } : chef
-      )
-    );
+  const toggleApproval = async (id, currentStatus) => {
+    try {
+      const token = localStorage.getItem("AdminToken");
+      const res = await axios.put(
+        `${import.meta.env.VITE_API_URL}/chefs/toggleApproval/${id}`,
+        { isVerified: !currentStatus },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setChefs((prev) => prev.map((chef) => (chef._id === id ? res.data.chef : chef)));
+    } catch (err) {
+      console.error("Failed to toggle approval", err);
+    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-100 via-orange-100 to-yellow-200 p-6">
-      <motion.h2
-        className="text-3xl font-bold text-orange-700 mb-6"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
+      <motion.h2 className="text-3xl font-bold text-orange-700 mb-6" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
         All Registered Chefs
       </motion.h2>
-
       <div className="overflow-x-auto rounded-lg shadow-md bg-white">
         <table className="min-w-full text-left border-collapse">
           <thead className="bg-orange-500 text-white">
@@ -73,9 +79,7 @@ export default function AdminAllChefs() {
           <tbody>
             {chefs.length === 0 ? (
               <tr>
-                <td colSpan="5" className="p-4 text-center text-gray-500">
-                  No chefs found.
-                </td>
+                <td colSpan="5" className="p-4 text-center text-gray-500">No chefs found.</td>
               </tr>
             ) : (
               chefs.map((chef, index) => (
@@ -91,20 +95,12 @@ export default function AdminAllChefs() {
                     )}
                   </td>
                   <td className="p-3 space-x-2">
-                    {/* Stylish View Button */}
-                    <button
-                      onClick={() => fetchChefDetails(chef._id)}
-                      className="bg-gradient-to-r from-yellow-500 via-orange-500 to-yellow-500 text-white px-4 py-1.5 rounded-full shadow-md hover:shadow-lg hover:scale-105 transform transition-all duration-300 font-semibold"
-                    >
+                    <button onClick={() => fetchChefDetails(chef._id)} className="bg-gradient-to-r from-yellow-500 via-orange-500 to-yellow-500 text-white px-4 py-1.5 rounded-full shadow-md hover:scale-105 transition-all font-semibold">
                       👁 View
                     </button>
-
-                    {/* Original Approve/Reject Button */}
                     <button
-                      onClick={() => toggleApproval(chef._id)}
-                      className={`${
-                        chef.isVerified ? "bg-red-600" : "bg-green-600"
-                      } hover:opacity-90 text-white px-3 py-1 rounded`}
+                      onClick={() => toggleApproval(chef._id, chef.isVerified)}
+                      className={`${chef.isVerified ? "bg-red-600" : "bg-green-600"} hover:opacity-90 text-white px-3 py-1 rounded`}
                     >
                       {chef.isVerified ? "Reject" : "Approve"}
                     </button>
@@ -115,8 +111,6 @@ export default function AdminAllChefs() {
           </tbody>
         </table>
       </div>
-
-      {/* Chef Detail Modal */}
       {selectedChef && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-2xl w-[95%] max-w-2xl shadow-xl relative overflow-y-auto max-h-[90vh]">
@@ -126,30 +120,8 @@ export default function AdminAllChefs() {
             <p><strong>Phone:</strong> {selectedChef.phone}</p>
             <p><strong>Bio:</strong> {selectedChef.bio}</p>
             <p><strong>Cuisine:</strong> {selectedChef.cuisine?.join(", ")}</p>
-            <p><strong>Aadhaar:</strong> {selectedChef.documents?.aadhaar}</p>
-            <p><strong>PAN:</strong> {selectedChef.documents?.pan}</p>
-            <p><strong>Bank Details:</strong></p>
-            <ul className="pl-4">
-              <li>Acc No: {selectedChef.bankDetails?.accNo}</li>
-              <li>IFSC: {selectedChef.bankDetails?.ifsc}</li>
-              <li>Holder: {selectedChef.bankDetails?.holderName}</li>
-            </ul>
-            <p><strong>Location:</strong></p>
-            <ul className="pl-4">
-              <li>Area: {selectedChef.location?.area}</li>
-              <li>Lat: {selectedChef.location?.lat}</li>
-              <li>Lng: {selectedChef.location?.lng}</li>
-            </ul>
             <p><strong>Status:</strong> <span className={selectedChef.isVerified ? "text-green-600" : "text-red-600"}>{selectedChef.isVerified ? "Approved" : "Pending"}</span></p>
-            <p><strong>Rating:</strong> {selectedChef.rating}</p>
-            <p><strong>Created:</strong> {new Date(selectedChef.createdAt).toLocaleString()}</p>
-
-            <button
-              onClick={() => setSelectedChef(null)}
-              className="absolute top-2 right-2 text-red-600 hover:scale-110 font-bold text-xl"
-            >
-              ×
-            </button>
+            <button onClick={() => setSelectedChef(null)} className="absolute top-2 right-2 text-red-600 font-bold text-xl">&times;</button>
           </div>
         </div>
       )}
