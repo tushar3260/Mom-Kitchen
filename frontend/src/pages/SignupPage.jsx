@@ -68,7 +68,7 @@ function SignupPage() {
           setLoading(false);
 
           setTimeout(() => {
-            window.location.href = "/dashboard";
+            window.location.href = "/otp?role=user";
           }, 1500);
         } else {
           setError("Signup failed: Missing user or token");
