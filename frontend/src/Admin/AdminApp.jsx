@@ -3,9 +3,10 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import AdminLogin from './AdminLogin.jsx';
 import AdminSignup from './AdminSignup.jsx';
 import AdminDashboard from './AdminDashboard.jsx';
-import AdminAllUsers from './AdminAllusers.jsx';
-import AdminAllChefs from './AdminAllchef.jsx';
-import AdminAllOrders from './AdminAllorder.jsx';
+import AdminAllUsers from './admincomponents/AdminAllusers.jsx'
+import AdminAllChefs from './admincomponents/AdminAllchef.jsx';
+import AdminAllOrders from './admincomponents/AdminAllorder.jsx';
+// import AdminAllOrders from './admincomponents/admincomponents/AdminAllOrders.jsx';
 import { AdminProvider } from './context/AdminContext.jsx';
 import AdminProtect from './protect/adminprotect.jsx';
 
