@@ -61,7 +61,9 @@ function SignupPage() {
         if (user && token) {
           setUser(user);           // ✅ Context
           setToken(token);         // ✅ Context
-          localStorage.setItem("userData", JSON.stringify(user));
+          localStorage.setItem("userData", JSON.stringify(
+            { fullName: user.fullName, email: user.email, phone: user.phone ,role: user.role }
+          ));
           localStorage.setItem("usertoken", token);
 
           setSuccess("Signup successful! Redirecting...");

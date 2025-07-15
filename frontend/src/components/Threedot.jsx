@@ -20,7 +20,7 @@ const Threedot = () => {
     setIsMenuOpen(false);
     setLoading(true);
     setTimeout(() => {
-      navigate("chef/");
+      window.location.href = "/chef/";
     }, 600); // spinner delay
   };
 

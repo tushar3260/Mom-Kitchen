@@ -1,18 +1,28 @@
-import express from 'express';
-import { UserLogin, UserSignUp, getallUsers } from '../controllers/user.controller.js';
+import express from "express";
+import {
+  UserLogin,
+  UserSignUp,
+  getallUsers,
+  toggleBlockStatus,
+} from "../controllers/user.controller.js";
+import {
+  addUserAddress,
+  getUserAddresses,
+} from "../controllers/addlocation.controller.js";
 import authorize from "../middlewares/Authmiddleware.js";
 
 const router = express.Router();
 
-router.post('/login', UserLogin);
-router.post('/signup', UserSignUp);
-router.get('/getallusers', authorize('admin'), getallUsers); // Only admin can view all users
-// In routes/userRoutes.js
+// ✅ Public routes
+router.post("/login", UserLogin);
+router.post("/signup", UserSignUp);
 
-import { addUserAddress, getUserAddresses } from "../controllers/addlocation.controller.js";
+// ✅ User address routes
+router.post("/:id/address", addUserAddress);  // Add address
+router.get("/:id/address", getUserAddresses); // Get addresses
 
-router.post("/:id/address", addUserAddress); // PUT for adding new address
-router.get("/:id/address", getUserAddresses); // GET for fetching user addresses
+// ✅ Admin-only routes
+router.get("/getallusers", authorize("admin"), getallUsers);
+router.put("/toggleBlock/:id", authorize("admin"), toggleBlockStatus); // New block/unblock route
 
 export default router;
-//685bf2b806817869a865d3ad

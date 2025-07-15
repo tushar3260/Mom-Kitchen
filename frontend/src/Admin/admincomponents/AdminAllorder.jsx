@@ -1,23 +1,29 @@
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 import { motion } from "framer-motion";
 
 export default function AdminAllOrders() {
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const dummyOrders = Array.from({ length: 50 }, (_, i) => ({
-      _id: (i + 1).toString(),
-      userName: `User ${i + 1}`,
-      chefName: `Chef ${((i % 10) + 1)}`,
-      items: [`Item A${i + 1}`, `Item B${i + 2}`],
-      address: `Street ${i + 5}, City ${(i % 5) + 1}`,
-      amount: Math.floor(Math.random() * 1000) + 200,
-      status: Math.random() < 0.6 ? "Delivered" : Math.random() < 0.5 ? "Pending" : "Cancelled",
-      date: new Date(Date.now() - i * 86400000).toLocaleDateString("en-IN"),
-    }));
+    const fetchOrders = async () => {
+      try {
+        const token = localStorage.getItem("AdminToken");
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/orders`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setOrders(res.data);
+      } catch (err) {
+        console.error("Error fetching orders:", err);
+        setError(err.response?.data?.message || "Failed to fetch orders");
+      }
+    };
 
-    setOrders(dummyOrders);
+    fetchOrders();
   }, []);
 
   return (
@@ -54,25 +60,26 @@ export default function AdminAllOrders() {
               orders.map((order, index) => (
                 <tr key={order._id} className="border-b hover:bg-yellow-100 transition">
                   <td className="p-3">{index + 1}</td>
-                  <td className="p-3">{order.userName}</td>
-                  <td className="p-3">{order.chefName}</td>
-                  <td className="p-3">₹{order.amount}</td>
+                  <td className="p-3">{order.userId?.fullName || order.userId?.name || "N/A"}</td>
+                  <td className="p-3">{order.chefId?.name || "N/A"}</td>
+                  <td className="p-3">₹{order.totalPrice}</td>
                   <td className="p-3">
                     <span className={`font-semibold ${
                       order.status === "Delivered" ? "text-green-600" :
-                      order.status === "Pending" ? "text-yellow-600" :
-                      "text-red-600"
+                      order.status === "Preparing" ? "text-yellow-600" :
+                      order.status === "Cancelled" ? "text-red-600" :
+                      "text-gray-700"
                     }`}>
                       {order.status}
                     </span>
                   </td>
-                  <td className="p-3">{order.date}</td>
+                  <td className="p-3">{new Date(order.createdAt).toLocaleString()}</td>
                   <td className="p-3">
                     <button
                       onClick={() => setSelectedOrder(order)}
-                      className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
+                      className="bg-gradient-to-r from-yellow-500 via-orange-500 to-yellow-500 text-white px-4 py-1.5 rounded-full shadow-md hover:shadow-lg hover:scale-105 transform transition-all duration-300 font-semibold"
                     >
-                      View
+                      👁 View
                     </button>
                   </td>
                 </tr>
@@ -85,23 +92,44 @@ export default function AdminAllOrders() {
       {/* Order Detail Modal */}
       {selectedOrder && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-2xl w-[90%] max-w-md shadow-xl relative">
+          <div className="bg-white p-6 rounded-2xl w-[95%] max-w-2xl shadow-xl relative overflow-y-auto max-h-[90vh]">
             <h3 className="text-2xl font-bold mb-4 text-orange-700">Order Details</h3>
-            <p><strong>User:</strong> {selectedOrder.userName}</p>
-            <p><strong>Chef:</strong> {selectedOrder.chefName}</p>
-            <p><strong>Amount:</strong> ₹{selectedOrder.amount}</p>
+
+            <p><strong>User:</strong> {selectedOrder.userId?.fullName || selectedOrder.userId?.name}</p>
+            <p><strong>User ID:</strong> {selectedOrder.userId?._id}</p>
+
+            <p><strong>Chef:</strong> {selectedOrder.chefId?.name}</p>
+            <p><strong>Chef ID:</strong> {selectedOrder.chefId?._id}</p>
+
+            <p><strong>Amount:</strong> ₹{selectedOrder.totalPrice}</p>
             <p><strong>Status:</strong>{" "}
               <span className={
                 selectedOrder.status === "Delivered" ? "text-green-600" :
-                selectedOrder.status === "Pending" ? "text-yellow-600" :
-                "text-red-600"
+                selectedOrder.status === "Preparing" ? "text-yellow-600" :
+                selectedOrder.status === "Cancelled" ? "text-red-600" :
+                "text-gray-700"
               }>
                 {selectedOrder.status}
               </span>
             </p>
-            <p><strong>Date:</strong> {selectedOrder.date}</p>
-            <p><strong>Items:</strong> {selectedOrder.items.join(", ")}</p>
-            <p><strong>Address:</strong> {selectedOrder.address}</p>
+
+            <p><strong>Payment:</strong> {selectedOrder.paymentStatus} ({selectedOrder.paymentMode})</p>
+            <p><strong>Time Slot:</strong> {selectedOrder.timeSlot}</p>
+            <p><strong>Date:</strong> {new Date(selectedOrder.createdAt).toLocaleString()}</p>
+
+            <p><strong>Items:</strong></p>
+            <ul className="pl-5 list-disc">
+              {selectedOrder.meals.map((meal, idx) => (
+                <li key={idx}>
+                  {meal.mealId?.title || "Meal"} × {meal.quantity} — ₹{meal.price}
+                </li>
+              ))}
+            </ul>
+
+            <p><strong>Address:</strong></p>
+            <p className="pl-3">
+              {selectedOrder.deliveryAddress?.street}, {selectedOrder.deliveryAddress?.city}, {selectedOrder.deliveryAddress?.pincode}
+            </p>
 
             <button
               onClick={() => setSelectedOrder(null)}
@@ -115,3 +143,4 @@ export default function AdminAllOrders() {
     </div>
   );
 }
+            

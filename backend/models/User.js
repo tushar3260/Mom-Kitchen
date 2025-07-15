@@ -28,7 +28,12 @@ const userSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   isVerified: { type: Boolean, default: false },
   resetToken: { type: String },
-  resetTokenExpiry: { type: Date }
+  resetTokenExpiry: { type: Date },
+  isOtpVerified : {
+    type : Boolean,
+    default : false
+  },
+   isBlocked: { type: Boolean, default: false }
   
 }, {
   timestamps: true

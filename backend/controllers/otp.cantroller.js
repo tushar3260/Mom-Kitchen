@@ -1,83 +1,112 @@
 import nodemailer from 'nodemailer';
-import Chef from '../models/Chef.js'; // Chef model import
 import jwt from 'jsonwebtoken';
-// In-memory store for OTPs (demo ke liye, production me DB use karna)
+
+import Admin from '../models/admin.js';
+import User from '../models/User.js';
+import Chef from '../models/Chef.js';
+
+// Temporary in-memory OTP store (for demo purposes; use DB in production)
 const otpStore = {};
 
+// Utility function to select model based on role
+const getModelByRole = (role) => {
+  const models = {
+    admin: Admin,
+    user: User,
+    chef: Chef,
+  };
+  return models[role] || null;
+};
+
+// Controller to send OTP
 export const sendOTP = async (req, res) => {
-  const { email } = req.body;
-  if (!email) return res.status(400).json({ message: 'Email dena zaroori hai!' });
+  const { email, role } = req.body;
+
+  if (!email || !role) {
+    return res.status(400).json({ message: 'Email and role are required.' });
+  }
+
+  const Model = getModelByRole(role);
+  if (!Model) return res.status(400).json({ message: 'Invalid role provided.' });
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  const expiry = Date.now() + 5 * 60 * 1000; // 5 min ke liye valid
+  const expiry = Date.now() + 5 * 60 * 1000; // Valid for 5 minutes
 
-  otpStore[email] = { otp, expiry };
+  otpStore[email] = { otp, expiry, role };
 
-  // Nodemailer transporter setup (Gmail SMTP)
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: 'aroravartul@gmail.com',     // apna Gmail daal yahan
-      pass: 'hrwx pcfz xmvg ulna',                // Gmail ka app password yahan daal
+      user: 'aroravartul@gmail.com',
+      pass: 'hrwx pcfz xmvg ulna', // App password
     },
   });
 
   const mailOptions = {
     from: 'aroravartul@gmail.com',
     to: email,
-    subject: 'Your OTP Code',
-    text: `Tera OTP hai: ${otp}. Yeh 5 minute ke liye valid hai.`,
+    subject: 'OTP Verification Code',
+    text: `Your One-Time Password (OTP) is: ${otp}. This code is valid for 5 minutes.`,
   };
 
   try {
     await transporter.sendMail(mailOptions);
-    res.status(200).json({ message: 'OTP bhej diya bhai!' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'OTP bhejne me dikkat aa rahi hai.' });
+    res.status(200).json({ message: 'OTP sent successfully.' });
+  } catch (error) {
+    console.error('Error sending OTP email:', error);
+    res.status(500).json({ message: 'Failed to send OTP. Please try again later.' });
   }
 };
 
-
-
+// Controller to verify OTP
 export const verifyOTP = async (req, res) => {
-  const { email, otp } = req.body;
-  if (!email || !otp) return res.status(400).json({ message: 'Email aur OTP dono chahiye!' });
+  const { email, otp, role } = req.body;
+
+  if (!email || !otp || !role) {
+    return res.status(400).json({ message: 'Email, OTP, and role are required.' });
+  }
 
   const record = otpStore[email];
-  if (!record) return res.status(400).json({ message: 'OTP bhejna pehle padega!' });
+  if (!record || record.role !== role) {
+    return res.status(400).json({ message: 'OTP not found or role mismatch.' });
+  }
 
   if (Date.now() > record.expiry) {
     delete otpStore[email];
-    return res.status(400).json({ message: 'OTP expire ho gaya bhai!' });
+    return res.status(400).json({ message: 'OTP has expired. Please request a new one.' });
   }
 
-  if (record.otp !== otp) return res.status(400).json({ message: 'OTP galat hai!' });
+  if (record.otp !== otp) {
+    return res.status(400).json({ message: 'Incorrect OTP. Please try again.' });
+  }
 
   delete otpStore[email];
 
+  const Model = getModelByRole(role);
+  if (!Model) return res.status(400).json({ message: 'Invalid role provided.' });
+
   try {
-    const chef = await Chef.findOne({ email });
-    if (!chef) return res.status(404).json({ message: 'Chef mila hi nahi!' });
+    const user = await Model.findOne({ email });
+    if (!user) return res.status(404).json({ message: `${role} not found.` });
 
     const token = jwt.sign(
-      { id: chef._id, email: chef.email, role: chef.role },
+      { id: user._id, email: user.email, role },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
 
     res.status(200).json({
-      message: 'OTP verify ho gaya bhai!',
+      message: 'OTP verified successfully.',
       token,
-      chef: {
-        id: chef._id,
-        name: chef.name,
-        email: chef.email,
-        role: chef.role,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role,
       },
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server me kuch gadbad hai bhai.' });
+  } catch (error) {
+    console.error('Error during OTP verification:', error);
+    res.status(500).json({ message: 'Internal server error. Please try again later.' });
   }
 };

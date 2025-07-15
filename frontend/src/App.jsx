@@ -1,5 +1,6 @@
-import LandingPage from "./pages/LandingPage.jsx";
+import React from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import LandingPage from "./pages/LandingPage.jsx";
 import Login from "./pages/LoginPage.jsx";
 import Signup from "./pages/SignupPage.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
@@ -8,7 +9,6 @@ import Cart from "./pages/Cart.jsx";
 import Allchef from "./pages/Allchef.jsx";
 import AllMeals from "./pages/AllMeals";
 import ChefDetail from "./pages/Chef/ChefDetail.jsx";
-
 import AddLocation from "./pages/Addlocation.jsx";
 import { UserProvider } from "./context/userContext.jsx";
 import UserProtect from "./ProtectWrapper/UserProtect.jsx"; // 👈 Import protect component
