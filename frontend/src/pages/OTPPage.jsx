@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
-import Loading from '../Loading'; // Adjust if needed
+import Loading from '../Loading'; // Update path as needed
 
 const OTPPage = () => {
   const [otp, setOtp] = useState(new Array(6).fill(''));
@@ -16,33 +16,40 @@ const OTPPage = () => {
   const queryParams = new URLSearchParams(location.search);
   const role = queryParams.get('role') || 'user';
 
-  // 👇 Email fetching based on role
+  // ✅ Validate role
+  const validRoles = ['user', 'chef', 'admin'];
+  if (!validRoles.includes(role)) {
+    toast.error('Invalid role provided.');
+    navigate('/');
+    return null;
+  }
+
+  // ✅ Retrieve email based on role
   let email = null;
   if (role === 'chef') {
-    email = localStorage.getItem('chefEmail');
+    email = localStorage.getItem('chefEmail'); // Assuming it's stored as plain string
   } else if (role === 'admin') {
-    const admin = JSON.parse(localStorage.getItem('adminData'));
+    const admin = JSON.parse(localStorage.getItem('adminData') || '{}');
     email = admin?.email;
   } else if (role === 'user') {
-    const user = JSON.parse(localStorage.getItem('userData'));
+    const user = JSON.parse(localStorage.getItem('userData') || '{}');
     email = user?.email;
   }
 
-  // 👇 Login redirect
+  // ✅ Route redirection setup
   let loginRedirect = '/login';
   if (role === 'chef') loginRedirect = '/chef/login';
   else if (role === 'admin') loginRedirect = '/admin/secure/tales/login';
 
-  // 👇 Dashboard redirect
   let dashboardRedirect = '/';
   if (role === 'chef') dashboardRedirect = '/chef/chefdashboard';
   else if (role === 'admin') dashboardRedirect = '/admin/secure/tales/dashboard';
 
-  // ✅ Memoized autoSendOtp
+  // ✅ Send OTP automatically on mount
   const autoSendOtp = useCallback(async () => {
     try {
       setLoading(true);
-      await axios.post(`${import.meta.env.VITE_API_URL}/otp/send-otp`, { email });
+      await axios.post(`${import.meta.env.VITE_API_URL}/otp/send-otp`, { email, role });
       toast.success(`OTP sent to ${email}`);
       setTimer(300);
     } catch (err) {
@@ -50,11 +57,11 @@ const OTPPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [email]);
+  }, [email, role]);
 
   useEffect(() => {
     if (!email) {
-      toast.error('Please login first!');
+      toast.error('Please log in to continue.');
       navigate(loginRedirect);
     } else {
       autoSendOtp();
@@ -67,15 +74,16 @@ const OTPPage = () => {
     return () => clearInterval(interval);
   }, [email, navigate, loginRedirect, autoSendOtp]);
 
+  // ✅ Resend OTP logic
   const handleSendOtp = async () => {
     if (attemptsLeft <= 0) {
-      toast.error('Maximum OTP attempts reached. Please try later.');
+      toast.error('Maximum OTP attempts reached. Please try again later.');
       return;
     }
 
     try {
       setLoading(true);
-      await axios.post(`${import.meta.env.VITE_API_URL}/otp/send-otp`, { email });
+      await axios.post(`${import.meta.env.VITE_API_URL}/otp/send-otp`, { email, role });
       toast.success(`OTP resent to ${email}`);
       setAttemptsLeft((prev) => prev - 1);
       setTimer(300);
@@ -86,6 +94,7 @@ const OTPPage = () => {
     }
   };
 
+  // ✅ Handle OTP input changes
   const handleChange = (element, index) => {
     if (!/^[0-9]?$/.test(element.value)) return;
     const newOtp = [...otp];
@@ -100,10 +109,11 @@ const OTPPage = () => {
     }
   };
 
+  // ✅ Verify OTP
   const handleVerify = async () => {
     const enteredOtp = otp.join('');
     if (enteredOtp.length < 6) {
-      toast.error('Please enter the complete 6-digit OTP!');
+      toast.error('Please enter the complete 6-digit OTP.');
       return;
     }
 
@@ -112,10 +122,11 @@ const OTPPage = () => {
       const res = await axios.post(`${import.meta.env.VITE_API_URL}/otp/verify-otp`, {
         email,
         otp: enteredOtp,
+        role,
       });
 
       if (res.data.message.toLowerCase().includes('verify')) {
-        toast.success('OTP verified! Redirecting...');
+        toast.success('OTP verified successfully. Redirecting...');
         setTimeout(() => {
           window.location.href = dashboardRedirect;
         }, 1500);
@@ -123,7 +134,7 @@ const OTPPage = () => {
         toast.error(res.data.message || 'Invalid OTP.');
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Server error. Try again.');
+      toast.error(err.response?.data?.message || 'Server error. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -145,7 +156,7 @@ const OTPPage = () => {
       </h1>
 
       <p className="text-sm text-gray-600 mb-4">
-        {email ? `OTP has been sent to ${email}` : 'No email found. Please login again.'}
+        {email ? `An OTP has been sent to ${email}` : 'No email found. Please login again.'}
       </p>
 
       <p className="text-xs text-gray-500 mb-4">

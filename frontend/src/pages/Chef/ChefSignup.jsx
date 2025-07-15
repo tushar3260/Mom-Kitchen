@@ -120,7 +120,7 @@ const ChefSignup = () => {
       toast.success(res.data.message || "Chef registered successfully!");
       setTimeout(() => {
         setLoading(true);
-        window.location.href = "/otp";
+        window.location.href = "/otp?role=chef";
       }, 800);
 
       const token = res.data.token;
