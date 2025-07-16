@@ -1,49 +1,31 @@
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
 
-function ChefDetail() {
+const ChefDetail = () => {
   const { id } = useParams();
   const [chef, setChef] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/chef/getChefById/${id}`, {
-      method: "GET",
-      credentials: "include", // ⬅️ Important for auth cookie
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Unauthorized or Not Found");
-        return res.json();
-      })
-      .then((data) => {
-        setChef(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error:", err.message);
-        setChef(null);
-        setLoading(false);
-      });
+    fetch(`http://localhost:5000/api/chefs/public/getChefById/${id}`)
+      .then((res) => res.json())
+      .then((data) => setChef(data))
+      .catch((err) => console.error("Error fetching chef details:", err));
   }, [id]);
 
-  if (loading) return <p className="p-6">⏳ Loading...</p>;
-  if (!chef) return <p className="text-red-500 p-6">❌ Chef not found or unauthorized</p>;
+  if (!chef) return <p className="text-center mt-10">Loading...</p>;
 
   return (
-    <div className="min-h-screen bg-[#fffaf1] flex flex-col items-center justify-center py-10">
-      <img
-        src={chef.kitchenImages?.[0] || "https://via.placeholder.com/200"}
-        alt={chef.name}
-        className="w-40 h-40 rounded-full object-cover mb-4"
-      />
-      <h1 className="text-2xl font-bold text-orange-600 mb-2">{chef.name}</h1>
-      <p className="text-gray-700">📍 {chef.location}</p>
-      <p className="text-gray-700">📧 {chef.email}</p>
-      <p className="text-gray-700">📞 {chef.phone}</p>
-      <p className="text-gray-700">Cuisine: {chef.cuisine?.join(", ")}</p>
-      <p className="text-center max-w-xl mt-4 text-gray-600">{chef.bio}</p>
+    <div className="max-w-3xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-lg">
+      <h1 className="text-3xl font-bold text-orange-700 mb-4">{chef.name}</h1>
+      <p className="text-gray-800 mb-2"><strong>Email:</strong> {chef.email}</p>
+      <p className="text-gray-800 mb-2"><strong>Phone:</strong> {chef.phone}</p>
+      <p className="text-gray-800 mb-2"><strong>Location:</strong> {chef.location?.area}, {chef.location?.city}</p>
+      <p className="text-gray-800 mb-2"><strong>Cuisines:</strong> {chef.cuisine?.join(", ")}</p>
+      <p className="text-gray-800 mb-2"><strong>Bio:</strong> {chef.bio || "No bio available."}</p>
+      <p className="text-gray-800 mb-2"><strong>Documents:</strong> {chef.documents?.length || 0} uploaded</p>
+      {/* Add more fields as needed, excluding ifsc, accountHolderName, and image */}
     </div>
   );
-}
+};
 
 export default ChefDetail;

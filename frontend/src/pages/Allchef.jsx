@@ -1,251 +1,93 @@
-// import React, { useState } from "react";
-
-// const dummyChefs = [
-//   {
-//     id: 1,
-//     name: "Chef Sita Ram",
-//     location: "Vrindavan",
-//     rating: 4.8,
-//     image: "https://via.placeholder.com/200x200",
-//     speciality: "Pure Veg Meals",
-//     type: "veg"
-//   },
-//   {
-//     id: 2,
-//     name: "Chef Khan",
-//     location: "Govardhan",
-//     rating: 4.6,
-//     image: "https://via.placeholder.com/200x200",
-//     speciality: "Spicy Non-Veg Tiffins",
-//     type: "non-veg"
-//   },
-//   {
-//     id: 3,
-//     name: "Chef Lakshmi",
-//     location: "Dauji",
-//     rating: 4.9,
-//     image: "https://via.placeholder.com/200x200",
-//     speciality: "South Indian Dishes",
-//     type: "veg"
-//   },
-//   {
-//     id: 4,
-//     name: "Chef Balwinder",
-//     location: "Barsana",
-//     rating: 4.7,
-//     image: "https://via.placeholder.com/200x200",
-//     speciality: "Punjabi Thalis",
-//     type: "veg"
-//   },
-//   {
-//     id: 5,
-//     name: "Chef Arjun",
-//     location: "Radha Kund",
-//     rating: 4.5,
-//     image: "https://via.placeholder.com/200x200",
-//     speciality: "Egg & Light Meals",
-//     type: "non-veg"
-//   }
-// ];
-
-// const Allchef = () => {
-//   const [filter, setFilter] = useState("all");
-
-//   const filteredChefs = dummyChefs.filter(chef => {
-//     if (filter === "all") return true;
-//     return chef.type === filter;
-//   });
-
-//   return (
-//     <section className="bg-[#fffaf1] min-h-screen w-screen overflow-x-hidden py-16 px-4">
-//       <div className="max-w-6xl w-full mx-auto text-center px-4">
-//         <h2 className="text-3xl font-bold text-orange-600 mb-6">Our Chefs</h2>
-
-//         {/* Filter Buttons */}
-//         <div className="flex justify-center gap-4 mb-10">
-//           <button
-//             onClick={() => setFilter("all")}
-//             className={`px-4 py-2 rounded font-medium ${filter === "all" ? "bg-orange-500 text-white" : "bg-white border border-orange-500 text-orange-500"}`}
-//           >
-//             All
-//           </button>
-//           <button
-//             onClick={() => setFilter("veg")}
-//             className={`px-4 py-2 rounded font-medium ${filter === "veg" ? "bg-orange-500 text-white" : "bg-white border border-orange-500 text-orange-500"}`}
-//           >
-//             Veg
-//           </button>
-//           <button
-//             onClick={() => setFilter("non-veg")}
-//             className={`px-4 py-2 rounded font-medium ${filter === "non-veg" ? "bg-orange-500 text-white" : "bg-white border border-orange-500 text-orange-500"}`}
-//           >
-//             Non-Veg
-//           </button>
-//         </div>
-
-//         {/* Chef Cards */}
-//         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-//           {filteredChefs.map((chef) => (
-//             <div
-//               key={chef.id}
-//               className="bg-white p-6 rounded-lg shadow text-center hover:shadow-lg transition duration-300"
-//             >
-//               <img
-//                 src={chef.image}
-//                 alt={chef.name}
-//                 className="w-32 h-32 rounded-full mx-auto mb-4 object-cover"
-//               />
-//               <h3 className="text-xl font-bold text-orange-600 mb-1">{chef.name}</h3>
-//               <p className="text-sm text-gray-600 mb-1">📍 {chef.location}</p>
-//               <p className="text-sm text-gray-600 mb-2">⭐ {chef.rating} rating</p>
-//               <p className="text-gray-700 font-medium">Speciality: {chef.speciality}</p>
-//             </div>
-//           ))}
-//         </div>
-//       </div>
-//     </section>
-//   );
-// };
-
-// export default Allchef;
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-
-const dummyChefs = [
-  {
-    id: 1,
-    name: "Chef Sita Ram",
-    location: "Vrindavan",
-    rating: 4.8,
-    image: "https://via.placeholder.com/200x200",
-    speciality: "Pure Veg Meals",
-    type: "veg"
-  },
-  {
-    id: 2,
-    name: "Chef Khan",
-    location: "Govardhan",
-    rating: 4.6,
-    image: "https://via.placeholder.com/200x200",
-    speciality: "Spicy Non-Veg Tiffins",
-    type: "non-veg"
-  },
-  {
-    id: 3,
-    name: "Chef Lakshmi",
-    location: "Dauji",
-    rating: 4.9,
-    image: "https://via.placeholder.com/200x200",
-    speciality: "South Indian Dishes",
-    type: "veg"
-  },
-  {
-    id: 4,
-    name: "Chef Balwinder",
-    location: "Barsana",
-    rating: 4.7,
-    image: "https://via.placeholder.com/200x200",
-    speciality: "Punjabi Thalis",
-    type: "veg"
-  },
-  {
-    id: 5,
-    name: "Chef Arjun",
-    location: "Radha Kund",
-    rating: 4.5,
-    image: "https://via.placeholder.com/200x200",
-    speciality: "Egg & Light Meals",
-    type: "non-veg"
-  }
-];
+import React, { useEffect, useState } from "react";
 
 const Allchef = () => {
-  const [filter, setFilter] = useState("all");
   const [chefs, setChefs] = useState([]);
-  const navigate = useNavigate();
+  const [selectedChef, setSelectedChef] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/chef/getAllChefs", {
+    fetch(`${import.meta.env.VITE_API_URL}/chefs/getAllChefs`,{
       method: "GET",
       credentials: "include",
     })
       .then((res) => {
-        if (!res.ok) throw new Error("Unauthorized");
+        if (!res.ok) throw new Error("Failed to fetch chefs");
         return res.json();
       })
-      .then((data) => setChefs(data))
+      .then((data) => {
+        setChefs(data);
+      })
       .catch((err) => {
         console.error("Fetch error:", err.message);
-        setChefs(dummyChefs); // fallback
+        setChefs([]);
       });
   }, []);
 
-  const filteredChefs = chefs.filter((chef) => {
-    if (filter === "all") return true;
-    return chef.type === filter;
-  });
-
   return (
-    <section className="bg-[#fffaf1] min-h-screen w-screen overflow-x-hidden py-16 px-4">
-      <div className="max-w-6xl w-full mx-auto text-center px-4">
-        <h2 className="text-3xl font-bold text-orange-600 mb-6">Our Chefs</h2>
+    <section className="bg-[#fffaf1] min-h-screen py-16 px-4">
+      <div className="max-w-6xl mx-auto text-center">
+        <h2 className="text-4xl font-bold text-orange-600 mb-10">Our Chefs</h2>
 
-        {/* Filter Buttons */}
-        <div className="flex justify-center gap-4 mb-10">
-          <button
-            onClick={() => setFilter("all")}
-            className={`px-4 py-2 rounded font-medium ${
-              filter === "all"
-                ? "bg-orange-500 text-white"
-                : "bg-white border border-orange-500 text-orange-500"
-            }`}
-          >
-            All
-          </button>
-          <button
-            onClick={() => setFilter("veg")}
-            className={`px-4 py-2 rounded font-medium ${
-              filter === "veg"
-                ? "bg-orange-500 text-white"
-                : "bg-white border border-orange-500 text-orange-500"
-            }`}
-          >
-            Veg
-          </button>
-          <button
-            onClick={() => setFilter("non-veg")}
-            className={`px-4 py-2 rounded font-medium ${
-              filter === "non-veg"
-                ? "bg-orange-500 text-white"
-                : "bg-white border border-orange-500 text-orange-500"
-            }`}
-          >
-            Non-Veg
-          </button>
-        </div>
+        {/* 🔹 If a chef is selected, show full details */}
+        {selectedChef ? (
+          <div className="bg-white p-8 rounded-2xl shadow-md border border-orange-300 text-left max-w-2xl mx-auto">
+           <button
+  onClick={() => setSelectedChef(null)}
+  className="inline-block mb-6 px-4 py-2 border border-orange-500 text-orange-700 font-semibold text-lg rounded-lg hover:bg-orange-50 hover:text-orange-800 transition duration-200"
+>
+  ← Back to all chefs
+</button>
 
-        {/* Chef Cards */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredChefs.map((chef) => (
-            <div
-              key={chef._id || chef.id}
-              onClick={() => navigate(`/chef-detail/${chef._id || chef.id}`)}
-              className="bg-white p-6 rounded-lg shadow text-center hover:shadow-lg transition duration-300 cursor-pointer"
-            >
-              <img
-                src={chef.image || "https://via.placeholder.com/200x200"}
-                alt={chef.name}
-                className="w-32 h-32 rounded-full mx-auto mb-4 object-cover"
-              />
-              <h3 className="text-xl font-bold text-orange-600 mb-1">{chef.name}</h3>
-              <p className="text-sm text-gray-600 mb-1">📍 {chef.location}</p>
-              <p className="text-sm text-gray-600 mb-2">⭐ {chef.rating || "4.5"} rating</p>
-              <p className="text-gray-700 font-medium">
-                Speciality: {chef.speciality || "N/A"}
-              </p>
+
+            <h3 className="text-3xl font-bold text-orange-700 mb-4">{selectedChef.name}</h3>
+
+            <div className="space-y-3 text-[17px] text-gray-800 leading-relaxed">
+              <p>📍 <strong>Area:</strong> {selectedChef.location?.area || "N/A"}</p>
+              <p>📞 <strong>Phone:</strong> {selectedChef.phone || "N/A"}</p>
+              <p>📧 <strong>Email:</strong> {selectedChef.email || "N/A"}</p>
+              <p>🍽 <strong>Cuisine:</strong> {selectedChef.cuisine?.join(", ") || "N/A"}</p>
+              <p>📝 <strong>Bio:</strong> {selectedChef.bio || "No description provided."}</p>
+
+              {/* ✅ No links — plain text documents */}
+              
+
+             
             </div>
-          ))}
-        </div>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {chefs.map((chef) => (
+      <div
+  key={chef._id}
+  className="bg-white p-8 rounded-2xl shadow-md hover:shadow-lg transition border border-gray-200 cursor-pointer"
+  onClick={() => setSelectedChef(chef)}
+>
+  {/* Name - centered and themed */}
+  <h3 className="text-2xl font-bold text-orange-700 text-center mb-4">
+    {chef.name}
+  </h3>
+
+  {/* Cuisine - above area */}
+  <p className="text-base text-center mb-2">
+    🍽 <span className="font-semibold text-orange-600">Cuisine:</span>{" "}
+    <span className="text-gray-800 font-normal">
+      {chef.cuisine?.join(", ") || "N/A"}
+    </span>
+  </p>
+
+  {/* Area */}
+  <p className="text-base text-gray-700 text-center mb-2">
+    📍 {chef.location?.area || "N/A"}
+  </p>
+
+  {/* Bio */}
+  <p className="text-base text-gray-600 mt-2 text-center">
+    {chef.bio?.slice(0, 60) || "No bio available..."}
+  </p>
+</div>
+
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
