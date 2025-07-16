@@ -24,9 +24,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 //cors for security purposes 
 app.use(cors({
-  origin: 'http://localhost:5173', // <- your frontend origin
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
+
 
 
 app.use('/api/user', userRouter);
