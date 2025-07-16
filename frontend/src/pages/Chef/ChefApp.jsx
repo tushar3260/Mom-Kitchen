@@ -1,31 +1,50 @@
 import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+
 import ChefSignup from './ChefSignup';
 import ChefLogin from './ChefLogin';
-import ChefDashboard from './ChefDashboard';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import ChefProtect from './chefProtect/chefProtect';
 import ChefLanding from './ChefLanding';
-// import OTPPage from '../OTPPage'; // Assuming OTPPage is used in the flow
+import ChefDashboard from './ChefDashboard';
+import ChefProtect from './chefProtect/chefProtect';
+
+import ChefMenu from './chefComponents/ChefMenu';
+import ChefOrders from './chefComponents/ChefOrders';
+import ChefReviews from './chefComponents/ChefReviews';
+import ChefMessages from './chefComponents/Chefmessages';
+import ChefEarning from './chefComponents/ChefEarning';
+import ChefOverview from './chefComponents/ChefOverview'; // this is the dashboard main content
+// ⚠️ Create this file if not done (contains StatsCard + OrderCard like earlier)
+
 const ChefApp = () => {
   return (
-  
+   
       <Routes>
+
+        {/* Public Routes */}
         <Route path="/" element={<ChefLanding />} />
         <Route path="/signup" element={<ChefSignup />} />
         <Route path="/login" element={<ChefLogin />} />
 
+        {/* Protected Dashboard Layout Route */}
         <Route path="/chefdashboard" element={
           <ChefProtect>
             <ChefDashboard />
           </ChefProtect>
-        } />
-        
-        {/* Optional: Add dashboard or 404 page later */}
+        }>
+          {/* Nested Routes for Dashboard */}
+          <Route index element={<ChefOverview />} />
+          <Route path="menu" element={<ChefMenu />} />
+          <Route path="orders" element={<ChefOrders />} />
+          <Route path="messages" element={<ChefMessages />} />
+          <Route path="reviews" element={<ChefReviews />} />
+          <Route path="earnings" element={<ChefEarning />} />
+        </Route>
+
+        {/* Optional: Handle 404 */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    
+   
   );
 };
 
 export default ChefApp;
-
-     
