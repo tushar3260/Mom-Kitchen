@@ -37,8 +37,8 @@ export const sendOTP = async (req, res) => {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: 'aroravartul@gmail.com',
-      pass: 'hrwx pcfz xmvg ulna', // App password
+      user: 'tiffintales@gmail.com',
+      pass: 'regf tlvj cxfi hpwg', // App password
     },
   });
 
@@ -46,7 +46,16 @@ export const sendOTP = async (req, res) => {
     from: 'aroravartul@gmail.com',
     to: email,
     subject: 'OTP Verification Code',
-    text: `Your One-Time Password (OTP) is: ${otp}. This code is valid for 5 minutes.`,
+    text: `Hello from Tiffin Tales!
+
+Your One-Time Password (OTP) for secure access is: ${otp}
+
+This code is valid for the next 5 minutes and is required to verify your identity. Please do not share this code with anyone, including Tiffin Tales staff, for your security.
+
+If you did not request this code, please ignore this message or contact our support team immediately.
+
+Thank you for choosing Tiffin Tales – where every meal tells a story! 🍱`
+
   };
 
   try {

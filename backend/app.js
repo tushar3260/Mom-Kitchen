@@ -23,11 +23,7 @@ app.use(express.json());
 //urlencoded parser for incoming requests
 app.use(express.urlencoded({ extended: true }));
 //cors for security purposes 
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true
-}));
+app.use(cors());
 
 
 
