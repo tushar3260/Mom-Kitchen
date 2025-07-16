@@ -1,6 +1,16 @@
 import Chef from "../models/Chef.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+// ✅ New Public Controller to Get Verified Chefs Only
+export const getPublicVerifiedChefs = async (req, res) => {
+  try {
+    const chefs = await Chef.find({ isVerified: true }).select("-passwordHash");
+    res.status(200).json(chefs);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch verified chefs", error: err.message });
+  }
+};
+
 
 export const registerChef = async (req, res) => {
   const { name, email, phone, passwordHash, bio, cuisine, kitchenImages, documents, bankDetails, location } = req.body;
