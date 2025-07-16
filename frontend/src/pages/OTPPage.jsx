@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
-import Loading from '../Loading'; // Adjust as per your folder structure
+import Loading from '../Loading'; // Adjust this path as per your folder structure
 
 const OTPPage = () => {
   const [otp, setOtp] = useState(new Array(6).fill(''));
@@ -16,27 +16,18 @@ const OTPPage = () => {
   const queryParams = new URLSearchParams(location.search);
   const role = queryParams.get('role') || 'user';
 
-  // ✅ Role validation
-  const validRoles = ['user', 'chef', 'admin'];
-  if (!validRoles.includes(role)) {
-    toast.error('Invalid role provided.');
-    navigate('/');
-    return null;
-  }
-
-  // ✅ Email fetch based on role
-  let email = null;
-  if (role === 'chef') {
-    email = localStorage.getItem('chefEmail');
-  } else if (role === 'admin') {
-    const admin = JSON.parse(localStorage.getItem('adminData') || '{}');
-    email = admin?.email;
-  } else {
+  // ✅ Memoized email fetch
+  const email = useMemo(() => {
+    if (role === 'chef') return localStorage.getItem('chefEmail');
+    if (role === 'admin') {
+      const admin = JSON.parse(localStorage.getItem('adminData') || '{}');
+      return admin?.email;
+    }
     const user = JSON.parse(localStorage.getItem('userData') || '{}');
-    email = user?.email;
-  }
+    return user?.email;
+  }, [role]);
 
-  // ✅ Redirect routes
+  // ✅ Redirect paths
   const loginRedirect = role === 'chef'
     ? '/chef/login'
     : role === 'admin'
@@ -49,7 +40,7 @@ const OTPPage = () => {
     ? '/admin/secure/tales/dashboard'
     : '/';
 
-  // ✅ Auto send OTP on mount
+  // ✅ Auto send OTP
   const autoSendOtp = useCallback(async () => {
     try {
       setLoading(true);
@@ -64,23 +55,33 @@ const OTPPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [email, role]);
+  }, [role, email]);
 
+  // ✅ Initial side-effects
   useEffect(() => {
+    const validRoles = ['user', 'chef', 'admin'];
+    if (!validRoles.includes(role)) {
+      toast.error('Invalid role provided.');
+      navigate('/');
+      return;
+    }
+
     if (!email) {
       toast.error('Please log in to continue.');
       navigate(loginRedirect);
-    } else {
-      autoSendOtp();
+      return;
     }
+
+    autoSendOtp();
 
     const interval = setInterval(() => {
       setTimer((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [email, navigate, loginRedirect, autoSendOtp]);
+  }, [role, email, autoSendOtp, navigate, loginRedirect]);
 
+  // ✅ Manual resend
   const handleSendOtp = async () => {
     if (attemptsLeft <= 0) {
       toast.error('Max attempts reached. Try again later.');
@@ -134,7 +135,7 @@ const OTPPage = () => {
 
       if (res.data.token) {
         toast.success('OTP verified! Redirecting...');
-        localStorage.setItem(`${role}Token`, res.data.token); // optional: save token
+        localStorage.setItem(`${role}Token`, res.data.token);
         setTimeout(() => {
           window.location.href = dashboardRedirect;
         }, 1500);

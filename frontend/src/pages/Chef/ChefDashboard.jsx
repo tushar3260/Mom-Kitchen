@@ -7,9 +7,9 @@ const ChefDashboard = () => {
   return (
     <div className="bg-[#fff8ee] min-h-screen">
       <Sidebar />
-      <div className="ml-64 p-8 transition-all duration-300">
+      <div className="p-8 transition-all duration-300">
         <Header />
-        <div className="max-w-[95%] mx-auto">
+        <div className="w-[85%] mx-auto">
           <Outlet />
         </div>
       </div>
