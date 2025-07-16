@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Loading from '../../../Loading';
+import { useChef } from '../Context/ChefContext';
 import {
   FaCheckCircle,
   FaClock,
@@ -38,6 +39,9 @@ const statusStyles = {
 };
 
 const ChefOrders = () => {
+  const {chef} = useChef()
+  console.log(chef)
+  const chefId = chef?._id;
   const [orders, setOrders] = useState([]);
   const [expandedOrderId, setExpandedOrderId] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -49,7 +53,7 @@ const ChefOrders = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/orders`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/orders/${chefId}`);
       setOrders(res.data);
       console.log('✅ Orders fetched:', res.data);
     } catch (error) {

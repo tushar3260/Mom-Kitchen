@@ -3,7 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import LandingPage from "./pages/LandingPage.jsx";
 import Login from "./pages/LoginPage.jsx";
 import Signup from "./pages/SignupPage.jsx";
-import Dashboard from "./pages/Dashboard.jsx";
+import Dashboard from "./pages/DashBoard.jsx";
 import ChefApp from "./pages/Chef/ChefApp.jsx";
 import Cart from "./pages/Cart.jsx";
 import Allchef from "./pages/Allchef.jsx";
@@ -19,12 +19,15 @@ import AdminProtect from "./Admin/protect/adminprotect.jsx";
 import { AdminProvider } from "./Admin/context/AdminContext.jsx";// 👈 Import AdminProvider
 import ResetPassword from "./pages/ResetPassword.jsx";
 import ForgotPassword from "./pages/ForgotPassword.jsx";
+
+import OrderNowPage from "./components/OrderNowPage.jsx";
 function App() {
   return (
     <div>
       <UserProvider>
         <BrowserRouter>
           <Routes>
+            
             {/* Public Routes */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
@@ -35,7 +38,7 @@ function App() {
             <Route path="/otp" element={<OTPPage />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
-
+            <Route path="/order-now/:id" element={<OrderNowPage />} />
             <Route path="/meals" element={<AllMeals />} />
             <Route path="/chef-detail/:id" element={<ChefDetail />} />
             {/* Protected Routes */}

@@ -6,6 +6,7 @@ import Footer from "../components/Footer.jsx";
 import PopularItems from "../components/PopularItems.jsx";
 import FeaturedRestaurants from "../components/FeaturedRestaurants.jsx";
 import DealCard from "../components/DealCard.jsx";
+
 const LandingPage = () => {
   return (
     <>
