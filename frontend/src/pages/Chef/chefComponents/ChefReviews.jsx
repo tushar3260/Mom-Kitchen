@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaStar } from 'react-icons/fa';
-import { useChef } from '../context/ChefContext.jsx';
+import { useChef } from '../Context/ChefContext.jsx';
 
 const API = import.meta.env.VITE_API_URL;
 

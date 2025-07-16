@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { useChef } from '../context/ChefContext';
+import { useChef } from '../Context/ChefContext';
 
 const Header = () => {
   const { chef } = useChef(); // ✅ Accessing context

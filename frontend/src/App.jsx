@@ -12,7 +12,7 @@ import ChefDetail from "./pages/Chef/ChefDetail.jsx";
 import AddLocation from "./pages/Addlocation.jsx";
 import { UserProvider } from "./context/userContext.jsx";
 import UserProtect from "./ProtectWrapper/UserProtect.jsx"; // 👈 Import protect component
-import { ChefProvider } from "./pages/Chef/context/ChefContext.jsx";
+import { ChefProvider } from "./pages/Chef/Context/ChefContext.jsx";
 import OTPPage from "./pages/OTPPage.jsx"; // Assuming OTPPage is used in the flow
 import AdminApp from "./Admin/AdminApp.jsx";
 import AdminProtect from "./Admin/protect/adminprotect.jsx";

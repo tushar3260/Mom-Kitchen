@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { useChef } from '../context/ChefContext';
+import { useChef } from '../Context/ChefContext';
 
 const ChefMeals = () => {
   const { chef } = useChef();

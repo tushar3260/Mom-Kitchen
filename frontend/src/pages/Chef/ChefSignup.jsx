@@ -3,7 +3,7 @@ import axios from "axios";
 import { toast, Toaster } from "react-hot-toast";
 import { Link } from "react-router-dom";
 import {useNavigate } from 'react-router-dom';
-import ChefContext from "./context/ChefContext";
+import ChefContext from "./Context/ChefContext";
 import { useContext } from "react";
 import Loading from "../../Loading";
 const ChefSignup = () => {

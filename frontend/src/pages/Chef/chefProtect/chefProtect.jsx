@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState, useRef } from 'react';
 import { Navigate } from 'react-router-dom';
-import ChefContext from '../context/ChefContext'; // ✅ Adjust path if needed
+import ChefContext from '../Context/ChefContext'; // ✅ Adjust path if needed
 import { toast } from 'react-hot-toast';
 
 const ChefProtect = ({ children }) => {

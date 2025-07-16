@@ -4,7 +4,7 @@ import { toast, Toaster } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 
 // import { useNavigate } from 'react-router-dom';
-import ChefContext from './context/ChefContext.jsx';
+import ChefContext from './Context/ChefContext.jsx';
 import Loading from '../../Loading.jsx'; // Make sure path is correct
 
 const ChefLogin = () => {

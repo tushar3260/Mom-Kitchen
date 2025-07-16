@@ -23,7 +23,10 @@ app.use(express.json());
 //urlencoded parser for incoming requests
 app.use(express.urlencoded({ extended: true }));
 //cors for security purposes 
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173', // allow only your frontend dev URL
+  credentials: true               // allow cookies, headers etc.
+}));
 
 
 
