@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { toast, Toaster } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
-import { useChef } from './Context/ChefContext.jsx';
+import ChefContext from './Context/ChefContext.jsx';
 import Loading from '../../Loading.jsx'; // make sure path is correct
 
 const ChefLogin = () => {
@@ -13,8 +13,7 @@ const ChefLogin = () => {
   const [error, setError] = useState('');
   const [showForgotLink, setShowForgotLink] = useState(false);
 
-  const {chef}  = useChef()
-  console.log(chef) 
+  const { setChef, setChefToken } = useContext(ChefContext);
 
   const shouldShowForgot = (msg = '') => {
     const m = msg.toLowerCase();
