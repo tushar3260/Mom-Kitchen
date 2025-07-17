@@ -111,3 +111,17 @@ export const deleteMeal = async (req, res) => {
     res.status(500).json({ message: "Failed to delete meal", error: err.message });
   }
 };
+
+
+export const getMealByChefId = async (req, res) => {
+  try {
+    const meals = await Meal.find({ chefId: req.params.chefId }).populate("chefId", "name email");
+    if (meals.length === 0) {
+      return res.status(404).json({ message: "No meals found for the given chefId" });
+    }
+    res.status(200).json({ meals });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch meals", error: err.message });
+  }
+};
+

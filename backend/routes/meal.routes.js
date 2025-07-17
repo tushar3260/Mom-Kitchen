@@ -4,7 +4,8 @@ import {
   getAllMeals,
   getMealById,
   updateMeal,
-  deleteMeal
+  deleteMeal,
+  getMealByChefId
 } from '../controllers/meal.controller.js';
 
 const router = express.Router();
@@ -14,5 +15,5 @@ router.get("/", getAllMeals);
 router.get("/:id", getMealById);
 router.put("/:id", updateMeal);
 router.delete("/:id", deleteMeal);
-
+router.get("/chef/:chefId", getMealByChefId);
 export default router;
