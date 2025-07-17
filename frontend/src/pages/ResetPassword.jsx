@@ -34,7 +34,7 @@ const ResetPassword = () => {
 
       // ✅ Redirect after 2.5s
       setTimeout(() => {
-        if (role === "admin") navigate("/admin/login");
+        if (role === "admin") navigate("/admin/secure/tales/login");
         else if (role === "chef") navigate("/chef/login");
         else navigate("/login");
       }, 2500);
