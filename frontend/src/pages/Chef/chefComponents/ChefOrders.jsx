@@ -194,7 +194,7 @@ const ChefOrders = () => {
                       {order.paymentMode} - {order.paymentStatus}
                     </td>
 
-                    <td className="px-6 py-4 text-sm">{order.userId.email}</td>
+                    <td className="px-6 py-4 text-sm">{order.userId?.email}</td>
 
                     <td className="px-6 py-4 text-sm text-right">
                       {order.status === "Placed" && (

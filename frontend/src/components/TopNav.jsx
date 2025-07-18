@@ -1,33 +1,28 @@
 import React, { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { FaShoppingCart, FaUser } from "react-icons/fa";
 import axios from "axios";
 import TiffinTalesLogo from "../assets/tiffintaleslogo.png";
-import { useUser } from "../context/userContext.jsx"; // Custom hook for user context
-import ThreeDotMenu from "./Threedot.jsx";
+import { useUser } from "../context/userContext.jsx";
 import Loading from "../Loading.jsx";
 
 function TopNav() {
   const { user, setUser } = useUser();
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
-  const [redirectLoading, setRedirectLoading] = useState(false); // ✅ NEW
-  const [logoutLoading, setLogoutLoading] = useState(false)
+  const [redirectLoading, setRedirectLoading] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false); // ✅ Profile dropdown state
+  const [cartCount, setCartCount] = useState(0); // ✅ Dynamic Cart Count
   const userId = user?._id;
 
-  // ✅ Fetch addresses on user login
+  // ✅ Fetch addresses
   useEffect(() => {
     const fetchAddresses = async () => {
       if (!userId) return;
-
       try {
-        console.log("Fetching addresses for userId:", userId);
-
-        const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/user/${userId}/address`
-        );
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/user/${userId}/address`);
         const data = res.data;
-
-        console.log("Fetched addresses:", data);
-
         if (Array.isArray(data) && data.length > 0) {
           setAddresses(data);
           setSelectedAddress(data[0]);
@@ -39,68 +34,64 @@ function TopNav() {
         console.error("Error fetching addresses:", err);
       }
     };
-
     fetchAddresses();
   }, [userId]);
 
-  // ✅ Add Address Click
-  const handleAddAddress = () => {
-    if (!userId) {
-      localStorage.setItem("redirectAfterLogin", "/addlocation");
-      window.location.href = "/login";
-    } else {
-      window.location.href = "/addlocation";
-    }
-  };
+  // ✅ Fetch Cart Count
+  useEffect(() => {
+    if (!userId) return;
+    const fetchCartCount = async () => {
+      try {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/cart/${userId}`);
+        setCartCount(res.data?.items?.length || 0);
+      } catch (err) {
+        console.error("Error fetching cart:", err);
+      }
+    };
+    fetchCartCount();
+  }, [userId]);
 
-  // ✅ Login Click with Redirect and Loading
+  // ✅ Login Redirect
   const handleLoginRedirect = () => {
     setRedirectLoading(true);
     localStorage.setItem("redirectAfterLogin", window.location.pathname);
     setTimeout(() => {
       window.location.href = "/login";
-    }, 800); // for smooth UX
+    }, 800);
   };
 
   // ✅ Logout
   const handleLogout = () => {
     setLogoutLoading(true);
     localStorage.removeItem("userData");
-    setTimeout(()=>{
-      window.location.href = "/"
-    },800)
+    setTimeout(() => {
+      window.location.href = "/";
+    }, 800);
     setUser(null);
-   
   };
 
-  // ✅ Show loading screen when redirecting
   if (redirectLoading) return <Loading message="Redirecting to login..." />;
-  if (logoutLoading)   return <Loading message="Logging Out....." />;
+  if (logoutLoading) return <Loading message="Logging Out..." />;
+
   return (
-    <header className="bg-red shadow-sm border-b-2 border-orange-500">
+    <header className="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
-        {/* LOGO */}
-        <div className="flex items-center pl-2 min-w-[120px]">
-          <img
-            src={TiffinTalesLogo}
-            alt="Tiffin Tales Logo"
-            className="h-50 w-auto object-contain"
-          />
+        
+        {/* ✅ Logo */}
+        <div className="flex items-center">
+          <img src={TiffinTalesLogo} alt="Tiffin Tales" className="h-40 w-auto" />
         </div>
 
-        {/* LOCATION DROPDOWN - Desktop */}
-        <div className="hidden md:block text-sm text-gray-600">
-          Deliver to:{" "}
+        {/* ✅ Location */}
+        <div className="hidden md:block">
           {user ? (
             addresses.length > 0 ? (
               <select
                 value={selectedAddress?._id || ""}
                 onChange={(e) =>
-                  setSelectedAddress(
-                    addresses.find((addr) => addr._id === e.target.value)
-                  )
+                  setSelectedAddress(addresses.find((addr) => addr._id === e.target.value))
                 }
-                className="ml-2 border-none bg-transparent font-semibold text-black"
+                className="px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 font-semibold text-gray-700 outline-none"
               >
                 {addresses.map((addr) => (
                   <option key={addr._id} value={addr._id}>
@@ -109,61 +100,92 @@ function TopNav() {
                 ))}
               </select>
             ) : (
-              <span className="ml-2 font-semibold text-black">
-                No address found
-              </span>
+              <p className="font-semibold text-gray-700">No Address Found</p>
             )
           ) : (
-            <span className="ml-2 font-semibold text-black">
-              Login to see addresses
-            </span>
+            <p className="font-semibold text-gray-700">Login to see addresses</p>
           )}
         </div>
 
-        {/* ACTION BUTTONS */}
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handleAddAddress}
-            className="text-sm border border-gray-300 px-3 py-1 rounded-full text-gray-600 hover:text-black hover:border-black transition"
+        {/* ✅ Buttons */}
+        <div className="flex items-center gap-4">
+          {/* Become a Chef */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            className="bg-gradient-to-r from-red-500 to-orange-500 text-white font-bold px-4 py-2 rounded-full shadow hover:shadow-lg transition"
+            onClick={() => (window.location.href = "/chef")}
           >
-            Add Location
-          </button>
+            Become a Chef
+          </motion.button>
 
-          {!user ? (
+          {/* ✅ Show Cart & Profile Only if Logged In */}
+          {user && (
+            <>
+              {/* Cart */}
+              <motion.div whileHover={{ scale: 1.2 }} className="relative cursor-pointer">
+                <button
+                  onClick={() => {
+                    window.location.href = "/cart";
+                  }}
+                >
+                  <FaShoppingCart size={22} className="text-gray-700" />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                      {cartCount}
+                    </span>
+                  )}
+                </button>
+              </motion.div>
+
+              {/* ✅ Profile Dropdown */}
+              <motion.div whileHover={{ scale: 1.1 }} className="relative">
+                <FaUser
+                  size={22}
+                  className="text-gray-700 cursor-pointer"
+                  onClick={() => setProfileOpen(!profileOpen)}
+                />
+                <AnimatePresence>
+                  {profileOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg border"
+                    >
+                      <ul className="text-gray-700 text-sm">
+                        <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                          My Orders
+                        </li>
+                        <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                          Profile
+                        </li>
+                        <li
+                          onClick={handleLogout}
+                          className="px-4 py-2 hover:bg-red-100 text-red-500 cursor-pointer"
+                        >
+                          Logout
+                        </li>
+                        <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                          Dashboard
+                        </li>
+                      </ul>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            </>
+          )}
+
+          {/* ✅ Login button only when not logged in */}
+          {!user && (
             <button
               onClick={handleLoginRedirect}
-              className="bg-yellow-400 hover:bg-yellow-500 text-sm text-white px-4 py-1.5 rounded-full transition"
+              className="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded-full font-semibold transition"
             >
               Login
             </button>
-          ) : (
-            <button
-              onClick={handleLogout}
-              className="bg-red-100 hover:bg-red-200 text-sm text-red-600 px-4 py-1.5 rounded-full transition"
-            >
-              Logout
-            </button>
           )}
-          <ThreeDotMenu />
         </div>
-      </div>
-
-      {/* MOBILE SCREEN: Show selected address */}
-      <div className="md:hidden px-4 pb-2 text-sm text-center text-gray-600">
-        Deliver to:{" "}
-        <span className="font-semibold text-black">
-          {user ? (
-            selectedAddress ? (
-              `${selectedAddress.tag} - ${selectedAddress.city} (${selectedAddress.pincode})`
-            ) : addresses.length === 0 ? (
-              "No address found"
-            ) : (
-              "Loading..."
-            )
-          ) : (
-            "Login to view address"
-          )}
-        </span>
       </div>
     </header>
   );

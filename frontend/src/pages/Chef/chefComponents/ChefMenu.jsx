@@ -62,6 +62,24 @@ const ChefMeals = () => {
     setEditId(null);
   };
 
+  // ✅ Normalize data after fetch
+  const normalizeMeals = (data) => {
+    return data.map(m => ({
+      ...m,
+      availableDays: Array.isArray(m.availableDays)
+        ? m.availableDays
+        : typeof m.availableDays === 'string'
+          ? m.availableDays.split(',').map(x => x.trim()).filter(Boolean)
+          : [],
+      timeSlots: Array.isArray(m.timeSlots)
+        ? m.timeSlots
+        : typeof m.timeSlots === 'string'
+          ? m.timeSlots.split(',').map(x => x.trim()).filter(Boolean)
+          : [],
+      photo: m.photo || '',
+    }));
+  };
+
   // ✅ Fetch Meals
   const fetchMeals = async (id) => {
     if (!id) {
@@ -78,10 +96,7 @@ const ChefMeals = () => {
         ? res.data
         : res.data.meals || [];
 
-      setMeals(data);
-      if (data.length === 0) {
-        console.warn("⚠️ No meals found for this chef");
-      }
+      setMeals(normalizeMeals(data));
     } catch (err) {
       console.error('❌ Error fetching meals:', err);
       setError('Failed to fetch meals');
@@ -106,7 +121,15 @@ const ChefMeals = () => {
       return toast.error('Please fill all fields!');
     }
 
-    const payload = { chefId, title, description, price: Number(price), photo, availableDays, timeSlots };
+    const payload = {
+      chefId,
+      title,
+      description,
+      price: Number(price),
+      photo,
+      availableDays: Array.from(new Set(availableDays)),
+      timeSlots: Array.from(new Set(timeSlots)),
+    };
 
     try {
       if (editId) {
@@ -127,13 +150,13 @@ const ChefMeals = () => {
 
   const handleEdit = (meal) => {
     setFormData({
-      chefId: meal.chefId?._id || meal.chefId,
-      title: meal.title,
-      description: meal.description,
-      price: meal.price,
-      photo: meal.photo,
-      availableDays: meal.availableDays,
-      timeSlots: meal.timeSlots,
+      chefId: meal.chefId?._id || meal.chefId || '',
+      title: meal.title || '',
+      description: meal.description || '',
+      price: meal.price || '',
+      photo: meal.photo || '',
+      availableDays: Array.isArray(meal.availableDays) ? meal.availableDays : [],
+      timeSlots: Array.isArray(meal.timeSlots) ? meal.timeSlots : [],
     });
     setEditId(meal._id);
     setShowForm(true);
@@ -233,8 +256,12 @@ const ChefMeals = () => {
                 <h2 className="text-lg font-bold">{meal.title}</h2>
                 <p className="text-gray-600 line-clamp-2">{meal.description}</p>
                 <p className="font-semibold text-orange-600 mt-2">₹{meal.price}</p>
-                <p className="text-xs text-gray-500">Days: {meal.availableDays.join(', ')}</p>
-                <p className="text-xs text-gray-500">Time: {meal.timeSlots.join(', ')}</p>
+                <p className="text-xs text-gray-500">
+                  Days: {meal.availableDays?.length ? meal.availableDays.join(', ') : '—'}
+                </p>
+                <p className="text-xs text-gray-500">
+                  Time: {meal.timeSlots?.length ? meal.timeSlots.join(', ') : '—'}
+                </p>
                 <div className="flex justify-between mt-3">
                   <button onClick={() => handleEdit(meal)} className="text-blue-600 hover:text-blue-800 flex items-center gap-1"><FaEdit /> Edit</button>
                   <button onClick={() => handleDelete(meal._id)} className="text-red-600 hover:text-red-800 flex items-center gap-1"><FaTrash /> Delete</button>

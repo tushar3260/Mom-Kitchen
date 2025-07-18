@@ -1,89 +1,165 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import axios from "axios";
 import girlPizzaImg from "../assets/eating.jpg";
 
 function Herosection() {
   const [mode, setMode] = useState("delivery");
-   const [searchInput, setSearchInput] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [allMealTitles, setAllMealTitles] = useState([]);
   const navigate = useNavigate();
- const handleSearch = () => {
-    navigate("/meals", { state: { query: searchInput.trim() } });
- };
+
+  useEffect(() => {
+    const fetchMealTitles = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/meals");
+        const titles = res.data.map((meal) => meal.title);
+        setAllMealTitles(titles);
+      } catch (err) {
+        console.error("Error fetching meal titles:", err);
+      }
+    };
+    fetchMealTitles();
+  }, []);
+
+  const handleSearch = () => {
+    const trimmedQuery = searchInput.trim();
+    if (trimmedQuery) {
+      navigate(`/meals?meal=${encodeURIComponent(trimmedQuery)}`);
+    } else {
+      navigate("/meals");
+    }
+  };
+
+  const filteredSuggestions = allMealTitles
+    .filter((title) =>
+      title.toLowerCase().includes(searchInput.toLowerCase())
+    )
+    .slice(0, 5);
+
   return (
-    <div className="font-sans bg-gradient-to-br from-yellow-100 to-orange-50">
-      {/* Hero Section */}
-      <div className="bg-[#fff7ed] py-16 px-6 md:px-20 flex flex-col md:flex-row items-center justify-between relative">
-        <div className="max-w-xl z-10">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-800 leading-tight mb-4">
-            Are you starving?
+    <div className="relative overflow-hidden bg-gradient-to-br from-yellow-100 to-orange-50 font-sans">
+      {/* Floating Emojis */}
+      <motion.div
+        className="absolute top-10 left-10 text-5xl"
+        animate={{ y: [0, 20, 0], rotate: [0, 10, -10, 0] }}
+        transition={{ repeat: Infinity, duration: 6 }}
+      >
+        🍕
+      </motion.div>
+      <motion.div
+        className="absolute bottom-20 left-16 text-4xl"
+        animate={{ x: [0, 15, 0] }}
+        transition={{ repeat: Infinity, duration: 5 }}
+      >
+        🍔
+      </motion.div>
+      <motion.div
+        className="absolute top-20 right-16 text-5xl"
+        animate={{ y: [0, -20, 0], rotate: [0, -10, 10, 0] }}
+        transition={{ repeat: Infinity, duration: 7 }}
+      >
+        🥗
+      </motion.div>
+
+      <div className="py-16 px-6 md:px-20 flex flex-col md:flex-row items-center justify-between relative z-10">
+        {/* Left Content */}
+        <motion.div
+          className="max-w-xl"
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800 leading-tight mb-4">
+            Are you <span className="text-orange-500">starving?</span>
           </h1>
-          <p className="text-gray-600 mb-6">
-            Within a few clicks, find meals that are accessible near you
+          <p className="text-gray-600 mb-6 text-lg">
+            Within a few clicks, find meals near you
           </p>
 
-          {/* Delivery/Pickup Toggle */}
-          <div className="relative w-fit bg-gray-100 rounded-full p-1 flex gap-2 mb-3">
-            {/* Sliding Indicator */}
-            <div
-              className={`absolute top-1 left-1 h-[34px] w-[90px] rounded-full bg-white shadow-md transition-all duration-300 ease-in-out z-0 ${
-                mode === "pickup" ? "translate-x-[100px]" : "translate-x-0"
-              }`}
-            ></div>
-
-            {/* Buttons */}
+          {/* Toggle */}
+          <div className="relative w-fit bg-gray-200 rounded-full p-1 flex gap-2 mb-4">
+            <motion.div
+              className="absolute top-1 left-1 h-[34px] w-[90px] rounded-full bg-white shadow-md"
+              animate={{ x: mode === "pickup" ? 100 : 0 }}
+              transition={{ type: "spring", stiffness: 200 }}
+            />
             <button
               onClick={() => setMode("delivery")}
-              className={`relative z-10 w-[90px] text-sm font-medium py-1.5 rounded-full ${
-                mode === "delivery"
-                  ? "text-orange-500"
-                  : "text-gray-500"
+              className={`relative z-10 w-[90px] text-sm font-medium py-1.5 ${
+                mode === "delivery" ? "text-orange-500" : "text-gray-500"
               }`}
             >
               🍔 Delivery
             </button>
             <button
               onClick={() => setMode("pickup")}
-              className={`relative z-10 w-[90px] text-sm font-medium py-1.5 rounded-full ${
-                mode === "pickup"
-                  ? "text-orange-500"
-                  : "text-gray-500"
+              className={`relative z-10 w-[90px] text-sm font-medium py-1.5 ${
+                mode === "pickup" ? "text-orange-500" : "text-gray-500"
               }`}
             >
               🥡 Pickup
             </button>
           </div>
 
-          {/* Search Box */}
+          {/* Search Bar */}
           <div className="relative">
-            <div className="bg-white rounded-lg p-4 w-full z-10 relative shadow-[0px_10px_30px_rgba(255,115,0,0.25)]">
+            <div className="bg-white rounded-xl p-4 shadow-xl hover:shadow-2xl transition border border-orange-100">
               <div className="flex">
                 <input
                   type="text"
-                  placeholder="Enter Your Food"
-                  className="flex-grow bg-gray-100 px-4 py-2 rounded-l-md outline-none text-sm"
+                  placeholder="Search your favorite food..."
+                  className="flex-grow bg-gray-100 px-4 py-2 rounded-l-lg outline-none text-sm focus:ring-2 focus:ring-orange-400"
                   value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
+                  onChange={(e) => setSearchInput(e.target.value)}
                 />
-                <button 
-                onClick={handleSearch}
-                className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 text-sm font-medium rounded-r-md">
+                <button
+                  onClick={handleSearch}
+                  className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-6 py-2 text-sm font-bold rounded-r-lg"
+                >
                   🔍 Find Food
                 </button>
               </div>
+
+              {/* Suggestions */}
+              {searchInput && filteredSuggestions.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto z-50"
+                >
+                  {filteredSuggestions.map((suggestion, idx) => (
+                    <div
+                      key={idx}
+                      className="px-4 py-2 text-gray-700 hover:bg-orange-100 cursor-pointer"
+                      onClick={() => {
+                        setSearchInput(suggestion);
+                        navigate(`/meals?meal=${encodeURIComponent(suggestion)}`);
+                      }}
+                    >
+                      {suggestion}
+                    </div>
+                  ))}
+                </motion.div>
+              )}
             </div>
-            <div className="absolute top-full left-0 right-0 h-3 bg-gradient-to-b from-orange-100 to-transparent rounded-b-lg shadow-xl blur-sm"></div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="mt-10 md:mt-0 z-10">
+        {/* Right Image */}
+        <motion.div
+          className="mt-10 md:mt-0"
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8 }}
+        >
           <img
-  src={girlPizzaImg}
-  alt="Happy girl enjoying a slice of pizza"
-  className="w-full max-w-[600px] h-auto rounded-3xl shadow-xl object-cover transition-transform duration-300 hover:scale-105"
-/>
-
-
-        </div>
+            src={girlPizzaImg}
+            alt="Happy girl enjoying pizza"
+            className="w-full max-w-[550px] rounded-3xl shadow-2xl object-cover transform hover:scale-105 transition"
+          />
+        </motion.div>
       </div>
     </div>
   );
