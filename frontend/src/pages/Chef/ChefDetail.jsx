@@ -6,7 +6,8 @@ const ChefDetail = () => {
   const [chef, setChef] = useState(null);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/chefs/public/getChefById/${id}`)
+    fetch(`${import.meta.env.VITE_API_URL}/chefs/public/getChefById/${id}`)
+
       .then((res) => res.json())
       .then((data) => setChef(data))
       .catch((err) => console.error("Error fetching chef details:", err));

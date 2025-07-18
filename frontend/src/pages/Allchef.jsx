@@ -1,11 +1,66 @@
 import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { FaStar } from "react-icons/fa";
+
+const getRandomRating = () => (Math.random() * 1.4 + 3.6).toFixed(1); // 3.6–5.0
+
+const containerVariants = {
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 25, scale: 0.95 },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { type: "spring", stiffness: 120, damping: 14 },
+  },
+};
+
+const StarRow = ({ rating }) => {
+  const full = Math.floor(rating);
+  const half = rating - full >= 0.5;
+  const total = 5;
+
+  return (
+    <div className="flex items-center justify-center gap-0.5">
+      {Array.from({ length: total }).map((_, i) => {
+        const filled = i < full;
+        const showHalf = !filled && i === full && half;
+        return (
+          <FaStar
+            key={i}
+            className={
+              filled
+                ? "text-yellow-400"
+                : showHalf
+                ? "text-yellow-300 opacity-70"
+                : "text-gray-300"
+            }
+            size={14}
+          />
+        );
+      })}
+      <span className="ml-1 text-xs font-semibold text-gray-700">
+        {rating.toFixed(1)}
+      </span>
+    </div>
+  );
+};
 
 const Allchef = () => {
   const [chefs, setChefs] = useState([]);
   const [selectedChef, setSelectedChef] = useState(null);
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/chefs/getAllChefs`,{
+    fetch(`${import.meta.env.VITE_API_URL}/chefs/getAllChefs`, {
       method: "GET",
       credentials: "include",
     })
@@ -14,7 +69,11 @@ const Allchef = () => {
         return res.json();
       })
       .then((data) => {
-        setChefs(data);
+        const updated = data.map((chef) => ({
+          ...chef,
+          rating: parseFloat(getRandomRating()),
+        }));
+        setChefs(updated);
       })
       .catch((err) => {
         console.error("Fetch error:", err.message);
@@ -24,69 +83,121 @@ const Allchef = () => {
 
   return (
     <section className="bg-[#fffaf1] min-h-screen py-16 px-4">
-      <div className="max-w-6xl mx-auto text-center">
-        <h2 className="text-4xl font-bold text-orange-600 mb-10">Our Chefs</h2>
+      <div className="max-w-7xl mx-auto text-center">
+        <h2 className="text-4xl font-bold text-orange-600 mb-12">Our Chefs</h2>
 
-        {/* 🔹 If a chef is selected, show full details */}
         {selectedChef ? (
-          <div className="bg-white p-8 rounded-2xl shadow-md border border-orange-300 text-left max-w-2xl mx-auto">
-           <button
-  onClick={() => setSelectedChef(null)}
-  className="inline-block mb-6 px-4 py-2 border border-orange-500 text-orange-700 font-semibold text-lg rounded-lg hover:bg-orange-50 hover:text-orange-800 transition duration-200"
->
-  ← Back to all chefs
-</button>
+  <div className="group bg-white px-8 py-10 rounded-2xl shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 w-full max-w-xl mx-auto text-center relative">
+    <img
+      src="https://t4.ftcdn.net/jpg/05/89/93/27/360_F_589932782_vQAEAZhHnq1QCGu5ikwrYaQD0Mmurm0N.jpg"
+      alt={selectedChef.name}
+      className="w-28 h-28 rounded-full mx-auto mb-5 object-cover border-4 border-orange-300 shadow-md transition-transform duration-300 group-hover:scale-105"
+    />
 
+    <h3 className="text-2xl font-bold text-gray-800 group-hover:text-orange-600 transition-all duration-200">
+      {selectedChef.name}
+    </h3>
 
-            <h3 className="text-3xl font-bold text-orange-700 mb-4">{selectedChef.name}</h3>
+    <p className="text-base text-gray-500 mt-1">{selectedChef.location?.area || "N/A"}</p>
 
-            <div className="space-y-3 text-[17px] text-gray-800 leading-relaxed">
-              <p>📍 <strong>Area:</strong> {selectedChef.location?.area || "N/A"}</p>
-              <p>📞 <strong>Phone:</strong> {selectedChef.phone || "N/A"}</p>
-              <p>📧 <strong>Email:</strong> {selectedChef.email || "N/A"}</p>
-              <p>🍽 <strong>Cuisine:</strong> {selectedChef.cuisine?.join(", ") || "N/A"}</p>
-              <p>📝 <strong>Bio:</strong> {selectedChef.bio || "No description provided."}</p>
+    <p className="text-lg text-orange-600 font-semibold mt-1">
+      {selectedChef.cuisine?.join(", ") || "Cuisine not listed"}
+    </p>
 
-              {/* ✅ No links — plain text documents */}
-              
+    <hr className="my-6 border-t border-gray-200" />
 
-             
-            </div>
-          </div>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {chefs.map((chef) => (
-      <div
-  key={chef._id}
-  className="bg-white p-8 rounded-2xl shadow-md hover:shadow-lg transition border border-gray-200 cursor-pointer"
-  onClick={() => setSelectedChef(chef)}
->
-  {/* Name - centered and themed */}
-  <h3 className="text-2xl font-bold text-orange-700 text-center mb-4">
-    {chef.name}
-  </h3>
+    {/* Phone & Email section */}
+    <div className="flex justify-center gap-16 text-base text-gray-700 mb-6 px-2">
+      <div className="flex items-center gap-2 hover:text-orange-600 transition-colors duration-200 cursor-pointer">
+        <span>📞</span>
+        <span>{selectedChef.phone || "N/A"}</span>
+      </div>
+      <div className="flex items-center gap-2 hover:text-orange-600 transition-colors duration-200 cursor-pointer">
+        <span>📧</span>
+        <span>{selectedChef.email || "N/A"}</span>
+      </div>
+    </div>
 
-  {/* Cuisine - above area */}
-  <p className="text-base text-center mb-2">
-    🍽 <span className="font-semibold text-orange-600">Cuisine:</span>{" "}
-    <span className="text-gray-800 font-normal">
-      {chef.cuisine?.join(", ") || "N/A"}
-    </span>
-  </p>
+    {/* Bio section */}
+    <div className="text-left max-w-xl mx-auto px-2">
+      <p className="font-bold text-lg text-gray-700 mb-2">Bio</p>
+      <p className="text-base text-gray-600">{selectedChef.bio || "No description available."}</p>
+    </div>
 
-  {/* Area */}
-  <p className="text-base text-gray-700 text-center mb-2">
-    📍 {chef.location?.area || "N/A"}
-  </p>
+    {/* Button */}
+    <button
+      onClick={() => setSelectedChef(null)}
+      className="mt-8 px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-xl shadow-md transition-all"
+    >
+      Back to All Chefs
+    </button>
+  </div>
+) 
+ : (
+          <motion.div
+            className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8"
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+          >
+            {chefs.map((chef) => {
+              const ringClass =
+                "bg-gradient-to-tr from-orange-500 via-orange-400 to-amber-300 p-[2px] rounded-full";
 
-  {/* Bio */}
-  <p className="text-base text-gray-600 mt-2 text-center">
-    {chef.bio?.slice(0, 60) || "No bio available..."}
-  </p>
-</div>
+              return (
+                <motion.div
+                  key={chef._id}
+                  variants={cardVariants}
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="group relative flex flex-col justify-between rounded-2xl bg-white/90 backdrop-blur-sm shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden"
+                >
+                  {/* 🔥 Badge Always Visible */}
+                  <span className="absolute top-3 left-3 z-10 bg-orange-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm uppercase tracking-wide">
+                    Best Choice
+                  </span>
 
-            ))}
-          </div>
+                  <div className="w-full flex justify-center pt-6">
+                    <div className={ringClass}>
+                      <img
+                        src="https://t4.ftcdn.net/jpg/05/89/93/27/360_F_589932782_vQAEAZhHnq1QCGu5ikwrYaQD0Mmurm0N.jpg"
+                        alt={chef.name}
+                        className="w-24 h-24 rounded-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex-grow p-6 pb-7 text-center flex flex-col">
+                    <h3 className="text-lg font-bold text-gray-800 group-hover:text-orange-600 transition-colors">
+                      {chef.name}
+                    </h3>
+                    <p className="text-sm text-orange-600 font-medium mt-0.5">
+                      {chef.cuisine?.join(", ") || "Cuisine not listed"}
+                    </p>
+
+                    <div className="mt-2">
+                      <StarRow rating={chef.rating} />
+                    </div>
+
+                    <p className="text-gray-600 text-sm mt-3 min-h-[2.5rem]">
+                      {chef.bio?.slice(0, 70) || "No bio available."}
+                    </p>
+
+                    <div className="flex-grow" />
+
+                    <button
+                      onClick={() => setSelectedChef(chef)}
+                      className="mt-5 w-full py-2 rounded-lg font-semibold text-white bg-[#ff7e00] hover:bg-orange-600 active:scale-95 transition-all shadow-md"
+                    >
+                      View Detail
+                    </button>
+                  </div>
+
+                  <div className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-orange-500/20 to-transparent" />
+                </motion.div>
+              );
+            })}
+          </motion.div>
         )}
       </div>
     </section>
