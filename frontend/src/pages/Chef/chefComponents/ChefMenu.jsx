@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import toast from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
 import { useChef } from '../Context/ChefContext';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FaPlusCircle, FaTimes, FaTrash, FaEdit } from 'react-icons/fa';
 
 const allDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const allSlots = ['Breakfast', 'Lunch', 'Dinner'];
@@ -11,8 +13,8 @@ const ChefMeals = () => {
   const chefId = chef?._id;
 
   const [meals, setMeals] = useState([]);
-  const [loading, setLoading] = useState(false);        // 🔄 loading
-  const [error, setError] = useState(null);             // ❌ error
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const [formData, setFormData] = useState({
     chefId: '',
@@ -27,22 +29,19 @@ const ChefMeals = () => {
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState(null);
 
-  // 🔐 Safe checkbox updater
+  // ✅ Checkbox Handler
   const handleCheckbox = (name, value, checked) => {
     setFormData(prev => {
       const prevArr = prev[name] ?? [];
-      let nextArr;
-      if (checked) {
-        nextArr = prevArr.includes(value) ? prevArr : [...prevArr, value];
-      } else {
-        nextArr = prevArr.filter(v => v !== value);
-      }
+      const nextArr = checked
+        ? [...prevArr, value]
+        : prevArr.filter(v => v !== value);
       return { ...prev, [name]: nextArr };
     });
   };
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, checked } = e.target;
     if (name === 'availableDays' || name === 'timeSlots') {
       handleCheckbox(name, value, checked);
     } else {
@@ -63,22 +62,30 @@ const ChefMeals = () => {
     setEditId(null);
   };
 
-  const closeForm = () => {
-    clearForm();
-    setShowForm(false);
-  };
-
+  // ✅ Fetch Meals
   const fetchMeals = async (id) => {
+    if (!id) {
+      console.warn("❌ No chefId for fetching meals");
+      return;
+    }
+    console.log("✅ Fetching meals for chefId:", id);
     setLoading(true);
-    setError(null);
     try {
       const res = await axios.get(`${import.meta.env.VITE_API_URL}/meals/chef/${id}`);
-      const data = Array.isArray(res.data) ? res.data : res.data?.meals;
-      setMeals(Array.isArray(data) ? data : []);
+      console.log("✅ API Response:", res.data);
+
+      const data = Array.isArray(res.data)
+        ? res.data
+        : res.data.meals || [];
+
+      setMeals(data);
+      if (data.length === 0) {
+        console.warn("⚠️ No meals found for this chef");
+      }
     } catch (err) {
-      console.error('fetchMeals error', err);
-      setError(err?.response?.data?.message || 'Failed to fetch meals');
-      toast.error(err?.response?.data?.message || 'Failed to fetch meals');
+      console.error('❌ Error fetching meals:', err);
+      setError('Failed to fetch meals');
+      toast.error('Failed to fetch meals');
     } finally {
       setLoading(false);
     }
@@ -96,51 +103,37 @@ const ChefMeals = () => {
     const { title, description, price, photo, availableDays, timeSlots, chefId } = formData;
 
     if (![title, description, price, photo].every(Boolean) || !availableDays.length || !timeSlots.length) {
-      return toast.error('Please fill all required fields!');
-    }
-    const numericPrice = Number(price);
-    if (Number.isNaN(numericPrice) || numericPrice < 0) {
-      return toast.error('Price must be a positive number');
+      return toast.error('Please fill all fields!');
     }
 
-    const payload = {
-      chefId,
-      title: title.trim(),
-      description: description.trim(),
-      price: numericPrice,
-      photo: photo.trim(),
-      availableDays,
-      timeSlots,
-    };
+    const payload = { chefId, title, description, price: Number(price), photo, availableDays, timeSlots };
 
     try {
       if (editId) {
         const res = await axios.put(`${import.meta.env.VITE_API_URL}/meals/${editId}`, payload);
-        const updated = res.data?.meal || res.data;
-        setMeals(prev => prev.map(m => (m._id === editId ? updated : m)));
+        setMeals(prev => prev.map(m => (m._id === editId ? res.data : m)));
         toast.success('Meal updated!');
       } else {
         const res = await axios.post(`${import.meta.env.VITE_API_URL}/meals/create`, payload);
-        const created = res.data?.meal || res.data;
-        setMeals(prev => [created, ...prev]);
-        toast.success('Meal created!');
+        setMeals(prev => [res.data, ...prev]);
+        toast.success('Meal added!');
       }
       clearForm();
+      setShowForm(false);
     } catch (err) {
-      console.error('handleSubmit error', err);
-      toast.error(err?.response?.data?.message || 'Error submitting meal!');
+      toast.error('Error submitting meal!');
     }
   };
 
   const handleEdit = (meal) => {
     setFormData({
       chefId: meal.chefId?._id || meal.chefId,
-      title: meal.title ?? '',
-      description: meal.description ?? '',
-      price: meal.price ?? '',
-      photo: meal.photo ?? '',
-      availableDays: meal.availableDays ?? [],
-      timeSlots: meal.timeSlots ?? [],
+      title: meal.title,
+      description: meal.description,
+      price: meal.price,
+      photo: meal.photo,
+      availableDays: meal.availableDays,
+      timeSlots: meal.timeSlots,
     });
     setEditId(meal._id);
     setShowForm(true);
@@ -154,176 +147,105 @@ const ChefMeals = () => {
       setMeals(prev => prev.filter(m => m._id !== id));
       toast.success('Meal deleted!');
     } catch (err) {
-      console.error('handleDelete error', err);
-      toast.error(err?.response?.data?.message || 'Failed to delete meal');
+      toast.error('Failed to delete meal');
     }
   };
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-3xl font-bold mb-4 text-orange-600">👨‍🍳 All Meals</h1>
+      <Toaster />
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-4xl font-extrabold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
+          🍽️ Manage Your Meals
+        </h1>
+        <button
+          className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-5 py-2 rounded-lg shadow-lg hover:scale-105 transition"
+          onClick={() => setShowForm(!showForm)}
+        >
+          {showForm ? <FaTimes /> : <FaPlusCircle />} {showForm ? 'Close' : 'Add New Meal'}
+        </button>
+      </div>
 
-      <button
-        className="mb-4 px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
-        onClick={() => (showForm ? closeForm() : setShowForm(true))}
-        type="button"
-      >
-        {showForm ? 'Hide Form' : 'Add New Meal'}
-      </button>
+      {/* Animated Form */}
+      <AnimatePresence>
+        {showForm && (
+          <motion.form
+            onSubmit={handleSubmit}
+            className="bg-white/80 backdrop-blur-lg p-6 rounded-xl shadow-lg border border-orange-200 mb-10 space-y-4"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+          >
+            <input type="text" name="title" value={formData.title} onChange={handleChange} placeholder="Meal Title" className="w-full px-3 py-2 border rounded" />
+            <textarea name="description" value={formData.description} onChange={handleChange} placeholder="Description" className="w-full px-3 py-2 border rounded" />
+            <input type="number" name="price" value={formData.price} onChange={handleChange} placeholder="Price" className="w-full px-3 py-2 border rounded" />
+            <input type="url" name="photo" value={formData.photo} onChange={handleChange} placeholder="Photo URL" className="w-full px-3 py-2 border rounded" />
 
-      {showForm && (
-        <form onSubmit={handleSubmit} className="bg-orange-50 p-6 rounded shadow space-y-4 mb-10">
-          <input
-            type="text"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            placeholder="Meal Title"
-            className="w-full px-3 py-2 border rounded"
-          />
-          <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            placeholder="Description"
-            className="w-full px-3 py-2 border rounded"
-          />
-          <input
-            type="number"
-            name="price"
-            value={formData.price}
-            onChange={handleChange}
-            placeholder="Price"
-            className="w-full px-3 py-2 border rounded"
-            min="0"
-          />
-          <input
-            type="url"
-            name="photo"
-            value={formData.photo}
-            onChange={handleChange}
-            placeholder="Photo URL"
-            className="w-full px-3 py-2 border rounded"
-          />
-          {formData.photo && (
-            <img
-              src={formData.photo}
-              alt="preview"
-              className="h-40 w-auto rounded border"
-              onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/150?text=No+Image'; }}
-            />
-          )}
+            {formData.photo && <img src={formData.photo} alt="Preview" className="h-32 w-auto rounded shadow" />}
 
-          {/* Days */}
-          <fieldset className="flex flex-wrap gap-3">
-            <legend className="text-sm font-medium text-gray-700 mb-1">Available Days</legend>
-            {allDays.map((day) => {
-              const id = `day-${day}`;
-              return (
-                <label key={day} htmlFor={id} className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    id={id}
-                    type="checkbox"
-                    name="availableDays"
-                    value={day}
-                    checked={formData.availableDays.includes(day)}
-                    onChange={handleChange}
-                  />
+            {/* Days */}
+            <div className="flex flex-wrap gap-3">
+              {allDays.map((day) => (
+                <label key={day} className="flex items-center gap-2">
+                  <input type="checkbox" name="availableDays" value={day} checked={formData.availableDays.includes(day)} onChange={handleChange} />
                   {day}
                 </label>
-              );
-            })}
-          </fieldset>
+              ))}
+            </div>
 
-          {/* Time Slots */}
-          <fieldset className="flex flex-wrap gap-3">
-            <legend className="text-sm font-medium text-gray-700 mb-1">Time Slots</legend>
-            {allSlots.map((slot) => {
-              const id = `slot-${slot}`;
-              return (
-                <label key={slot} htmlFor={id} className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    id={id}
-                    type="checkbox"
-                    name="timeSlots"
-                    value={slot}
-                    checked={formData.timeSlots.includes(slot)}
-                    onChange={handleChange}
-                  />
+            {/* Time Slots */}
+            <div className="flex flex-wrap gap-3">
+              {allSlots.map((slot) => (
+                <label key={slot} className="flex items-center gap-2">
+                  <input type="checkbox" name="timeSlots" value={slot} checked={formData.timeSlots.includes(slot)} onChange={handleChange} />
                   {slot}
                 </label>
-              );
-            })}
-          </fieldset>
+              ))}
+            </div>
 
-          <div className="flex gap-3">
-            <button
-              type="submit"
-              className="bg-orange-600 text-white px-6 py-2 rounded hover:bg-orange-700"
-            >
+            <button type="submit" className="bg-orange-600 text-white px-6 py-2 rounded hover:bg-orange-700">
               {editId ? 'Update Meal' : 'Add Meal'}
             </button>
-            {editId && (
-              <button
-                type="button"
-                onClick={clearForm}
-                className="px-4 py-2 border border-orange-600 text-orange-600 rounded hover:bg-orange-100"
-              >
-                Cancel Edit
-              </button>
-            )}
-          </div>
-        </form>
-      )}
+          </motion.form>
+        )}
+      </AnimatePresence>
 
-      {/* Loading / Error / Empty */}
-      {loading && <p className="text-gray-500">Loading meals...</p>}
-      {!loading && error && (
-        <p className="text-red-600">{error}</p>
-      )}
-      {!loading && !error && meals.length === 0 && (
-        <p className="text-gray-500">No meals yet. Click “Add New Meal” to create one.</p>
-      )}
-
-      {/* Meal Grid */}
+      {/* Meals Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {meals.map((meal) => (
-          <div key={meal._id} className="bg-white shadow rounded overflow-hidden">
-            <img
-              src={meal.photo}
-              alt={meal.title}
-              className="h-40 w-full object-cover"
-              onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/300x160?text=Image+Missing'; }}
-            />
-            <div className="p-4">
-              <h2 className="text-lg font-semibold">{meal.title}</h2>
-              <p className="text-sm text-gray-600 line-clamp-2">{meal.description}</p>
-              <p className="text-sm mt-1 font-medium">₹{meal.price}</p>
-              <p className="text-xs text-gray-500">Days: {meal.availableDays?.join(', ')}</p>
-              <p className="text-xs text-gray-500">Time: {meal.timeSlots?.join(', ')}</p>
-              <div className="mt-3 flex justify-between text-sm">
-                <button
-                  onClick={() => handleEdit(meal)}
-                  className="text-yellow-600 hover:underline"
-                  type="button"
-                >
-                  ✏️ Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(meal._id)}
-                  className="text-red-600 hover:underline"
-                  type="button"
-                >
-                  🗑️ Delete
-                </button>
+        {loading ? (
+          Array(3).fill().map((_, i) => (
+            <div key={i} className="h-60 bg-gray-200 animate-pulse rounded-lg"></div>
+          ))
+        ) : error ? (
+          <p className="text-red-500">{error}</p>
+        ) : meals.length === 0 ? (
+          <div className="col-span-full text-center text-gray-500 text-lg">🚫 No meals found. Add some!</div>
+        ) : (
+          meals.map((meal) => (
+            <motion.div
+              key={meal._id}
+              className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition hover:scale-[1.02]"
+              whileHover={{ scale: 1.02 }}
+            >
+              <img src={meal.photo} alt={meal.title} className="h-40 w-full object-cover" />
+              <div className="p-4">
+                <h2 className="text-lg font-bold">{meal.title}</h2>
+                <p className="text-gray-600 line-clamp-2">{meal.description}</p>
+                <p className="font-semibold text-orange-600 mt-2">₹{meal.price}</p>
+                <p className="text-xs text-gray-500">Days: {meal.availableDays.join(', ')}</p>
+                <p className="text-xs text-gray-500">Time: {meal.timeSlots.join(', ')}</p>
+                <div className="flex justify-between mt-3">
+                  <button onClick={() => handleEdit(meal)} className="text-blue-600 hover:text-blue-800 flex items-center gap-1"><FaEdit /> Edit</button>
+                  <button onClick={() => handleDelete(meal._id)} className="text-red-600 hover:text-red-800 flex items-center gap-1"><FaTrash /> Delete</button>
+                </div>
               </div>
-            </div>
-          </div>
-        ))}
+            </motion.div>
+          ))
+        )}
       </div>
     </div>
   );
 };
-
 
 export default ChefMeals;
