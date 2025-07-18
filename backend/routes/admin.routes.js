@@ -8,4 +8,5 @@ router.post("/register", registerAdmin);
 router.post("/login", loginAdmin);
 router.get("/getAllAdmins", authorize('admin'), getAllAdmins);  // Only accessible to admin
 
+
 export default router;

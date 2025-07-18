@@ -1,121 +1,107 @@
-import React, { useState } from "react";
-import { motion } from "framer-motion";
-import toast from "react-hot-toast";
-
-const paymentOptions = ["Cash On Delivery", "UPI", "Card", "Razorpay"];
-const upiApps = ["GPay", "PhonePe", "Paytm", "Amazon Pay"];
-const timeSlots = ["Lunch", "Dinner"];
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const Cart = () => {
-  const [address, setAddress] = useState("");
-  const [timeSlot, setTimeSlot] = useState("");
-  const [paymentMode, setPaymentMode] = useState("");
-  const [selectedUPI, setSelectedUPI] = useState("");
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [cartItems, setCartItems] = useState([]);
 
-  const handlePlaceOrder = () => {
-    if (!address || !timeSlot || !paymentMode) {
-      toast.error("Please fill all the fields.");
-      return;
+  useEffect(() => {
+    if (location.state?.meal) {
+      const meal = location.state.meal;
+      setCartItems([{ ...meal, quantity: 1 }]);
     }
-    toast.success("Order placed successfully! 🥳");
+  }, [location.state]);
+
+  const handleQuantity = (index, delta) => {
+    setCartItems((prev) =>
+      prev.map((item, i) =>
+        i === index
+          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
+          : item
+      )
+    );
   };
 
+  const handleRemove = (index) => {
+    setCartItems((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const total = cartItems.reduce(
+    (acc, item) => acc + item.discountedPrice * item.quantity,
+    0
+  );
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-100 to-orange-200 p-4 md:p-10">
-      <motion.div
-        initial={{ opacity: 0, y: 80 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-4xl mx-auto bg-white/70 backdrop-blur-lg rounded-3xl shadow-2xl p-8"
-      >
-        <h1 className="text-3xl font-bold text-orange-600 mb-6 text-center">
-          🍛 Checkout
-        </h1>
+    <div className="min-h-screen bg-gradient-to-br from-orange-100 to-yellow-200 p-6">
+      <div className="bg-[#fffce5] rounded-xl shadow-xl p-6 max-w-4xl mx-auto">
+        <h2 className="text-3xl font-bold mb-4 text-orange-700">Your Cart</h2>
 
-        {/* Address */}
-        <div className="mb-6">
-          <label className="block font-semibold text-lg mb-2">Delivery Address</label>
-          <textarea
-            rows={3}
-            className="w-full border border-orange-300 p-3 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-orange-400"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            placeholder="Enter your full address..."
-          />
+        <div className="flex flex-col lg:flex-row gap-4">
+          {/* Left Cart Icon Box */}
+          <div className="flex-shrink-0 w-40 h-40 bg-orange-400 rounded-lg flex items-center justify-center text-white text-3xl font-bold shadow-md">
+            🛒 {cartItems.reduce((sum, item) => sum + item.quantity, 0)}
+          </div>
+
+          {/* Right Items List */}
+          <div className="flex-1 space-y-4">
+            {cartItems.length === 0 ? (
+              <p className="text-gray-500 text-center">Your cart is empty.</p>
+            ) : (
+              cartItems.map((item, index) => (
+                <div key={item._id} className="flex items-center border-b pb-2">
+                  <img
+                    src={item.photo}
+                    alt={item.title}
+                    className="w-20 h-20 rounded mr-4"
+                  />
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold">{item.title}</h3>
+                    <p className="text-gray-600">
+                      ₹{item.discountedPrice} x {item.quantity}
+                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <button
+                        className="px-2 py-1 bg-gray-200 rounded"
+                        onClick={() => handleQuantity(index, -1)}
+                      >
+                        -
+                      </button>
+                      <span>{item.quantity}</span>
+                      <button
+                        className="px-2 py-1 bg-gray-200 rounded"
+                        onClick={() => handleQuantity(index, 1)}
+                      >
+                        +
+                      </button>
+                      <button
+                        className="ml-4 text-red-500 font-semibold"
+                        onClick={() => handleRemove(index)}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
 
-        {/* Time Slot */}
-        <div className="mb-6">
-          <label className="block font-semibold text-lg mb-2">Select Time Slot</label>
-          <select
-            className="w-full border border-orange-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
-            value={timeSlot}
-            onChange={(e) => setTimeSlot(e.target.value)}
+        {/* Total and Checkout */}
+        <div className="text-right mt-6">
+          <p className="text-xl font-semibold text-orange-800 mb-2">
+            Total: ₹{total}
+          </p>
+          <button
+            className="bg-orange-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-orange-700 transition"
+            disabled={cartItems.length === 0}
+            onClick={() => navigate("/checkout")}
           >
-            <option value="">Select</option>
-            {timeSlots.map((slot) => (
-              <option key={slot}>{slot}</option>
-            ))}
-          </select>
+            Proceed to Checkout →
+          </button>
         </div>
-
-        {/* Payment Options */}
-        <div className="mb-6">
-          <label className="block font-semibold text-lg mb-2">Payment Option</label>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {paymentOptions.map((option) => (
-              <motion.div
-                key={option}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setPaymentMode(option)}
-                className={`p-4 rounded-xl cursor-pointer text-center shadow transition-all duration-300 font-medium
-                ${
-                  paymentMode === option
-                    ? "bg-orange-500 text-white"
-                    : "bg-white border hover:bg-orange-100"
-                }`}
-              >
-                {option}
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        {/* UPI Apps */}
-        {paymentMode === "UPI" && (
-          <div className="mb-6">
-            <label className="block font-semibold text-lg mb-2">Choose UPI App</label>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {upiApps.map((app) => (
-                <motion.div
-                  key={app}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setSelectedUPI(app)}
-                  className={`p-3 rounded-xl cursor-pointer text-center shadow font-medium
-                  ${
-                    selectedUPI === app
-                      ? "border-2 border-orange-500 bg-orange-100"
-                      : "bg-white border hover:bg-orange-50"
-                  }`}
-                >
-                  {app}
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Place Order Button */}
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.97 }}
-          onClick={handlePlaceOrder}
-          className="mt-8 w-full bg-orange-600 hover:bg-orange-700 text-white font-bold text-lg py-3 rounded-xl shadow-lg"
-        >
-          ✅ Place Order
-        </motion.button>
-      </motion.div>
+      </div>
     </div>
   );
 };

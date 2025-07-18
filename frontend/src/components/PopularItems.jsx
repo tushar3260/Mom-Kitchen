@@ -7,7 +7,7 @@ function PopularItems() {
   const scrollRef = useRef(null);
   const [meals, setMeals] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate(); // ✅ Hook for routing
+  const navigate = useNavigate();
 
   const scroll = (direction) => {
     const { current } = scrollRef;
@@ -34,7 +34,7 @@ function PopularItems() {
   }, []);
 
   return (
-    <div className="p-10 bg-white">
+    <div className="p-10 bg-gradient-to-b from-yellow-100 via-orange-100 to-yellow-50">
       <h2 className="text-2xl font-bold mb-6 text-center text-orange-600">Popular Items</h2>
 
       {loading ? (
@@ -72,7 +72,7 @@ function PopularItems() {
                   <p className="text-sm text-gray-500">{item.chefId?.name || "Unknown Chef"}</p>
                   <p className="font-bold mt-2">₹{item.price}</p>
                   <motion.button
-                    onClick={() => navigate(`/order-now/${item._id}`)} // ✅ Meal ID used correctly
+                    onClick={() => navigate(`/order-now/${item._id}`)}
                     whileTap={{ scale: 0.95 }}
                     className="mt-3 bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
                   >

@@ -105,6 +105,7 @@ export default function AdminDashboard() {
             Chefs
           </motion.button>
 
+
           <motion.button
             onClick={() => navigate("/admin/secure/tales/orders")}
             whileHover={{ scale: 1.05 }}
@@ -115,6 +116,17 @@ export default function AdminDashboard() {
           >
             Orders
           </motion.button>
+          <motion.button
+  onClick={() => navigate("/admin/secure/tales/discounts")}
+  whileHover={{ scale: 1.05 }}
+  whileTap={{ scale: 0.95 }}
+  className={`w-full text-left bg-gradient-to-br from-orange-500 to-yellow-400 text-white p-3 rounded-full font-semibold shadow-xl transition-all duration-300 ${
+    location.pathname === "/admin/secure/tales/discounts" ? "ring-2 ring-white" : ""
+  }`}
+>
+  Create Discount on Meals
+</motion.button>
+
         </nav>
 
         {/* Logout Button */}

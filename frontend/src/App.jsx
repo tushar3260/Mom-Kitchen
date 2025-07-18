@@ -19,7 +19,7 @@ import AdminProtect from "./Admin/protect/adminprotect.jsx";
 import { AdminProvider } from "./Admin/context/AdminContext.jsx";// 👈 Import AdminProvider
 import ResetPassword from "./pages/ResetPassword.jsx";
 import ForgotPassword from "./pages/ForgotPassword.jsx";
-
+import Checkout from "./pages/Checkout.jsx";
 import OrderNowPage from "./components/OrderNowPage.jsx";
 function App() {
   return (
@@ -41,6 +41,7 @@ function App() {
             <Route path="/order-now/:id" element={<OrderNowPage />} />
             <Route path="/meals" element={<AllMeals />} />
             <Route path="/chef-detail/:id" element={<ChefDetail />} />
+            <Route path="/checkout" element={<Checkout />} />
             {/* Protected Routes */}
             <Route
               path="/dashboard"

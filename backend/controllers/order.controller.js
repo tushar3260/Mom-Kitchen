@@ -1,6 +1,8 @@
 import Order from "../models/Order.js";
-
+import {io} from '../server.js'
 // ✅ Place a New Order
+
+
 export const placeOrder = async (req, res) => {
   try {
     const {
@@ -33,20 +35,29 @@ export const placeOrder = async (req, res) => {
       userId,
       chefId,
       meals,
-      totalPrice, // ✅ correct casing
-      deliveryAddress, // ✅ expects: { street, city, pincode }
-      paymentMode,     // ✅ correct field name from schema
-      timeSlot,        // ✅ optional: Lunch / Dinner
-      status: "Placed",         // ✅ enum: Placed, Preparing, Delivered, Cancelled
-      paymentStatus: "Pending"  // ✅ enum: Pending, Paid, Failed
+      totalPrice,
+      deliveryAddress,
+      paymentMode,
+      timeSlot,
+      status: "Placed",
+      paymentStatus: "Pending"
     });
 
     await order.save();
+
+    // ✅ Emit event to specific chef's room
+    io.to(`chef:${chefId}`).emit("newOrder", {
+      message: "You have a new order",
+      order
+    });
+
     res.status(201).json({ message: "Order placed successfully", order });
   } catch (err) {
+    console.error("Error placing order:", err);
     res.status(500).json({ message: "Error placing order", error: err.message });
   }
 };
+
 
 // ✅ Get All Orders (Admin/Support)
 export const getAllOrders = async (req, res) => {
