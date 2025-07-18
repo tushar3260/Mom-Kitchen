@@ -111,3 +111,72 @@ export const deleteMeal = async (req, res) => {
     res.status(500).json({ message: "Failed to delete meal", error: err.message });
   }
 };
+
+
+export const getMealByChefId = async (req, res) => {
+  try {
+    const meals = await Meal.find({ chefId: req.params.chefId }).populate("chefId", "name email");
+    if (meals.length === 0) {
+      return res.status(404).json({ message: "No meals found for the given chefId" });
+    }
+    res.status(200).json({ meals });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch meals", error: err.message });
+  }
+};
+
+// ✅ Apply discounts to multiple meals
+// ✅ Apply discount to selected meals
+export const applyDiscountToMeals = async (req, res) => {
+  try {
+    const { mealIds, discountValues, durationValues } = req.body;
+
+    // 🔍 Input validation
+    if (
+      !Array.isArray(mealIds) ||
+      !Array.isArray(discountValues) ||
+      !Array.isArray(durationValues) ||
+      mealIds.length === 0 ||
+      mealIds.length !== discountValues.length ||
+      mealIds.length !== durationValues.length
+    ) {
+      return res.status(400).json({ message: "❌ Invalid or mismatched input arrays." });
+    }
+
+    // 🔄 Update all meals
+    const updatedMeals = await Promise.all(
+      mealIds.map((id, index) =>
+        Meal.findByIdAndUpdate(
+          id,
+          {
+            $set: {
+              discount: discountValues[index],
+              discountDuration: durationValues[index],
+              discountStartDate: new Date(),
+            },
+          },
+          { new: true }
+        )
+      )
+    );
+
+    res.status(200).json({
+      message: `✅ Discounts applied to ${updatedMeals.length} meals.`,
+      updatedMeals,
+    });
+  } catch (error) {
+    console.error("Error applying discount:", error);
+    res.status(500).json({ message: "❌ Failed to apply discounts", error });
+  }
+};
+
+// ✅ Get meals that have any discount applied
+export const getDiscountedMeals = async (req, res) => {
+  try {
+    const discountedMeals = await Meal.find({ discount: { $gt: 0 } });
+    res.status(200).json(discountedMeals);
+  } catch (error) {
+    console.error("Error fetching discounted meals:", error);
+    res.status(500).json({ message: "❌ Failed to fetch discounted meals", error });
+  }
+};

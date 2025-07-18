@@ -10,7 +10,7 @@ function Herosection() {
     navigate("/meals", { state: { query: searchInput.trim() } });
  };
   return (
-    <div className="font-sans">
+    <div className="font-sans bg-gradient-to-br from-yellow-100 to-orange-50">
       {/* Hero Section */}
       <div className="bg-[#fff7ed] py-16 px-6 md:px-20 flex flex-col md:flex-row items-center justify-between relative">
         <div className="max-w-xl z-10">

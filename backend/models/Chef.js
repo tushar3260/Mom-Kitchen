@@ -35,7 +35,9 @@ const chefSchema = new mongoose.Schema({
   },
   isVerified: { type: Boolean, default: false },
   rating: { type: Number, default: 0, min: 0, max: 5 },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  resetToken: { type: String },
+  resetTokenExpiry: { type: Date }
 });
 
 export default mongoose.model("Chef", chefSchema);

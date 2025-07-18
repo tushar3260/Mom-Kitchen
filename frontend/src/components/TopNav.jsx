@@ -77,7 +77,7 @@ function TopNav() {
   if (redirectLoading) return <Loading message="Redirecting to login..." />;
   if (logoutLoading)   return <Loading message="Logging Out....." />;
   return (
-    <header className="bg-white shadow-sm border-b-2 border-orange-500">
+    <header className="bg-red shadow-sm border-b-2 border-orange-500">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
         {/* LOGO */}
         <div className="flex items-center pl-2 min-w-[120px]">
