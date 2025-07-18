@@ -38,6 +38,8 @@ const chefSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   resetToken: { type: String },
   resetTokenExpiry: { type: Date }
+,isOtpVerified: { type: Boolean, default: false }
+
 });
 
 export default mongoose.model("Chef", chefSchema);

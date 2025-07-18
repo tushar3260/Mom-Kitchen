@@ -29,10 +29,8 @@ const userSchema = new mongoose.Schema({
   isVerified: { type: Boolean, default: false },
   resetToken: { type: String },
   resetTokenExpiry: { type: Date },
-  isOtpVerified : {
-    type : Boolean,
-    default : false
-  },
+  isOtpVerified: { type: Boolean, default: false },
+
    isBlocked: { type: Boolean, default: false }
   
 }, {

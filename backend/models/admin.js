@@ -7,7 +7,9 @@ const adminSchema = new mongoose.Schema({
   passwordHash: { type: String, required: true },
   role: { type: String, enum: ['admin'], default: 'admin' },
   resetToken: { type: String },
-  resetTokenExpiry: { type: Date }
+  resetTokenExpiry: { type: Date },
+  isOtpVerified: { type: Boolean, default: false },
+
 }, {
   timestamps: true  
 });
