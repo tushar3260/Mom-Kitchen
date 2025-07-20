@@ -4,6 +4,7 @@ import {
   UserSignUp,
   getallUsers,
   toggleBlockStatus,
+  updateProfile
 } from "../controllers/user.controller.js";
 import {
   addUserAddress,
@@ -24,5 +25,5 @@ router.get("/:id/address", getUserAddresses); // Get addresses
 // ✅ Admin-only routes
 router.get("/getallusers", authorize("admin"), getallUsers);
 router.put("/toggleBlock/:id", authorize("admin"), toggleBlockStatus); // New block/unblock route
-
+router.put("/update",authorize("user"),updateProfile)
 export default router;

@@ -10,6 +10,7 @@ import FeaturedRestaurants from "../components/FeaturedRestaurants.jsx";
 import DealCard from "../components/DealCard.jsx";
 import SmoothScrollProvider from "../utils/SmoothScrollProvider.jsx";
 import DiscountSection from "../components/Discountsection.jsx";
+import GalleryPage from "./GalleryPage.jsx";
 const fadeUp = {
   hidden: { opacity: 0, y: 50 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
@@ -33,7 +34,14 @@ const LandingPage = () => {
         >
           <Herosection />
         </motion.div>
-
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
+          <GalleryPage />
+        </motion.div>
         
         {/* Featured Restaurants */}
         <motion.div

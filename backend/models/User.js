@@ -8,6 +8,10 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
     match: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
   },
+  avtar :{
+      type: String,
+      default :"https://cdn-icons-png.flaticon.com/512/11018/11018596.png"
+        },
   phone: {
     type: String,
     required: true,

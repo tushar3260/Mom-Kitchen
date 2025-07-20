@@ -125,6 +125,7 @@ function TopNav() {
               <motion.div whileHover={{ scale: 1.2 }} className="relative cursor-pointer">
                 <button
                   onClick={() => {
+                    
                     window.location.href = "/cart";
                   }}
                 >
@@ -138,12 +139,17 @@ function TopNav() {
               </motion.div>
 
               {/* ✅ Profile Dropdown */}
-              <motion.div whileHover={{ scale: 1.1 }} className="relative">
-                <FaUser
-                  size={22}
-                  className="text-gray-700 cursor-pointer"
-                  onClick={() => setProfileOpen(!profileOpen)}
-                />
+              <motion.div whileHover={{ scale: 1.2 }} className="relative">
+              <span>
+                  <img
+  src={user?.avtar || "https://cdn-icons-png.flaticon.com/512/11018/11018596.png"}
+  alt="Profile"
+  className="w-9 h-9 rounded-full cursor-pointer border-2 border-orange-300 object-cover"
+  onClick={() => setProfileOpen(!profileOpen)}
+/>
+
+              </span>
+
                 <AnimatePresence>
                   {profileOpen && (
                     <motion.div
@@ -153,10 +159,18 @@ function TopNav() {
                       className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg border"
                     >
                       <ul className="text-gray-700 text-sm">
-                        <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                        <li
+                        onClick={()=>{
+                          window.location.href = "/orders";
+                        }}
+                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                           My Orders
                         </li>
-                        <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                        <li
+                        onClick={()=>{
+                          window.location.href = "/profile";
+                        }}
+                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                           Profile
                         </li>
                         <li
@@ -165,7 +179,11 @@ function TopNav() {
                         >
                           Logout
                         </li>
-                        <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                        <li 
+                        onClick={()=>{
+                          window.location.href = "/dashboard";
+                        }}
+                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                           Dashboard
                         </li>
                       </ul>

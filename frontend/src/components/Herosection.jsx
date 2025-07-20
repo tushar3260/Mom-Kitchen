@@ -39,7 +39,7 @@ function Herosection() {
     .slice(0, 5);
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-yellow-100 to-orange-50 font-sans">
+    <div className="relative  overflow-hidden bg-gradient-to-br from-yellow-100 to-orange-50 font-sans">
       {/* Floating Emojis */}
       <motion.div
         className="absolute top-10 left-10 text-5xl"
@@ -155,7 +155,7 @@ function Herosection() {
           transition={{ duration: 0.8 }}
         >
           <img
-            src={girlPizzaImg}
+            src="https://user-gen-media-assets.s3.amazonaws.com/gpt4o_images/88042f7f-d6d2-45fa-9a35-4e9052f8ceae.png"
             alt="Happy girl enjoying pizza"
             className="w-full max-w-[550px] rounded-3xl shadow-2xl object-cover transform hover:scale-105 transition"
           />

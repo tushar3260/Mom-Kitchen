@@ -103,3 +103,51 @@ export const toggleBlockStatus = async (req, res) => {
     res.status(500).json({ message: "Failed to update user status", error: err.message });
   }
 };
+
+
+// import User from "../models/userModel.js"; // make sure path is correct
+
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user?.id; // User ID from JWT middleware
+    const { fullName, phone, avtar, address } = req.body;
+
+    // Check if userId exists
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized request" });
+    }
+
+    // Find user
+    let user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // Update fields if provided
+    if (fullName) user.fullName = fullName.trim();
+    if (phone) user.phone = phone.trim();
+    if (avtar) user.avtar = avtar; // base64 or URL (ensure front-end sends correct format)
+
+    // Address handling
+    if (address) {
+      if (!Array.isArray(address)) {
+        return res.status(400).json({
+          success: false,
+          message: "Address must be an array",
+        });
+      }
+      user.address = address;
+    }
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      user,
+    });
+  } catch (error) {
+    console.error("Update profile error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};

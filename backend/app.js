@@ -19,9 +19,9 @@ dotenv.config();
 const app = express();
 
 //json parser for incoming requests
-app.use(express.json());
-//urlencoded parser for incoming requests
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "10mb" })); // increase JSON body limit to 10MB
+app.use(express.urlencoded({ limit: "10mb", extended: true })); 
+
 //cors for security purposes 
 app.use(cors({
   origin: 'http://localhost:5173', // allow only your frontend dev URL

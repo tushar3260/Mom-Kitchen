@@ -21,6 +21,8 @@ import ResetPassword from "./pages/ResetPassword.jsx";
 import ForgotPassword from "./pages/ForgotPassword.jsx";
 import Checkout from "./pages/Checkout.jsx";
 import OrderNowPage from "./components/OrderNowPage.jsx";
+import ProfilePage from "./pages/ProfilePage.jsx";
+import MyOrderPage from '../src/pages/MyOrderPage.jsx'
 function App() {
   return (
     <div>
@@ -42,6 +44,8 @@ function App() {
             <Route path="/meals" element={<AllMeals />} />
             <Route path="/chef-detail/:id" element={<ChefDetail />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/orders" element={<MyOrderPage />} />
+            
             {/* Protected Routes */}
             <Route
               path="/dashboard"
@@ -51,6 +55,8 @@ function App() {
                 </UserProtect>
               }
             />
+            <Route path="/profile" element={<ProfilePage />} />
+    
             <Route
               path="/chef/*"
               element={

@@ -13,11 +13,11 @@ const SmoothScrollProvider = ({ children }) => {
 
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 1.3, // buttery smooth
+      duration: 1.6, // buttery smooth
       easing: (t) => 1 - Math.pow(1 - t, 4), // premium easing
       smoothWheel: true,
       smoothTouch: false,
-      touchMultiplier: 2,
+      touchMultiplier: 6,
     });
 
     lenisRef.current = lenis;
