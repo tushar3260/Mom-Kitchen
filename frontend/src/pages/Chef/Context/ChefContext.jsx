@@ -1,20 +1,30 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { storage } from '../../../utils/Storage';
 
-// 👨‍🍳 1. Create context
 const ChefContext = createContext();
 
-// 🧠 2. Provider
 export const ChefProvider = ({ children }) => {
   const [chef, setChef] = useState(null);
   const [chefToken, setChefToken] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedChef = localStorage.getItem('chefData');
-    const storedToken = localStorage.getItem('chefToken');
-
-    if (storedChef) setChef(JSON.parse(storedChef));
-    if (storedToken) setChefToken(storedToken);
+    const loadData = async () => {
+      try {
+        const storedChef = await storage.getItem('chefData');
+        const storedToken = await storage.getItem('chefToken');
+        if (storedChef) setChef(storedChef);
+        if (storedToken) setChefToken(storedToken);
+      } catch (err) {
+        console.error('Failed to load chef data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
   }, []);
+
+  if (loading) return null; // Optional: Add a loader here
 
   return (
     <ChefContext.Provider value={{ chef, setChef, chefToken, setChefToken }}>
@@ -23,7 +33,6 @@ export const ChefProvider = ({ children }) => {
   );
 };
 
-// ✅ 3. Custom Hook
 export const useChef = () => {
   const context = useContext(ChefContext);
   if (!context) {
@@ -32,5 +41,4 @@ export const useChef = () => {
   return context;
 };
 
-// 👇 Default export (optional)
 export default ChefContext;

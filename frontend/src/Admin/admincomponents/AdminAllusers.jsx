@@ -1,14 +1,24 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
+import { storage } from "../../utils/Storage";
 
 export default function AdminAllUsers() {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
 
+  // ✅ Users fetch karne ka function
   const fetchUsers = async () => {
     try {
-      const token = localStorage.getItem("AdminToken");
+      const token = await storage.getItem("AdminToken"); // await lagaya
+      console.log("Admin Token:", token);
+
+      if (!token) {
+        console.error("Admin token missing");
+        alert("Please login again!");
+        return;
+      }
+
       const res = await axios.get(
         `${import.meta.env.VITE_API_URL}/user/getallusers`,
         {
@@ -29,9 +39,10 @@ export default function AdminAllUsers() {
     fetchUsers();
   }, []);
 
+  // ✅ Block/Unblock toggle
   const toggleBlock = async (id) => {
     try {
-      const token = localStorage.getItem("AdminToken");
+      const token = await storage.getItem("AdminToken"); // await lagaya
       const user = users.find((u) => u._id === id);
       const newStatus = !user.isBlocked;
 
@@ -45,7 +56,6 @@ export default function AdminAllUsers() {
         }
       );
 
-      // ✅ Re-fetch users from backend to stay in sync
       fetchUsers();
     } catch (error) {
       console.error("Error toggling block status", error);

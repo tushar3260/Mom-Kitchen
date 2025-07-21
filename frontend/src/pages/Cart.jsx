@@ -6,13 +6,13 @@ import { FaMinus, FaPlus, FaShoppingCart, FaRedo } from "react-icons/fa";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useUser } from "../context/userContext";
-
+import { storage } from "../utils/Storage";
 /**
  * Premium Cart Page – Backend Integrated (Tiffin Tales)
  * -----------------------------------------------------
  * Sources for cart items (priority order):
  * 1. location.state.meal (from product/meal page "Add to Cart & go to cart")
- * 2. localStorage "cart" (persisted between sessions)
+ * 2. storage "cart" (persisted between sessions)
  * 3. User can re-order past order items (quick add)
  *
  * Checkout navigation:
@@ -39,8 +39,8 @@ const Cart = () => {
       const meal = location.state.meal;
       init = [{ ...meal, quantity: 1 }];
     } else {
-      // 2. from localStorage
-      const stored = JSON.parse(localStorage.getItem("cart") || "[]");
+      // 2. from storage
+      const stored = storage.getItem("cart" || "[]");
       if (Array.isArray(stored) && stored.length) init = stored;
     }
 
@@ -49,7 +49,7 @@ const Cart = () => {
 
   /* -------------------- PERSIST CART -------------------- */
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cartItems));
+    storage.setItem("cart", cartItems);
   }, [cartItems]);
 
   /* -------------------- FETCH USER ORDERS (for re-order) -------------------- */

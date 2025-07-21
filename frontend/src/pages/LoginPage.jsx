@@ -3,7 +3,7 @@ import axios from 'axios';
 import { motion } from 'framer-motion';
 import { FaSpinner } from 'react-icons/fa';
 import UserContext from '../context/userContext.jsx';
-
+import { storage } from '../utils/Storage.js';
 function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -54,8 +54,8 @@ function LoginPage() {
         if (user && token) {
           setUser(user);
           setToken(token);
-          localStorage.setItem("userData", JSON.stringify(user));
-          localStorage.setItem("usertoken", token);
+          storage.setItem("userData", user);
+          storage.setItem("usertoken", token);
 
           setSuccess(message || "Login successful! Redirecting...");
           setLoading(false);

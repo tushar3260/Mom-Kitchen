@@ -3,7 +3,7 @@ import { FaEllipsisV } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/userContext.jsx";
-
+import { storage } from "../utils/Storage.js";
 const Threedot = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -25,7 +25,7 @@ const Threedot = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("userData");
+    storage.removeItem("userData");
     setUser(null);
     window.location.href = "/";
   };

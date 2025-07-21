@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
+import { storage } from "../utils/Storage";
 
 export default function AdminAlladmin() {
   const [admins, setAdmins] = useState([]);
@@ -9,7 +10,7 @@ export default function AdminAlladmin() {
   useEffect(() => {
     const fetchAdmins = async () => {
       try {
-        const token = localStorage.getItem("AdminToken");
+        const token = storage.getItem("AdminToken");
         const res = await axios.get(`${import.meta.env.VITE_API_URL}/admins/getAllAdmins`, {
           headers: {
             Authorization: `Bearer ${token}`,

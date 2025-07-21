@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { storage } from "../utils/Storage";
 import {
   BarChart,
   Bar,
@@ -32,7 +33,7 @@ export default function AdminDashboard() {
 
   // 🔐 Redirect to login if token is missing
   useEffect(() => {
-    const token = localStorage.getItem("AdminToken");
+    const token = storage.getItem("AdminToken");
     if (!token) {
       navigate("/admin/secure/tales/login");
     }
@@ -41,8 +42,8 @@ export default function AdminDashboard() {
   // 🧹 Remove token on tab/browser close
   useEffect(() => {
     const handleBeforeUnload = () => {
-      localStorage.removeItem("AdminToken");
-      localStorage.removeItem("AdminData");
+      storage.removeItem("AdminToken");
+      storage.removeItem("AdminData");
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -138,8 +139,8 @@ export default function AdminDashboard() {
         >
           <motion.button
             onClick={() => {
-              localStorage.removeItem("AdminToken");
-              localStorage.removeItem("AdminData");
+              storage.removeItem("AdminToken");
+              storage.removeItem("AdminData");
               navigate("/admin/secure/tales/login");
             }}
             whileHover={{ scale: 1.1 }}

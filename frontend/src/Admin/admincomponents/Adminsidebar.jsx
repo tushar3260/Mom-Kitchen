@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
-
+import { storage } from '../../utils/Storage';
 export default function AdminSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -80,8 +80,8 @@ export default function AdminSidebar() {
         >
           <motion.button
             onClick={() => {
-              localStorage.removeItem("AdminToken");
-              localStorage.removeItem("AdminData");
+              storage.removeItem("AdminToken");
+              storage.removeItem("AdminData");
               navigate("/admin/secure/tales/login");
             }}
             whileHover={{ scale: 1.1 }}

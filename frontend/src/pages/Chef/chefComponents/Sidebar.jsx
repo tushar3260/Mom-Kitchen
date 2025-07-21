@@ -5,7 +5,7 @@ import {
   FaShoppingCart
 } from 'react-icons/fa';
 import { NavLink } from 'react-router-dom';
-
+import { storage } from '../../../utils/Storage';
 const menuItems = [
   { label: 'Dashboard', icon: <FaClipboardList />, path: '' },
   { label: 'Orders', icon: <FaShoppingCart />, path: 'orders' },
@@ -55,7 +55,7 @@ const Sidebar = () => {
       <div className="absolute bottom-6 w-full px-2">
         <button
           onClick={() => {
-            localStorage.clear();
+            storage.clear();
             window.location.href = '/';
           }}
           className="flex items-center justify-center gap-2 w-full bg-[#ff7e00] text-white py-2 rounded-lg hover:bg-orange-600 transition"

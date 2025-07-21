@@ -6,6 +6,7 @@ import {useNavigate } from 'react-router-dom';
 import ChefContext from "./Context/ChefContext";
 import { useContext } from "react";
 import Loading from "../../Loading";
+import { storage } from "../../utils/Storage";
 const ChefSignup = () => {
   const [formData, setFormData] = useState({
     name: "",
@@ -131,12 +132,12 @@ const ChefSignup = () => {
         return;
       }
 
-      localStorage.setItem("chefToken", token);
-      localStorage.setItem("chefData", JSON.stringify(chef));
-      localStorage.setItem("chefEmail", chef.email);
+      storage.setItem("chefToken", token);
+      storage.setItem("chefData", chef);
+      storage.setItem("chefEmail", chef.email);
       setChef(chef);
       setChefToken(token);
-      // Store token in localStorage
+      // Store token in storage
       // Reset form
       setFormData({
         name: "",

@@ -1,14 +1,16 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
-import Loading from '../Loading'; // Adjust this path as per your folder structure
+import Loading from '../Loading'; 
+import { storage } from '../utils/Storage';
 
 const OTPPage = () => {
   const [otp, setOtp] = useState(new Array(6).fill(''));
   const [loading, setLoading] = useState(false);
   const [attemptsLeft, setAttemptsLeft] = useState(5);
   const [timer, setTimer] = useState(300);
+  const [email, setEmail] = useState('');  // ✅ email state
   const inputsRef = useRef([]);
   const navigate = useNavigate();
   const location = useLocation();
@@ -16,32 +18,46 @@ const OTPPage = () => {
   const queryParams = new URLSearchParams(location.search);
   const role = queryParams.get('role') || 'user';
 
-  // ✅ Memoized email fetch
-  const email = useMemo(() => {
-    if (role === 'chef') return localStorage.getItem('chefEmail');
-    if (role === 'admin') {
-      const admin = JSON.parse(localStorage.getItem('adminData') || '{}');
-      return admin?.email;
-    }
-    const user = JSON.parse(localStorage.getItem('userData') || '{}');
-    return user?.email;
+  // ✅ Fetch email from storage (async)
+  useEffect(() => {
+    const fetchEmail = async () => {
+      try {
+        if (role === 'chef') {
+          const chefEmail = await storage.getItem('chefEmail');
+          setEmail(chefEmail || '');
+        } else if (role === 'admin') {
+          const admin = await storage.getItem('adminData');
+          setEmail(admin?.email || '');
+        } else {
+          const user = await storage.getItem('userData');
+          console.log(user)
+          setEmail(user?.email || '');
+        }
+      } catch (err) {
+        console.error("Error fetching email from storage:", err);
+        setEmail('');
+      }
+    };
+    fetchEmail();
   }, [role]);
 
-  // ✅ Redirect paths
-  const loginRedirect = role === 'chef'
-    ? '/chef/login'
-    : role === 'admin'
-    ? '/admin/secure/tales/login'
-    : '/login';
+  const loginRedirect =
+    role === 'chef'
+      ? '/chef/login'
+      : role === 'admin'
+      ? '/admin/secure/tales/login'
+      : '/login';
 
-  const dashboardRedirect = role === 'chef'
-    ? '/chef/chefdashboard'
-    : role === 'admin'
-    ? '/admin/secure/tales/dashboard'
-    : '/';
+  const dashboardRedirect =
+    role === 'chef'
+      ? '/chef/chefdashboard'
+      : role === 'admin'
+      ? '/admin/secure/tales/dashboard'
+      : '/';
 
   // ✅ Auto send OTP
   const autoSendOtp = useCallback(async () => {
+    if (!email) return;
     try {
       setLoading(true);
       const { data } = await axios.post(
@@ -57,31 +73,22 @@ const OTPPage = () => {
     }
   }, [role, email]);
 
-  // ✅ Initial side-effects
+  // ✅ Initial effects
   useEffect(() => {
-    const validRoles = ['user', 'chef', 'admin'];
-    if (!validRoles.includes(role)) {
+    if (!['user', 'chef', 'admin'].includes(role)) {
       toast.error('Invalid role provided.');
       navigate('/');
       return;
     }
-
-    if (!email) {
-      toast.error('Please log in to continue.');
-      navigate(loginRedirect);
-      return;
-    }
-
-    autoSendOtp();
+    if (email) autoSendOtp();
 
     const interval = setInterval(() => {
       setTimer((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [role, email, autoSendOtp, navigate, loginRedirect]);
+  }, [role, email, autoSendOtp, navigate]);
 
-  // ✅ Manual resend
   const handleSendOtp = async () => {
     if (attemptsLeft <= 0) {
       toast.error('Max attempts reached. Try again later.');
@@ -135,7 +142,7 @@ const OTPPage = () => {
 
       if (res.data.token) {
         toast.success('OTP verified! Redirecting...');
-        localStorage.setItem(`${role}Token`, res.data.token);
+        await storage.setItem(`${role}Token`, res.data.token);
         setTimeout(() => {
           window.location.href = dashboardRedirect;
         }, 1500);

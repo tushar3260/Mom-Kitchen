@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   FaSignOutAlt,
@@ -11,22 +11,24 @@ import {
   FaUpload,
   FaArrowLeft
 } from "react-icons/fa";
-import Loading from '../Loading.jsx'
+import Loading from "../Loading.jsx";
 import axios from "axios";
-import toast, { Toaster } from "react-hot-toast"; // ✅ Toast Import
+import toast, { Toaster } from "react-hot-toast";
 import UserContext from "../context/userContext.jsx";
+import { storage } from "../utils/Storage.js";
 
 function ProfilePage() {
   const { user, setUser, setToken } = useContext(UserContext);
-  const userToken = localStorage.getItem("usertoken");
 
+  const [userToken, setUserToken] = useState(""); // ✅ Async token
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     fullName: user?.fullName || "",
     email: user?.email || "",
     phone: user?.phone || "",
-    avatar: user?.avtar || "",
+    avatar: user?.avatar || user?.avtar || "",
     address: user?.address || [],
   });
 
@@ -37,9 +39,18 @@ function ProfilePage() {
     pincode: "",
   });
 
+  // ✅ Load token from localforage
+  useEffect(() => {
+    const fetchToken = async () => {
+      const token = await storage.getItem("usertoken");
+      setUserToken(token || "");
+    };
+    fetchToken();
+  }, []);
+
   // Logout
   const handleLogout = () => {
-    localStorage.clear();
+    storage.clear();
     setUser(null);
     setToken(null);
     toast.success("Logged out successfully!");
@@ -48,7 +59,7 @@ function ProfilePage() {
     }, 800);
   };
 
-  // Change fields
+  // Input change
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -64,7 +75,7 @@ function ProfilePage() {
     }
   };
 
-  // Add Address
+  // Add address
   const handleAddAddress = () => {
     if (!newAddress.tag || !newAddress.street || !newAddress.city || !newAddress.pincode) {
       return toast.error("Please fill all address fields!");
@@ -77,7 +88,7 @@ function ProfilePage() {
     toast.success("Address added!");
   };
 
-  // Delete Address
+  // Delete address
   const handleDeleteAddress = (index) => {
     const updatedAddresses = formData.address.filter((_, i) => i !== index);
     setFormData({ ...formData, address: updatedAddresses });
@@ -86,6 +97,8 @@ function ProfilePage() {
 
   // Save Profile
   const handleUpdate = async () => {
+    if (!userToken) return toast.error("User token not found!");
+
     try {
       setLoading(true);
       const { data } = await axios.put(
@@ -93,7 +106,7 @@ function ProfilePage() {
         {
           fullName: formData.fullName,
           phone: formData.phone,
-          avtar: formData.avatar,
+          avtar: formData.avatar, // Backend may expect "avtar"
           address: formData.address,
         },
         {
@@ -119,11 +132,12 @@ function ProfilePage() {
 
   return (
     <>
-      <Toaster position="top-center" reverseOrder={false} />{" "}
-      {/* ✅ Toast Container */}
+      <Toaster position="top-center" reverseOrder={false} />
       <div className="absolute top-4 left-4">
         <button
-          onClick={() => window.history.back()}
+          
+          onClick={() => 
+            window.history.back()}
           className="flex items-center gap-2 px-3 py-1 bg-orange-500 text-white rounded-lg shadow hover:bg-orange-400 transition"
         >
           <FaArrowLeft /> Back
@@ -356,10 +370,8 @@ function ProfilePage() {
               )}
             </motion.div>
           </div>
-         {loading && <Loading message="Updating....." />}
+          {loading && <Loading message="Updating....." />}
         </motion.div>
-        
-
       </div>
     </>
   );

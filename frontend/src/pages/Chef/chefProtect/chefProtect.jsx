@@ -2,7 +2,7 @@ import { useContext, useEffect, useState, useRef } from 'react';
 import { Navigate } from 'react-router-dom';
 import ChefContext from '../Context/ChefContext'; // ✅ Adjust path if needed
 import { toast } from 'react-hot-toast';
-
+import { storage } from '../../../utils/Storage';
 const ChefProtect = ({ children }) => {
   const { chef, chefToken } = useContext(ChefContext);
   const [checking, setChecking] = useState(true);
@@ -15,8 +15,8 @@ const ChefProtect = ({ children }) => {
     const checkAuth = async () => {
       await new Promise((res) => setTimeout(res, 300)); // Add slight delay for UX
       
-      const storedChef = JSON.parse(localStorage.getItem('chefData'));
-      const storedToken = localStorage.getItem('chefToken');
+      const storedChef = storage.getItem('chefData');
+      const storedToken = storage.getItem('chefToken');
 
       const role = chef?.role || storedChef?.role;
 

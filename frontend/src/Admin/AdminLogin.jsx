@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast, Toaster } from 'react-hot-toast';
 import AdminContext from './context/AdminContext';
+import { storage } from "../utils/Storage";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
@@ -64,8 +65,8 @@ export default function AdminLogin() {
         setAdmin(admin);
         setAdminToken(token);
 
-        localStorage.setItem('AdminToken', token);
-        localStorage.setItem('AdminData', JSON.stringify(admin));
+        storage.setItem('AdminToken', token);
+        storage.setItem('AdminData', admin);
 
         toast.success(message || 'Login successful!');
         setLoading(false);

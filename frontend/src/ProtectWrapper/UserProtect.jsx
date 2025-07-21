@@ -2,7 +2,7 @@ import { useContext, useEffect, useState, useRef } from 'react';
 import { Navigate } from 'react-router-dom';
 import UserContext from '../context/userContext';
 import { toast } from 'react-hot-toast';
-
+import { storage } from '../utils/Storage';
 const UserProtect = ({ children }) => {
   const { user, token } = useContext(UserContext);
   const [checking, setChecking] = useState(true);
@@ -14,8 +14,8 @@ const UserProtect = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       await new Promise(res => setTimeout(res, 300)); // slight delay for loader
-      const storedUser = JSON.parse(localStorage.getItem('userData'));
-      const storedToken = localStorage.getItem('usertoken');
+      const storedUser = storage.getItem('userData');
+      const storedToken = storage.getItem('usertoken');
 
       const role = user?.role || storedUser?.role;
 

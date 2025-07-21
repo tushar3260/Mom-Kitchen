@@ -3,7 +3,7 @@ import axios from 'axios';
 import { motion } from 'framer-motion';
 import { FaSpinner, FaEye, FaEyeSlash } from 'react-icons/fa';
 import UserContext from '../context/userContext.jsx';
-
+import { storage } from '../utils/Storage.js';
 function SignupPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -61,10 +61,10 @@ function SignupPage() {
         if (user && token) {
           setUser(user);           // ✅ Context
           setToken(token);         // ✅ Context
-          localStorage.setItem("userData", JSON.stringify(
+          storage.setItem("userData", JSON.stringify(
             { fullName: user.fullName, email: user.email, phone: user.phone ,role: user.role }
           ));
-          localStorage.setItem("usertoken", token);
+          storage.setItem("usertoken", token);
 
           setSuccess("Signup successful! Redirecting...");
           setLoading(false);

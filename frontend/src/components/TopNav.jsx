@@ -5,7 +5,7 @@ import axios from "axios";
 import TiffinTalesLogo from "../assets/tiffintaleslogo.png";
 import { useUser } from "../context/userContext.jsx";
 import Loading from "../Loading.jsx";
-
+import { storage } from "../utils/Storage.js";
 function TopNav() {
   const { user, setUser } = useUser();
   const [addresses, setAddresses] = useState([]);
@@ -54,7 +54,7 @@ function TopNav() {
   // ✅ Login Redirect
   const handleLoginRedirect = () => {
     setRedirectLoading(true);
-    localStorage.setItem("redirectAfterLogin", window.location.pathname);
+    storage.setItem("redirectAfterLogin", window.location.pathname);
     setTimeout(() => {
       window.location.href = "/login";
     }, 800);
@@ -63,7 +63,7 @@ function TopNav() {
   // ✅ Logout
   const handleLogout = () => {
     setLogoutLoading(true);
-    localStorage.removeItem("userData");
+    storage.removeItem("userData");
     setTimeout(() => {
       window.location.href = "/";
     }, 800);

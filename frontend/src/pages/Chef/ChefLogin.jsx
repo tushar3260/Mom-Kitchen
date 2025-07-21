@@ -4,7 +4,7 @@ import { toast, Toaster } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 import ChefContext from './Context/ChefContext.jsx';
 import Loading from '../../Loading.jsx'; // make sure path is correct
-
+import { storage } from '../../utils/Storage.js';
 const ChefLogin = () => {
   const [email, setEmail] = useState('');
   const [passwordHash, setPasswordHash] = useState(''); // backend expects `passwordHash`
@@ -59,9 +59,9 @@ const ChefLogin = () => {
       }
 
       // Persist
-      localStorage.setItem('chefToken', token);
-      localStorage.setItem('chefData', JSON.stringify(chef));
-      localStorage.setItem('chefEmail', chef.email);
+      storage.setItem('chefToken', token);
+      storage.setItem('chefData', chef);
+      storage.setItem('chefEmail', chef.email);
 
       setChef(chef);
       setChefToken(token);
