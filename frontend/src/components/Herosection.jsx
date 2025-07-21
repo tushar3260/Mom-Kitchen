@@ -13,7 +13,7 @@ function Herosection() {
   useEffect(() => {
     const fetchMealTitles = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/meals");
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/meals`);
         const titles = res.data.map((meal) => meal.title);
         setAllMealTitles(titles);
       } catch (err) {
