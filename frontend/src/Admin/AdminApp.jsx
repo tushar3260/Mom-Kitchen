@@ -8,7 +8,7 @@ import AdminAllChefs from './admincomponents/AdminAllchef.jsx';
 import AdminAllOrders from './admincomponents/AdminAllorder.jsx';
 import CreateDiscount from './admincomponents/CreateDiscount.jsx'; // ✅ Import your discount page
 import { AdminProvider } from './context/AdminContext.jsx';
-import AdminProtect from './protect/adminprotect.jsx';
+import AdminProtect from "./protect/AdminProtect.jsx"
 
 function AdminApp() {
   return (
