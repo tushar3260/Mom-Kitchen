@@ -9,7 +9,7 @@ import Cart from "./pages/Cart.jsx";
 import Allchef from "./pages/Allchef.jsx";
 import AllMeals from "./pages/AllMeals";
 import ChefDetail from "./pages/Chef/ChefDetail.jsx";
-import AddLocation from "./pages/Addlocation.jsx";
+import AddLocation from "./pages/AddLocation.jsx";
 import { UserProvider } from "./context/userContext.jsx";
 import UserProtect from "./ProtectWrapper/UserProtect.jsx"; // 👈 Import protect component
 import { ChefProvider } from "./pages/Chef/Context/ChefContext.jsx";
