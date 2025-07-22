@@ -23,14 +23,27 @@ import Checkout from "./pages/Checkout.jsx";
 import OrderNowPage from "./components/OrderNowPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
 import MyOrderPage from '../src/pages/MyOrderPage.jsx'
-
+import DashboardLayout from "./components/Dashcomponents/DashboardLayout.jsx";
+import OrderSummary from "./components/Dashcomponents/OrderSummary.jsx";
+import Charts from "./components/Dashcomponents/Charts.jsx";
+import Tracker from "./components/Dashcomponents/Tracker.jsx";
+import SubscriptionPage from "./components/Dashcomponents/SubscriptionPage.jsx";
+import Wallet from "./components/Dashcomponents/Wallet.jsx";
+import ReferAndEarn from "./components/Dashcomponents/ReferAndEarnPage.jsx";
+import Support from "./components/Dashcomponents/Support.jsx";
+import Settings from "./components/Dashcomponents/Setting.jsx";
+import UpcomingMeals from "./components/Dashcomponents/UpcomingMeals.jsx";
+import Aboutus from '../src/pages/Aboutus.jsx'
+import Team from '../src/pages/Team.jsx'
+import Helpandsupport from '../src/pages/Helpandsupport.jsx'
+import Termcondition from '../src/pages/Termcondition.jsx'
+import Refundcancellation from '../src/pages/Refundcancellation.jsx'
 function App() {
   return (
     <div>
       <UserProvider>
         <BrowserRouter>
           <Routes>
-            
             {/* Public Routes */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
@@ -46,35 +59,44 @@ function App() {
             <Route path="/chef-detail/:id" element={<ChefDetail />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/orders" element={<MyOrderPage />} />
-            
+            <Route path="/aboutus" element={<Aboutus/>} />
+            <Route path="/team" element={<Team/>} />
+             <Route path="/help" element={<Helpandsupport/>} />
+              <Route path="/terms" element={<Termcondition/>} />
+               <Route path="/refund" element={<Refundcancellation/>} />
             {/* Protected Routes */}
             <Route
-              path="/dashboard"
+              path="/dashboard/*"
               element={
                 <UserProtect>
-                  <Dashboard />
+                  <DashboardLayout />
                 </UserProtect>
               }
-            />
+            >
+              <Route index element={<Dashboard />} /> {/* Default page */}
+              <Route path="orders" element={<OrderSummary />} />
+              <Route path="tracker" element={<Tracker />} />
+              <Route path="charts" element={<Charts />} />
+              <Route path="subscription" element={<SubscriptionPage />} />
+              <Route path="wallet" element={<Wallet />} />
+              <Route path="refer" element={<ReferAndEarn />} />
+              <Route path="support" element={<Support />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="upcoming" element={<UpcomingMeals />} />
+              {/* aur bhi nested components yahan add kar */}
+            </Route>
+
             <Route path="/profile" element={<ProfilePage />} />
-    
+
             <Route
               path="/chef/*"
               element={
                 <ChefProvider>
-                  
-                    <ChefApp />
-                  
+                  <ChefApp />
                 </ChefProvider>
               }
             />
-            <Route path="/admin/secure/tales/*" element={
-              
-            
-                
-                <AdminApp />
-             
-            } />
+            <Route path="/admin/secure/tales/*" element={<AdminApp />} />
           </Routes>
         </BrowserRouter>
       </UserProvider>

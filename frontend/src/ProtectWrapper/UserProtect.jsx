@@ -1,34 +1,36 @@
-import { useContext, useEffect, useState, useRef } from 'react';
-import { Navigate } from 'react-router-dom';
-import UserContext from '../context/userContext';
-import { toast } from 'react-hot-toast';
-import { storage } from '../utils/Storage';
+import { useContext, useEffect, useState, useRef } from "react";
+import { Navigate } from "react-router-dom";
+import UserContext from "../context/userContext";
+import { toast } from "react-hot-toast";
+import { storage } from "../utils/Storage";
+
 const UserProtect = ({ children }) => {
   const { user, token } = useContext(UserContext);
   const [checking, setChecking] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
-  const [redirect, setRedirect] = useState(false);
-
-  const toastShownRef = useRef(false); // prevent double toast
+  const toastShownRef = useRef(false);
 
   useEffect(() => {
     const checkAuth = async () => {
-      await new Promise(res => setTimeout(res, 300)); // slight delay for loader
-      const storedUser = storage.getItem('userData');
-      const storedToken = storage.getItem('usertoken');
+      await new Promise((res) => setTimeout(res, 300)); // slight delay
+      const storedUser = await storage.getItem("userData");
+      const storedToken = await storage.getItem("usertoken");
+
+      // console.log("UserProtect - storedUser:", storedUser);
+      // console.log("UserProtect - storedToken:", storedToken);
 
       const role = user?.role || storedUser?.role;
+      // console.log("UserProtect - role:", role);
 
-      if (!storedToken || role !== 'user') {
+      if (!storedToken || !storedUser || role !== "user") {
         if (!toastShownRef.current) {
           toast.error("🚫 Please login to access this page.");
           toastShownRef.current = true;
         }
-        setRedirect(true);
+        setAuthenticated(false);
       } else {
         setAuthenticated(true);
       }
-
       setChecking(false);
     };
 
@@ -51,11 +53,7 @@ const UserProtect = ({ children }) => {
     );
   }
 
-  if (redirect) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return children;
+  return authenticated ? children : <Navigate to="/login" replace />;
 };
 
 export default UserProtect;
