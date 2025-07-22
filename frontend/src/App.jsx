@@ -23,7 +23,6 @@ import Checkout from "./pages/Checkout.jsx";
 import OrderNowPage from "./components/OrderNowPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
 import MyOrderPage from '../src/pages/MyOrderPage.jsx'
-<<<<<<< HEAD
 import DashboardLayout from "./components/Dashcomponents/DashboardLayout.jsx";
 import OrderSummary from "./components/Dashcomponents/OrderSummary.jsx";
 import Charts from "./components/Dashcomponents/Charts.jsx";
@@ -34,13 +33,11 @@ import ReferAndEarn from "./components/Dashcomponents/ReferAndEarnPage.jsx";
 import Support from "./components/Dashcomponents/Support.jsx";
 import Settings from "./components/Dashcomponents/Setting.jsx";
 import UpcomingMeals from "./components/Dashcomponents/UpcomingMeals.jsx";
-=======
 import Aboutus from '../src/pages/Aboutus.jsx'
 import Team from '../src/pages/Team.jsx'
 import Helpandsupport from '../src/pages/Helpandsupport.jsx'
 import Termcondition from '../src/pages/Termcondition.jsx'
 import Refundcancellation from '../src/pages/Refundcancellation.jsx'
->>>>>>> d7d1d313998c1175cee5b7f74e34fa3b8e02a4ec
 function App() {
   return (
     <div>
@@ -62,15 +59,11 @@ function App() {
             <Route path="/chef-detail/:id" element={<ChefDetail />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/orders" element={<MyOrderPage />} />
-<<<<<<< HEAD
-
-=======
             <Route path="/aboutus" element={<Aboutus/>} />
             <Route path="/team" element={<Team/>} />
              <Route path="/help" element={<Helpandsupport/>} />
               <Route path="/terms" element={<Termcondition/>} />
                <Route path="/refund" element={<Refundcancellation/>} />
->>>>>>> d7d1d313998c1175cee5b7f74e34fa3b8e02a4ec
             {/* Protected Routes */}
             <Route
               path="/dashboard/*"
