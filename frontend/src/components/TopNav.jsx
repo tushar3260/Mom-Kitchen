@@ -16,26 +16,72 @@ function TopNav() {
   const [cartCount, setCartCount] = useState(0); // ✅ Dynamic Cart Count
   const userId = user?._id;
 
-  // ✅ Fetch addresses
-  useEffect(() => {
-    const fetchAddresses = async () => {
-      if (!userId) return;
-      try {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/user/${userId}/address`);
-        const data = res.data;
-        if (Array.isArray(data) && data.length > 0) {
-          setAddresses(data);
-          setSelectedAddress(data[0]);
+
+
+//address
+useEffect(() => {
+  const fetchAddresses = async () => {
+    if (!userId) return;
+
+    try {
+      // 🔹 Try to fetch saved addresses from backend
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/user/${userId}/address`);
+      const data = res.data;
+
+      if (Array.isArray(data) && data.length > 0) {
+        setAddresses(data);
+        setSelectedAddress(data[0]);
+      } else {
+        // 🔹 No address in DB – fallback to real-time geolocation
+        if ("geolocation" in navigator) {
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              const { latitude, longitude } = position.coords;
+              console.log("Detected Latitude:", latitude);
+              console.log("Detected Longitude:", longitude);
+
+              try {
+                // 🔹 Reverse geocoding via Nominatim (free)
+                const locationRes = await axios.get(
+                  `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+                );
+
+                const locationData = locationRes.data;
+
+                const addressObj = {
+                  addressLine: locationData.display_name,
+                  latitude,
+                  longitude
+                };
+
+                setAddresses([addressObj]);
+                setSelectedAddress(addressObj);
+              } catch (err) {
+                console.error("Error in reverse geocoding:", err);
+              }
+            },
+            (err) => {
+              console.error("Geolocation error:", err);
+            },
+            {
+              enableHighAccuracy: true, // ✅ Use GPS when available
+              timeout: 10000,
+              maximumAge: 0
+            }
+          );
         } else {
-          setAddresses([]);
-          setSelectedAddress(null);
+          console.warn("Geolocation is not supported by this browser.");
         }
-      } catch (err) {
-        console.error("Error fetching addresses:", err);
       }
-    };
-    fetchAddresses();
-  }, [userId]);
+    } catch (err) {
+      console.error("Error fetching addresses from backend:", err);
+    }
+  };
+
+  fetchAddresses();
+}, [userId]);
+
+
 
   // ✅ Fetch Cart Count
   useEffect(() => {
@@ -82,30 +128,43 @@ function TopNav() {
           <img src={TiffinTalesLogo} alt="Tiffin Tales" className="h-40 w-auto" />
         </div>
 
-        {/* ✅ Location */}
-        <div className="hidden md:block">
-          {user ? (
-            addresses.length > 0 ? (
-              <select
-                value={selectedAddress?._id || ""}
-                onChange={(e) =>
-                  setSelectedAddress(addresses.find((addr) => addr._id === e.target.value))
-                }
-                className="px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 font-semibold text-gray-700 outline-none"
-              >
-                {addresses.map((addr) => (
-                  <option key={addr._id} value={addr._id}>
-                    {addr.tag} - {addr.city} ({addr.pincode})
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <p className="font-semibold text-gray-700">No Address Found</p>
-            )
-          ) : (
-            <p className="font-semibold text-gray-700">Login to see addresses</p>
-          )}
-        </div>
+        <div className="hidden md:flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full shadow-sm transition-all duration-300 max-w-[400px] overflow-hidden cursor-pointer">
+  <span className="text-pink-600 text-lg">📍</span>
+
+  {user ? (
+    addresses.length > 0 ? (
+      <select
+        value={selectedAddress?._id || "live-location"}
+        onChange={(e) => {
+          const selected = addresses.find((addr) => addr._id === e.target.value);
+          if (selected) setSelectedAddress(selected);
+        }}
+        className="bg-transparent outline-none text-sm font-medium text-gray-800 truncate w-full"
+      >
+        {addresses.map((addr) => (
+          <option key={addr._id} value={addr._id}>
+            {addr.tag} - {addr.city} ({addr.pincode})
+          </option>
+        ))}
+        {selectedAddress?.addressLine && !selectedAddress?._id && (
+          <option value="live-location">
+            📍 {selectedAddress.addressLine}
+          </option>
+        )}
+      </select>
+    ) : selectedAddress?.addressLine ? (
+      <p className="text-sm font-medium text-gray-800 truncate">
+        {selectedAddress.addressLine}
+      </p>
+    ) : (
+      <p className="text-sm font-medium text-gray-600">No Address Found</p>
+    )
+  ) : (
+    <p className="text-sm font-medium text-gray-600">Login to see addresses</p>
+  )}
+</div>
+
+
 
         {/* ✅ Buttons */}
         <div className="flex items-center gap-4">

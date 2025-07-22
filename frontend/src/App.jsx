@@ -23,6 +23,11 @@ import Checkout from "./pages/Checkout.jsx";
 import OrderNowPage from "./components/OrderNowPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
 import MyOrderPage from '../src/pages/MyOrderPage.jsx'
+import Aboutus from '../src/pages/Aboutus.jsx'
+import Team from '../src/pages/Team.jsx'
+import Helpandsupport from '../src/pages/Helpandsupport.jsx'
+import Termcondition from '../src/pages/Termcondition.jsx'
+import Refundcancellation from '../src/pages/Refundcancellation.jsx'
 function App() {
   return (
     <div>
@@ -45,7 +50,11 @@ function App() {
             <Route path="/chef-detail/:id" element={<ChefDetail />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/orders" element={<MyOrderPage />} />
-            
+            <Route path="/aboutus" element={<Aboutus/>} />
+            <Route path="/team" element={<Team/>} />
+             <Route path="/help" element={<Helpandsupport/>} />
+              <Route path="/terms" element={<Termcondition/>} />
+               <Route path="/refund" element={<Refundcancellation/>} />
             {/* Protected Routes */}
             <Route
               path="/dashboard"

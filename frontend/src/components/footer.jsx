@@ -1,119 +1,146 @@
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { FaInstagram, FaYoutube } from "react-icons/fa";
+import { Link } from 'react-router-dom';
+
 
 function Footer() {
+  const [showLoader, setShowLoader] = useState(false);
+  const navigate = useNavigate();
+
+  const handleNavigate = (path) => {
+    setShowLoader(true);
+    setTimeout(() => {
+      setShowLoader(false);
+      navigate(path);
+    }, 500); // 0.5 seconds
+  };
+
+  const handleExternal = (url) => {
+    setShowLoader(true);
+    setTimeout(() => {
+      setShowLoader(false);
+      window.open(url, "_blank");
+    }, 500);
+  };
+
   return (
     <div>
+      {/* Loader */}
+      {showLoader && (
+        <div className="fixed inset-0 bg-orange-100 bg-opacity-90 flex items-center justify-center z-[9999]">
+          <div className="flex space-x-2">
+            <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce [animation-delay:0ms]" />
+            <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce [animation-delay:150ms]" />
+            <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce [animation-delay:300ms]" />
+          </div>
+        </div>
+      )}
+
+      {/* Footer Starts */}
       <footer className="bg-zinc-900 text-white px-8 pt-16 pb-8">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 text-sm mb-8">
           <div>
-            <h4 className="font-bold mb-2">Our top cities</h4>
+            <h4 className="font-bold mb-2">Top Areas in Mathura</h4>
             <ul>
-              <li>San Francisco</li>
-              <li>Miami</li>
-              <li>San Diego</li>
-              <li>East Bay</li>
-              <li>Long Beach</li>
+              <li>Mathura City</li>
+              <li>Vrindavan</li>
+              <li>Chaumhuna</li>
+              <li>Govardhan</li>
+              <li>Barsana</li>
             </ul>
           </div>
           <div>
             <ul className="mt-6 sm:mt-8">
-              <li>Los Angeles</li>
-              <li>Washington DC</li>
-              <li>Seattle</li>
-              <li>Portland</li>
-              <li>Nashville</li>
+              <li>GLA University</li>
+              <li>Chhata</li>
+              <li>Kosi Kalan</li>
+              <li>Naujheel</li>
+              <li>Gokul</li>
             </ul>
           </div>
           <div>
             <ul className="mt-6 sm:mt-8">
-              <li>New York City</li>
-              <li>Orange County</li>
-              <li>Atlanta</li>
-              <li>Charlotte</li>
-              <li>Denver</li>
+              <li>Raya</li>
+              <li>Radhakund</li>
+              <li>Township</li>
+              <li>Farah</li>
+              <li>Mahavan</li>
             </ul>
           </div>
           <div>
             <ul className="mt-6 sm:mt-8">
-              <li>Chicago</li>
-              <li>Phoenix</li>
-              <li>Las Vegas</li>
-              <li>Sacramento</li>
-              <li>Oklahoma City</li>
+              <li>Jait</li>
+              <li>Jamunavata</li>
+              <li>Shahpur</li>
+              <li>Jaisinghpura</li>
+              <li>Chhatikara</li>
             </ul>
           </div>
           <div>
             <ul className="mt-6 sm:mt-8">
-              <li>Columbus</li>
-              <li>New Mexico</li>
-              <li>Albuquerque</li>
-              <li>Sacramento</li>
-              <li>New Orleans</li>
+              <li>Tanki Chowk</li>
+              <li>Masani</li>
+              <li>Dampier Nagar</li>
+              <li>Chhata Rural</li>
+              <li>Yamuna Expressway Area</li>
             </ul>
           </div>
         </div>
 
+        {/* Footer Links */}
         <div className="border-t border-zinc-700 pt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 text-sm">
           <div>
             <h4 className="font-bold mb-2">Company</h4>
             <ul>
-              <li><a href="#" className="hover:underline">About us</a></li>
-              <li><a href="#" className="hover:underline">Team</a></li>
-              <li><a href="#" className="hover:underline">Careers</a></li>
-              <li><a href="#" className="hover:underline">Blog</a></li>
+              <li onClick={() => handleNavigate("/aboutus")} className="hover:underline cursor-pointer">About us</li>
+              <li onClick={() => handleNavigate("/team")} className="hover:underline cursor-pointer">Team</li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-bold mb-2">Contact</h4>
             <ul>
-              <li><a href="#" className="hover:underline">Help & Support</a></li>
-              <li><a href="#" className="hover:underline">Partner with us</a></li>
-              <li><a href="#" className="hover:underline">Ride with us</a></li>
+              <li onClick={() => handleNavigate("/help")} className="hover:underline cursor-pointer">Help & Support</li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-bold mb-2">Legal</h4>
             <ul>
-              <li><a href="#" className="hover:underline">Terms & Conditions</a></li>
-              <li><a href="#" className="hover:underline">Refund & Cancellation</a></li>
-              <li><a href="#" className="hover:underline">Privacy Policy</a></li>
-              <li><a href="#" className="hover:underline">Cookie Policy</a></li>
+              <li onClick={() => handleNavigate("/terms")} className="hover:underline cursor-pointer">Terms & Conditions</li>
+
+              <li onClick={() => handleNavigate("/refund")} className="hover:underline">Refund & Cancellation</li>
+              
             </ul>
           </div>
 
+          {/* Social */}
           <div>
-            <h4 className="font-bold mb-2">Follow Us</h4>
-            <div className="flex space-x-3 text-lg">
-              <a href="#"><i className="fab fa-instagram"></i></a>
-              <a href="#"><i className="fab fa-facebook"></i></a>
-              <a href="#"><i className="fab fa-twitter"></i></a>
+            <div className="flex items-center space-x-3 mb-2">
+              <h4 className="font-bold">Follow Us</h4>
+              <button onClick={() => handleExternal("https://www.instagram.com/ts3231442")} className="text-xl hover:text-pink-500">
+                <FaInstagram />
+              </button>
+              <button onClick={() => handleExternal("https://youtube.com/@tiffintales-z3x?si=0nphfnChs5QZtLjE")} className="text-xl hover:text-red-500">
+                <FaYoutube />
+              </button>
             </div>
 
             <div className="mt-4">
               <p className="text-xs font-semibold mb-1">Receive exclusive offers in your mailbox</p>
               <div className="flex items-center">
-                <input
-                  type="email"
-                  placeholder="Enter Your email"
-                  className="bg-zinc-800 px-4 py-2 rounded-l w-full outline-none"
-                />
-                <button className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-r">
-                  Subscribe
-                </button>
+                <input type="email" placeholder="Enter Your email" className="bg-zinc-800 px-4 py-2 rounded-l w-full outline-none" />
+                <button className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-r">Subscribe</button>
               </div>
             </div>
           </div>
         </div>
 
+        {/* Bottom note */}
         <div className="mt-8 text-xs text-zinc-500 border-t border-zinc-700 pt-4 flex flex-col md:flex-row justify-between items-center">
-          <p>
-            All rights Reserved © <span className="text-white font-semibold">Your Company, 2021</span>
-          </p>
-          <p>
-            Made with <span className="text-yellow-500">❤</span> by <span className="text-white">Tiffin Tales</span>
-          </p>
+          <p>All rights Reserved © <span className="text-white font-semibold">Your Company, 2025</span></p>
+          <p>Made with <span className="text-yellow-500">❤</span> by <span className="text-white">Tiffin Tales</span></p>
         </div>
       </footer>
     </div>
