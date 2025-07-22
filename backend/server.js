@@ -15,29 +15,50 @@ const io = new Server(server, {
   },
 });
 
-// --- AUTH-LITE HANDSHAKE ---
-// Expect chefId in connection query OR use proper auth token decode
-io.on('connection', (socket) => {
-  const { chefId } = socket.handshake.query;
+// Chat logic
+io.on("connection", (socket) => {
+  console.log("🔌 New client connected:", socket.id);
 
-  if (!chefId) {
-    console.warn(`Socket ${socket.id} connected w/o chefId. Not joining a room.`);
-    return;
-  }
+  // Join a chat room based on orderId
+  socket.on("joinRoom", (orderId) => {
+    socket.join(orderId);
+    console.log(`Socket ${socket.id} joined order room: ${orderId}`);
+  });
 
-  // Join room for this chef
-  const roomName = `chef:${chefId}`;
-  socket.join(roomName);
-  console.log(`Chef ${chefId} connected -> joined ${roomName}`);
+  // Handle incoming messages
+  socket.on("sendMessage", async (data) => {
+    const { orderId, senderId, senderModel, message } = data;
 
-  socket.on('disconnect', () => {
-    console.log(`Chef ${chefId} disconnected socket ${socket.id}`);
+    if (!orderId || !senderId || !senderModel || !message) {
+      console.warn("❌ Invalid message data received.");
+      return;
+    }
+
+    try {
+      const ChatMessage = (await import("./models/ChatMessage.js")).default;
+
+      const newMsg = await ChatMessage.create({
+        orderId,
+        sender: senderId,
+        senderModel,
+        message,
+      });
+
+      // Emit to everyone in the room
+      io.to(orderId).emit("receiveMessage", newMsg);
+    } catch (err) {
+      console.error("❌ Error saving chat message:", err);
+    }
+  });
+
+  socket.on("disconnect", () => {
+    console.log("❌ Client disconnected:", socket.id);
   });
 });
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`🚀 Server is running on http://localhost:${PORT}`);
 });
 
 export { io };

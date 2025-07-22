@@ -15,6 +15,7 @@ import otpRoutes from './routes/otp.routes.js';
 import connectDB from './models/db.js';
 import dotenv from 'dotenv';
 import forgotRoutes from './routes/forgot.routes.js';
+import chatRoutes from './routes/Chat.js'; // Import chat routes
 dotenv.config();
 const app = express();
 
@@ -40,6 +41,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/withdrawls", witthdrawlRoutes);
 app.use('/api/otp', otpRoutes); // OTP routes
 app.use('/api/forgot', forgotRoutes); // Forgot password routes
+app.use('/api/chat', chatRoutes); // Chat routes
 
 connectDB()
 app.get('/', (req, res) => {
