@@ -15,7 +15,7 @@ import UserProtect from "./ProtectWrapper/UserProtect.jsx"; // 👈 Import prote
 import { ChefProvider } from "./pages/Chef/Context/ChefContext.jsx";
 import OTPPage from "./pages/OTPPage.jsx"; // Assuming OTPPage is used in the flow
 import AdminApp from "./Admin/AdminApp.jsx";
-import AdminProtect from "./Admin/protect/adminprotect.jsx";
+//import AdminProtect from "./Admin/protect/adminprotect.jsx";
 import { AdminProvider } from "./Admin/context/AdminContext.jsx";// 👈 Import AdminProvider
 import ResetPassword from "./pages/ResetPassword.jsx";
 import ForgotPassword from "./pages/ForgotPassword.jsx";
