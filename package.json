@@ -1,5 +1,9 @@
 {
   "dependencies": {
+<<<<<<< HEAD
     "@heroicons/react": "^2.2.0"
+=======
+    "react-icons": "^5.5.0"
+>>>>>>> d7d1d313998c1175cee5b7f74e34fa3b8e02a4ec
   }
 }
