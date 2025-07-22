@@ -13,12 +13,12 @@ export const UserProvider = ({ children }) => {
     const loadData = async () => {
       try {
         const storedUser = await storage.getItem('userData');
-        console.log("stored user :",storedUser)
-        const storedToken = await storage.getItem('userToken');
+        // console.log("stored user :",storedUser)
+        const storedToken = await storage.getItem('usertoken');
         setUser(storedUser || null);
         setToken(storedToken || null);
       } catch (err) {
-        console.error("Failed to load user data", err);
+        // console.error("Failed to load user data", err);
       } finally {
         setLoading(false);
       }
@@ -36,7 +36,7 @@ export const UserProvider = ({ children }) => {
         if (token) await storage.setItem('usertoken', token);
         else await storage.removeItem('usertoken');
       } catch (err) {
-        console.error("Failed to save user data", err);
+        // console.error("Failed to save user data", err);
       }
     };
     saveData();

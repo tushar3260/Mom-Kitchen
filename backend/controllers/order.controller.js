@@ -77,7 +77,7 @@ export const getAllOrders = async (req, res) => {
 export const getOrdersByUser = async (req, res) => {
   try {
     const orders = await Order.find({ userId: req.params.userId })
-      .populate("meals.mealId", "title price")
+      .populate("meals.mealId", "title price photo")
       .sort({ createdAt: -1 });
 
     res.status(200).json(orders);
