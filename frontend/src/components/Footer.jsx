@@ -139,7 +139,7 @@ function Footer() {
 
         {/* Bottom note */}
         <div className="mt-8 text-xs text-zinc-500 border-t border-zinc-700 pt-4 flex flex-col md:flex-row justify-between items-center">
-          <p>All rights Reserved © <span className="text-white font-semibold">Your Company, 2025</span></p>
+          <p>All rights Reserved © <span className="text-white font-semibold">Tiffin Tales, 2025</span></p>
           <p>Made with <span className="text-yellow-500">❤</span> by <span className="text-white">Tiffin Tales</span></p>
         </div>
       </footer>
