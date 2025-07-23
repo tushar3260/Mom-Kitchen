@@ -1,8 +1,8 @@
 import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import TopNav from '../components/TopNav.jsx';
-import Footer from '../components/Footer.jsx';
+
+
 import { FaSpinner } from 'react-icons/fa';
 import UserContext from '../context/userContext.jsx';
 import { storage } from '../utils/Storage.js';
@@ -95,7 +95,7 @@ function LoginPage() {
     <>
 
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-orange-100 to-orange-200 p-6">
-      <TopNav />
+     
       <motion.div
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -172,7 +172,7 @@ function LoginPage() {
         </p>
       </motion.div>
     </div>
-      <Footer />
+     
     </>
   );
 }
