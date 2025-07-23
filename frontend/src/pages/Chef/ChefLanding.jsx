@@ -4,16 +4,21 @@ import { Toaster } from 'react-hot-toast';
 import ChefLogin from './ChefLogin';
 import ChefSignup from './ChefSignup';
 
-const ChefLanding = () => {
+const ChefLanding = ({ disableButtons = false }) => {
   const [showLogin, setShowLogin] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#fff8ee] text-gray-800 font-sans overflow-x-hidden">
+    <div className="min-h-screen bg-[#fff8ee] text-gray-800 font-sans overflow-x-hidden relative">
       <Toaster />
 
+      {/* Blur Layer (only when /chef/login or /chef/signup) */}
+      {disableButtons && (
+        <div className="absolute inset-0 bg-black/30 backdrop-blur-md z-10 pointer-events-none"></div>
+      )}
+
       {/* Hero Section */}
-      <section className="flex flex-col md:flex-row items-center justify-between px-6 md:px-20 py-10 bg-[#fff3da]">
+      <section className="flex flex-col md:flex-row items-center justify-between px-6 md:px-20 py-10 bg-[#fff3da] relative z-20">
         <motion.div
           className="md:w-1/2 mb-6 md:mb-0"
           initial={{ x: -80, opacity: 0 }}
@@ -26,14 +31,18 @@ const ChefLanding = () => {
           <p className="mt-4 text-lg text-gray-600">
             Join hundreds of home chefs building their food journey with Tiffin Tales.
           </p>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setShowSignup(true)}
-            className="mt-6 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg shadow-lg transition-all duration-200"
-          >
-            Become a Chef
-          </motion.button>
+
+          {/* Hide buttons if disableButtons is true */}
+          {!disableButtons && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowSignup(true)}
+              className="mt-6 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg shadow-lg transition-all duration-200"
+            >
+              Become a Chef
+            </motion.button>
+          )}
         </motion.div>
 
         <motion.div
@@ -51,7 +60,7 @@ const ChefLanding = () => {
       </section>
 
       {/* Why Join Section */}
-      <section className="px-6 md:px-20 py-14 bg-white">
+      <section className="px-6 md:px-20 py-14 bg-white relative z-20">
         <h2 className="text-3xl font-bold text-center text-orange-500 mb-6">
           Why Join Tiffin Tales as a Chef?
         </h2>
@@ -99,28 +108,30 @@ const ChefLanding = () => {
       </section>
 
       {/* CTA Footer */}
-      <motion.section
-        className="text-center py-12 bg-orange-50 border-t border-orange-100"
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        viewport={{ once: true }}
-      >
-        <h2 className="text-2xl font-semibold text-orange-500 mb-4">
-          Ready to Serve Your Tiffin Tales?
-        </h2>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setShowSignup(true)}
-          className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-full transition-all duration-200"
+      {!disableButtons && (
+        <motion.section
+          className="text-center py-12 bg-orange-50 border-t border-orange-100 relative z-20"
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
         >
-          Join as a Chef Now
-        </motion.button>
-      </motion.section>
+          <h2 className="text-2xl font-semibold text-orange-500 mb-4">
+            Ready to Serve Your Tiffin Tales?
+          </h2>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowSignup(true)}
+            className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-full transition-all duration-200"
+          >
+            Join as a Chef Now
+          </motion.button>
+        </motion.section>
+      )}
 
       {/* Modals */}
-      {showLogin && (
+      {!disableButtons && showLogin && (
         <ChefLogin
           onClose={() => setShowLogin(false)}
           onSignupClick={() => {
@@ -130,7 +141,7 @@ const ChefLanding = () => {
         />
       )}
 
-      {showSignup && (
+      {!disableButtons && showSignup && (
         <ChefSignup
           onClose={() => setShowSignup(false)}
           onLoginClick={() => {

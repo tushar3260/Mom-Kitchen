@@ -3,6 +3,7 @@ import axios from "axios";
 import { toast, Toaster } from "react-hot-toast";
 import { motion } from "framer-motion";
 import { IoClose } from "react-icons/io5";
+import { useNavigate } from "react-router-dom";
 import ChefContext from "./Context/ChefContext";
 import Loading from "../../Loading";
 import { storage } from "../../utils/Storage";
@@ -20,10 +21,11 @@ const ChefSignup = ({ onClose, onLoginClick }) => {
     bankDetails: { accNo: "", ifsc: "", holderName: "" },
     location: { area: "", lat: "", lng: "" },
   });
-  const { setChef, setChefToken } = useContext(ChefContext);
 
+  const { setChef, setChefToken } = useContext(ChefContext);
   const [loading, setLoading] = useState(false);
   const [locationFetched, setLocationFetched] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,7 +62,6 @@ const ChefSignup = ({ onClose, onLoginClick }) => {
       toast.error("Geolocation is not supported by your browser");
       return;
     }
-
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const lat = position.coords.latitude;
@@ -103,7 +104,6 @@ const ChefSignup = ({ onClose, onLoginClick }) => {
       toast.error("❌ Invalid Indian phone number");
       return;
     }
-
     if (!formData.location.lat || !formData.location.lng) {
       toast.error("❌ Location is required (auto or manual)");
       return;
@@ -119,23 +119,19 @@ const ChefSignup = ({ onClose, onLoginClick }) => {
 
       toast.success(res.data.message || "Chef registered successfully!");
       setTimeout(() => {
-        window.location.href = "/otp?role=chef";
+        navigate("/otp?role=chef");
       }, 800);
 
       const token = res.data.token;
       const chef = res.data.chef;
 
-      if (!token) {
-        toast.error("❌ Login failed! No token received");
-        return;
+      if (token) {
+        storage.setItem("chefToken", token);
+        storage.setItem("chefData", chef);
+        storage.setItem("chefEmail", chef.email);
+        setChef(chef);
+        setChefToken(token);
       }
-
-      storage.setItem("chefToken", token);
-      storage.setItem("chefData", chef);
-      storage.setItem("chefEmail", chef.email);
-      setChef(chef);
-      setChefToken(token);
-
       setFormData({
         name: "",
         email: "",
@@ -156,12 +152,22 @@ const ChefSignup = ({ onClose, onLoginClick }) => {
     }
   };
 
+  // Close and Login handlers
+  const handleClose = () => {
+    if (onClose) onClose();
+    else navigate("/chef");
+  };
+  const handleLogin = () => {
+    if (onLoginClick) onLoginClick();
+    else navigate("/chef/login");
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <Toaster position="top-center" reverseOrder={false} />
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
+        onClick={handleClose}
       ></div>
 
       {loading && <Loading message="Registering Chef..." />}
@@ -173,7 +179,7 @@ const ChefSignup = ({ onClose, onLoginClick }) => {
         className="relative bg-white p-8 rounded-2xl shadow-2xl max-w-3xl w-full border border-orange-300 z-10 overflow-y-auto max-h-[90vh]"
       >
         <button
-          onClick={onClose}
+          onClick={handleClose}
           className="absolute top-4 right-4 text-gray-600 hover:text-red-500 transition"
         >
           <IoClose size={24} />
@@ -184,7 +190,7 @@ const ChefSignup = ({ onClose, onLoginClick }) => {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* --- Inputs --- */}
+          {/* Input fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input
               type="text"
@@ -354,7 +360,7 @@ const ChefSignup = ({ onClose, onLoginClick }) => {
         <p className="mt-4 text-center">
           Already have an account?{" "}
           <button
-            onClick={onLoginClick}
+            onClick={handleLogin}
             className="text-[#ff7e00] underline font-semibold"
           >
             Login here

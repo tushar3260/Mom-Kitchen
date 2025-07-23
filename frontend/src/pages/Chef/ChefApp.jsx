@@ -22,8 +22,28 @@ const ChefApp = () => {
 
         {/* Public Routes */}
         <Route path="/" element={<ChefLanding />} />
-        <Route path="/signup" element={<ChefSignup />} />
-        <Route path="/login" element={<ChefLogin />} />
+        <Route
+  path="/login"
+  element={
+    <div className="relative">
+      <ChefLanding disableButtons /> {/* Background Landing Page */}
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-md"></div> {/* Blur Layer */}
+      <ChefLogin />
+    </div>
+  }
+/>
+
+<Route
+  path="/signup"
+  element={
+    <div className="relative">
+      <ChefLanding disableButtons /> {/* Background Landing Page */}
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-md"></div> {/* Blur Layer */}
+      <ChefSignup />
+    </div>
+  }
+/>
+
 
         {/* Protected Dashboard Layout Route */}
         <Route path="/chefdashboard" element={
