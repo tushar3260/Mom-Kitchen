@@ -1,13 +1,12 @@
 import React from "react";
-import logo from "../assets/logo.png"; // Ensure correct path
+import TopNav from "../components/TopNav";
 
 function RefundAndCancellation() {
   return (
+    <>
+    <TopNav />
     <div className="bg-white text-zinc-800 px-6 py-16 sm:px-12 md:px-24 lg:px-40 min-h-screen">
-      {/* Logo */}
-      <div className="flex justify-center mb-6">
-        <img src={logo} alt="Tiffin Tales Logo" className="h-20" />
-      </div>
+     
 
       {/* Heading */}
       <h1 className="text-4xl sm:text-5xl font-bold text-orange-500 mb-8 text-center">
@@ -55,6 +54,7 @@ function RefundAndCancellation() {
         </p>
       </div>
     </div>
+    </>
   );
 }
 

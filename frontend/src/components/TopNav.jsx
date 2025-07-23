@@ -6,6 +6,7 @@ import TiffinTalesLogo from "../assets/tiffintaleslogo.png";
 import { useUser } from "../context/userContext.jsx";
 import Loading from "../Loading.jsx";
 import { storage } from "../utils/Storage.js";
+import { Link } from "react-router-dom";
 
 function TopNav({ onLoginClick, onSignupClick, disableButtons }) {
   const { user, setUser } = useUser();
@@ -15,53 +16,37 @@ function TopNav({ onLoginClick, onSignupClick, disableButtons }) {
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
-  const [menuOpen, setMenuOpen] = useState(false); // Mobile menu toggle
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [locationLoading, setLocationLoading] = useState(false);
   const userId = user?._id;
 
-  // Fetch addresses
-  useEffect(() => {
-    const fetchAddresses = async () => {
-      if (!userId) return;
-      try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/user/${userId}/address`
-        );
-        const data = res.data;
-        if (Array.isArray(data) && data.length > 0) {
-          setAddresses(data);
-          setSelectedAddress(data[0]);
-        } else if ("geolocation" in navigator) {
-          navigator.geolocation.getCurrentPosition(
-            async (position) => {
-              const { latitude, longitude } = position.coords;
-              try {
-                const locationRes = await axios.get(
-                  `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
-                );
-                const locationData = locationRes.data;
-                const addressObj = {
-                  addressLine: locationData.display_name,
-                  latitude,
-                  longitude,
-                };
-                setAddresses([addressObj]);
-                setSelectedAddress(addressObj);
-              } catch (err) {
-                console.error("Error in reverse geocoding:", err);
-              }
-            },
-            (err) => console.error("Geolocation error:", err),
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-          );
-        }
-      } catch (err) {
-        console.error("Error fetching addresses from backend:", err);
+  // 🔹 Fetch addresses or fallback to location
+  // 🔹 Fetch addresses (no fallback to live location)
+useEffect(() => {
+  const fetchAddresses = async () => {
+    if (!userId) return;
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/user/${userId}/address`
+      );
+      const data = res.data;
+      if (Array.isArray(data) && data.length > 0) {
+        setAddresses(data);
+        setSelectedAddress(data[0]);
+      } else {
+        // 👇 DON'T fetch live location automatically
+        setAddresses([]);
+        setSelectedAddress(null);
       }
-    };
-    fetchAddresses();
-  }, [userId]);
+    } catch (err) {
+      console.error("Error fetching addresses from backend:", err);
+    }
+  };
+  fetchAddresses();
+}, [userId]);
 
-  // Fetch Cart Count
+
+  // 🔹 Cart count
   useEffect(() => {
     if (!userId) return;
     const fetchCartCount = async () => {
@@ -76,6 +61,54 @@ function TopNav({ onLoginClick, onSignupClick, disableButtons }) {
     };
     fetchCartCount();
   }, [userId]);
+
+  // 🔹 Live Location Fetch
+  const handleManualLocationFetch = async () => {
+    setLocationLoading(true);
+
+    if (!("geolocation" in navigator)) {
+      alert("Geolocation is not supported by your browser.");
+      setLocationLoading(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        try {
+          const locationRes = await axios.get(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+          );
+          const locationData = locationRes.data;
+
+          const addressObj = {
+            addressLine: locationData.display_name,
+            latitude,
+            longitude,
+          };
+
+          setAddresses([addressObj]);
+          setSelectedAddress(addressObj);
+        } catch (err) {
+          console.error("Reverse geocoding failed:", err);
+          alert("Failed to get address from location.");
+        } finally {
+          setLocationLoading(false);
+        }
+      },
+      (err) => {
+        console.error("Geolocation error:", err);
+        alert("Location permission denied.");
+        setLocationLoading(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
+  };
 
   const handleLoginRedirect = () => {
     setRedirectLoading(true);
@@ -98,16 +131,18 @@ function TopNav({ onLoginClick, onSignupClick, disableButtons }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
         {/* Logo */}
         <div className="flex items-center">
-          <img
-            src={TiffinTalesLogo}
-            alt="Tiffin Tales"
-            className="h-14 w-auto"
-          />
+          <Link to="/">
+            <img
+              src={TiffinTalesLogo}
+              alt="Tiffin Tales"
+              className="h-38 w-auto cursor-pointer"
+            />
+          </Link>
         </div>
 
-        {/* Address Bar (Desktop Only) */}
+        {/* 📍 Address Bar */}
         <div className="hidden md:flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full shadow-sm max-w-[400px] cursor-pointer">
-          <span className="text-pink-600 text-lg">📍</span>
+         
           {user ? (
             addresses.length > 0 ? (
               <select
@@ -121,13 +156,14 @@ function TopNav({ onLoginClick, onSignupClick, disableButtons }) {
                 className="bg-transparent outline-none text-sm font-medium text-gray-800 truncate w-full"
               >
                 {addresses.map((addr) => (
-                  <option key={addr._id} value={addr._id}>
-                    {addr.tag} - {addr.city} ({addr.pincode})
+                  <option key={addr._id || "live-location"} value={addr._id || "live-location"}>
+                    {addr.tag ? `${addr.tag} - ` : ""}
+                    {addr.city || addr.addressLine?.slice(0, 40)}...
                   </option>
                 ))}
                 {selectedAddress?.addressLine && !selectedAddress?._id && (
                   <option value="live-location">
-                    📍 {selectedAddress.addressLine}
+                     {selectedAddress.addressLine}
                   </option>
                 )}
               </select>
@@ -135,10 +171,15 @@ function TopNav({ onLoginClick, onSignupClick, disableButtons }) {
               <p className="text-sm font-medium text-gray-800 truncate">
                 {selectedAddress.addressLine}
               </p>
+            ) : locationLoading ? (
+              <p className="text-sm text-gray-500 italic">Detecting location...</p>
             ) : (
-              <p className="text-sm font-medium text-gray-600">
-                No Address Found
-              </p>
+              <button
+                onClick={handleManualLocationFetch}
+                className="text-sm font-medium text-orange-400 underline hover:text-orange-600"
+              >
+                Add Location
+              </button>
             )
           ) : (
             <p className="text-sm font-medium text-gray-600">
@@ -147,9 +188,8 @@ function TopNav({ onLoginClick, onSignupClick, disableButtons }) {
           )}
         </div>
 
-        {/* Desktop Buttons */}
+        {/* Right Desktop Buttons */}
         <div className="hidden md:flex items-center gap-4">
-          {/* Become a Chef */}
           <motion.button
             whileHover={{ scale: 0.9 }}
             className="bg-gradient-to-r from-red-500 to-orange-500 text-white font-bold px-4 py-2 rounded-full shadow"
@@ -158,7 +198,6 @@ function TopNav({ onLoginClick, onSignupClick, disableButtons }) {
             Become a Chef
           </motion.button>
 
-          {/* Cart & Profile */}
           {user && (
             <>
               <motion.div whileHover={{ scale: 1.2 }} className="relative">
@@ -191,28 +230,16 @@ function TopNav({ onLoginClick, onSignupClick, disableButtons }) {
                       className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg border"
                     >
                       <ul className="text-gray-700 text-sm">
-                        <li
-                          onClick={() => (window.location.href = "/orders")}
-                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                        >
+                        <li onClick={() => (window.location.href = "/orders")} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                           My Orders
                         </li>
-                        <li
-                          onClick={() => (window.location.href = "/profile")}
-                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                        >
+                        <li onClick={() => (window.location.href = "/profile")} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                           Profile
                         </li>
-                        <li
-                          onClick={handleLogout}
-                          className="px-4 py-2 hover:bg-red-100 text-red-500 cursor-pointer"
-                        >
+                        <li onClick={handleLogout} className="px-4 py-2 hover:bg-red-100 text-red-500 cursor-pointer">
                           Logout
                         </li>
-                        <li
-                          onClick={() => (window.location.href = "/dashboard")}
-                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                        >
+                        <li onClick={() => (window.location.href = "/dashboard")} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                           Dashboard
                         </li>
                       </ul>
@@ -233,7 +260,7 @@ function TopNav({ onLoginClick, onSignupClick, disableButtons }) {
           )}
         </div>
 
-        {/* Hamburger Menu (Mobile) */}
+        {/* Mobile Hamburger */}
         <div className="md:hidden">
           <button onClick={() => setMenuOpen(!menuOpen)}>
             {menuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
