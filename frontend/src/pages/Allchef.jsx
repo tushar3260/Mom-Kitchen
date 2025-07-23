@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { FaStar } from "react-icons/fa";
 import Loading from '../Loading.jsx'
 
+
 const getRandomRating = () => (Math.random() * 1.4 + 3.6).toFixed(1); // 3.6–5.0
 
 const containerVariants = {

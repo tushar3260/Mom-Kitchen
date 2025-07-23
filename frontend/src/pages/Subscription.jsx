@@ -74,7 +74,7 @@ const Subscription = ({ currentUser, currentChef }) => {
         selectedMeals: [],
       };
 
-      const res = await axios.post("http://localhost:5000/api/subscriptions", finalData);
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}api/subscriptions`, finalData);
 
       setSuccessMessage("✅ Subscription Created Successfully!");
 
