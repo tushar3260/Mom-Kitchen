@@ -16,13 +16,13 @@ import { ChefProvider } from "./pages/Chef/Context/ChefContext.jsx";
 import OTPPage from "./pages/OTPPage.jsx"; // Assuming OTPPage is used in the flow
 import AdminApp from "./Admin/AdminApp.jsx";
 //import AdminProtect from "./Admin/protect/adminprotect.jsx";
-import { AdminProvider } from "./Admin/context/AdminContext.jsx";// 👈 Import AdminProvider
+import { AdminProvider } from "./Admin/context/AdminContext.jsx"; // 👈 Import AdminProvider
 import ResetPassword from "./pages/ResetPassword.jsx";
 import ForgotPassword from "./pages/ForgotPassword.jsx";
 import Checkout from "./pages/Checkout.jsx";
 import OrderNowPage from "./components/OrderNowPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
-import MyOrderPage from '../src/pages/MyOrderPage.jsx'
+import MyOrderPage from "../src/pages/MyOrderPage.jsx";
 import DashboardLayout from "./components/Dashcomponents/DashboardLayout.jsx";
 import OrderSummary from "./components/Dashcomponents/OrderSummary.jsx";
 import Charts from "./components/Dashcomponents/Charts.jsx";
@@ -33,56 +33,77 @@ import ReferAndEarn from "./components/Dashcomponents/ReferAndEarnPage.jsx";
 import Support from "./components/Dashcomponents/Support.jsx";
 import Settings from "./components/Dashcomponents/Setting.jsx";
 import UpcomingMeals from "./components/Dashcomponents/UpcomingMeals.jsx";
-import Aboutus from '../src/pages/Aboutus.jsx'
-import Team from '../src/pages/Team.jsx'
-import Helpandsupport from '../src/pages/Helpandsupport.jsx'
-import Termcondition from '../src/pages/Termcondition.jsx'
-import Refundcancellation from '../src/pages/Refundcancellation.jsx'
+import Aboutus from "../src/pages/Aboutus.jsx";
+import Team from "../src/pages/Team.jsx";
+import Helpandsupport from "../src/pages/Helpandsupport.jsx";
+import Termcondition from "../src/pages/Termcondition.jsx";
+import Refundcancellation from "../src/pages/Refundcancellation.jsx";
 import { useState } from "react";
 function App() {
-   const [showLogin, setShowLogin] = useState(false);
-   const [showSignup, setShowSignup] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showSignup, setShowSignup] = useState(false);
   return (
     <div>
       <UserProvider>
         <BrowserRouter>
           <Routes>
             {/* Public Routes */}
-          <Route
-          path="/"
-          element={
-            <>
-              <LandingPage
-                onLoginClick={() => setShowLogin(true)} // Login button se popup khulega
-                onSignupClick={() => setShowSignup(true)} // Agar landing pe signup button h
-              />
+            <Route
+              path="/"
+              element={
+                <>
+                  <LandingPage
+                    onLoginClick={() => setShowLogin(true)} // Login button se popup khulega
+                    onSignupClick={() => setShowSignup(true)} // Agar landing pe signup button h
+                  />
 
-              {/* Login Popup */}
-              {showLogin && (
-                <Login
-                  onClose={() => setShowLogin(false)}
-                  onSignupClick={() => {
-                    setShowLogin(false);
-                    setShowSignup(true);
-                  }}
-                />
-              )}
+                  {/* Login Popup */}
+                  {showLogin && (
+                    <Login
+                      onClose={() => setShowLogin(false)}
+                      onSignupClick={() => {
+                        setShowLogin(false);
+                        setShowSignup(true);
+                      }}
+                    />
+                  )}
 
-              {/* Signup Popup */}
-              {showSignup && (
-                <Signup
-                  onClose={() => setShowSignup(false)}
-                  onLoginClick={() => {
-                    setShowSignup(false);
-                    setShowLogin(true);
-                  }}
-                />
-              )}
-            </>
-          }
-        />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
+                  {/* Signup Popup */}
+                  {showSignup && (
+                    <Signup
+                      onClose={() => setShowSignup(false)}
+                      onLoginClick={() => {
+                        setShowSignup(false);
+                        setShowLogin(true);
+                      }}
+                    />
+                  )}
+                </>
+              }
+            />
+            <Route
+              path="/login"
+              element={
+                <div className="relative">
+                  <LandingPage disableButtons /> {/* Background */}
+                  <div className="absolute inset-0 bg-black/30 backdrop-blur-md"></div>{" "}
+                  {/* Blur layer */}
+                  <Login />
+                </div>
+              }
+            />
+            <Route
+              path="/signup"
+              element={
+                <div className="relative">
+                  <LandingPage disableButtons /> {/* Background */}
+                  <div className="absolute inset-0 bg-black/30 backdrop-blur-md"></div>{" "}
+                  {/* Blur layer */}
+                  <Signup />
+                </div>
+              }
+            />
+
             <Route path="/cart" element={<Cart />} />
             <Route path="/allchef" element={<Allchef />} />
             <Route path="/addlocation" element={<AddLocation />} />
@@ -94,11 +115,11 @@ function App() {
             <Route path="/chef-detail/:id" element={<ChefDetail />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/orders" element={<MyOrderPage />} />
-            <Route path="/aboutus" element={<Aboutus/>} />
-            <Route path="/team" element={<Team/>} />
-             <Route path="/help" element={<Helpandsupport/>} />
-              <Route path="/terms" element={<Termcondition/>} />
-               <Route path="/refund" element={<Refundcancellation/>} />
+            <Route path="/aboutus" element={<Aboutus />} />
+            <Route path="/team" element={<Team />} />
+            <Route path="/help" element={<Helpandsupport />} />
+            <Route path="/terms" element={<Termcondition />} />
+            <Route path="/refund" element={<Refundcancellation />} />
             {/* Protected Routes */}
             <Route
               path="/dashboard/*"

@@ -7,7 +7,7 @@ import { useUser } from "../context/userContext.jsx";
 import Loading from "../Loading.jsx";
 import { storage } from "../utils/Storage.js";
 
-function TopNav({ onLoginClick }) {
+function TopNav({ onLoginClick, onSignupClick, disableButtons }) {
   const { user, setUser } = useUser();
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
@@ -98,7 +98,11 @@ function TopNav({ onLoginClick }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
         {/* Logo */}
         <div className="flex items-center">
-          <img src={TiffinTalesLogo} alt="Tiffin Tales" className="h-14 w-auto" />
+          <img
+            src={TiffinTalesLogo}
+            alt="Tiffin Tales"
+            className="h-14 w-auto"
+          />
         </div>
 
         {/* Address Bar (Desktop Only) */}
@@ -219,7 +223,7 @@ function TopNav({ onLoginClick }) {
             </>
           )}
 
-          {!user && (
+          {!user && !disableButtons && (
             <button
               onClick={onLoginClick}
               className="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded-full font-semibold transition"

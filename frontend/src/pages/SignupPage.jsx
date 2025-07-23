@@ -1,4 +1,5 @@
 import React, { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { FaSpinner, FaEye, FaEyeSlash } from "react-icons/fa";
@@ -7,6 +8,7 @@ import UserContext from "../context/userContext.jsx";
 import { storage } from "../utils/Storage.js";
 
 function SignupPage({ onClose, onLoginClick }) {
+  const navigate = useNavigate(); // React Router hook
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,6 +22,14 @@ function SignupPage({ onClose, onLoginClick }) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const { setUser } = useContext(UserContext);
+
+  const closeHandler = () => {
+    if (onClose) {
+      onClose();
+    } else {
+      navigate("/"); // Direct signup route se home page
+    }
+  };
 
   const checkPasswordStrength = (pwd) => {
     if (!pwd) return "";
@@ -75,7 +85,7 @@ function SignupPage({ onClose, onLoginClick }) {
             })
           );
 
-          // ✅ Send OTP after signup
+          // Send OTP after signup
           await axios.post(`${import.meta.env.VITE_API_URL}/otp/send-otp`, {
             email: user.email,
             role: "user",
@@ -104,7 +114,7 @@ function SignupPage({ onClose, onLoginClick }) {
       {/* Background Overlay */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
+        onClick={closeHandler}
       ></div>
 
       {/* Signup Modal */}
@@ -116,7 +126,7 @@ function SignupPage({ onClose, onLoginClick }) {
       >
         {/* Close Button */}
         <button
-          onClick={onClose}
+          onClick={closeHandler}
           className="absolute top-4 right-4 text-gray-600 hover:text-red-500 transition"
         >
           <IoClose size={24} />

@@ -5,8 +5,10 @@ import { FaSpinner } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
 import UserContext from "../context/userContext.jsx";
 import { storage } from "../utils/Storage.js";
+import { useNavigate } from "react-router-dom";
 
 function LoginPage({ onClose, onSignupClick }) {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -15,6 +17,14 @@ function LoginPage({ onClose, onSignupClick }) {
   const [showForgotLink, setShowForgotLink] = useState(false);
 
   const { setUser, setToken } = useContext(UserContext);
+
+  const closeHandler = () => {
+    if (onClose) {
+      onClose();
+    } else {
+      navigate("/"); // direct login route pe ho toh home page pe le jao
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -86,10 +96,10 @@ function LoginPage({ onClose, onSignupClick }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Background Overlay */}
+      {/* Blurred Background */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
+        className="absolute inset-0 bg-black/50 backdrop-blur-md"
+        onClick={closeHandler}
       ></div>
 
       {/* Login Modal */}
@@ -99,9 +109,8 @@ function LoginPage({ onClose, onSignupClick }) {
         transition={{ duration: 0.3 }}
         className="relative bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border border-orange-300 z-10"
       >
-        {/* Close Button */}
         <button
-          onClick={onClose}
+          onClick={closeHandler}
           className="absolute top-4 right-4 text-gray-600 hover:text-red-500 transition"
         >
           <IoClose size={24} />
@@ -131,9 +140,7 @@ function LoginPage({ onClose, onSignupClick }) {
           />
 
           {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-          {success && (
-            <p className="text-green-500 text-center mb-4">{success}</p>
-          )}
+          {success && <p className="text-green-500 text-center mb-4">{success}</p>}
 
           {showForgotLink && (
             <p className="text-center mb-4">
@@ -170,8 +177,6 @@ function LoginPage({ onClose, onSignupClick }) {
         </p>
       </motion.div>
     </div>
-     
-    
   );
 }
 
