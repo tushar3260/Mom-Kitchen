@@ -166,15 +166,18 @@ function LoginPage({ onClose, onSignupClick }) {
         </form>
 
         <p className="mt-6 text-center text-gray-600">
-          Don't have an account?{" "}
-          <button
-            type="button"
-            onClick={onSignupClick}
-            className="text-orange-500 hover:underline font-semibold"
-          >
-            Sign Up
-          </button>
-        </p>
+        Don't have an account?{" "}
+        <button
+          type="button"
+          onClick={() => {
+            if (onSignupClick) onSignupClick(); // Popup mode
+            else navigate("/signup"); // Direct route mode
+          }}
+          className="text-orange-500 hover:underline font-semibold"
+        >
+          Sign Up
+        </button>
+      </p>
       </motion.div>
     </div>
   );
