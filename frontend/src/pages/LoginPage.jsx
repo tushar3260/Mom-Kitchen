@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React, { useState, useContext } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
@@ -12,22 +11,6 @@ function LoginPage({ onClose, onSignupClick }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-=======
-import React, { useState, useContext } from 'react';
-import axios from 'axios';
-import { motion } from 'framer-motion';
-
-
-import { FaSpinner } from 'react-icons/fa';
-import UserContext from '../context/userContext.jsx';
-import { storage } from '../utils/Storage.js';
-function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [passwordStrength, setPasswordStrength] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
->>>>>>> c6137c0c65dcffcf404b7e24f5e212e6b8453976
   const [loading, setLoading] = useState(false);
   const [showForgotLink, setShowForgotLink] = useState(false);
 
@@ -188,7 +171,7 @@ function LoginPage() {
       </motion.div>
     </div>
      
-    </>
+    
   );
 }
 
