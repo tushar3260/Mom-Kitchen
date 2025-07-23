@@ -30,72 +30,74 @@ function SignupPage({ onClose, onLoginClick }) {
   };
 
   const handleSignup = async (e) => {
-  e.preventDefault();
-  setError("");
-  setSuccess("");
+    e.preventDefault();
+    setError("");
+    setSuccess("");
 
-  if (!name || !email || !password || !confirmPassword || !phone) {
-    setError("Please fill all fields");
-    return;
-  }
-  if (!email.includes("@")) {
-    setError("Please enter a valid email");
-    return;
-  }
-  if (password.length < 6) {
-    setError("Password must be at least 6 characters long");
-    return;
-  }
-  if (password !== confirmPassword) {
-    setError("Passwords do not match");
-    return;
-  }
-
-  const userData = { fullName: name, email, passwordHash: password, phone };
-  setLoading(true);
-
-  try {
-    const res = await axios.post(
-      `${import.meta.env.VITE_API_URL}/user/signup`,
-      userData
-    );
-
-    if (res.status === 201) {
-      const { user } = res.data;
-      if (user) {
-        setUser(user);
-
-        await storage.setItem(
-          "userData",
-          JSON.stringify({
-            fullName: user.fullName,
-            email: user.email,
-            phone: user.phone,
-            role: user.role,
-          })
-        );
-
-        // ✅ Send OTP after signup
-        await axios.post(`${import.meta.env.VITE_API_URL}/otp/send-otp`, {
-          email: user.email,
-          role: "user",
-        });
-
-        setSuccess("Signup successful! Check your email for OTP.");
-        setTimeout(() => (window.location.href = "/otp?role=user"), 1500);
-      } else {
-        setError("Signup failed: Missing user data");
-      }
+    if (!name || !email || !password || !confirmPassword || !phone) {
+      setError("Please fill all fields");
+      return;
     }
-  } catch (error) {
-    console.error("Signup Error:", error);
-    setError(
-      error?.response?.data?.message || "Signup failed. Please try again."
-    );
-  } finally {
-    setLoading(false);
-  }
-};
+    if (!email.includes("@")) {
+      setError("Please enter a valid email");
+      return;
+    }
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    const userData = { fullName: name, email, passwordHash: password, phone };
+    setLoading(true);
+
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/user/signup`,
+        userData
+      );
+
+      if (res.status === 201) {
+        const { user } = res.data;
+        if (user) {
+          setUser(user);
+
+          await storage.setItem(
+            "userData",
+            JSON.stringify({
+              fullName: user.fullName,
+              email: user.email,
+              phone: user.phone,
+              role: user.role,
+            })
+          );
+
+          // ✅ Send OTP after signup
+          await axios.post(`${import.meta.env.VITE_API_URL}/otp/send-otp`, {
+            email: user.email,
+            role: "user",
+          });
+
+          setSuccess("Signup successful! Check your email for OTP.");
+          setTimeout(() => {
+            window.location.href = "/otp?role=user";
+          }, 1500);
+        } else {
+          setError("Signup failed: Missing user data");
+        }
+      }
+    } catch (error) {
+      console.error("Signup Error:", error);
+      setError(
+        error?.response?.data?.message || "Signup failed. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
