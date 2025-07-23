@@ -1,32 +1,26 @@
-import React, { useState, useContext } from 'react';
-import axios from 'axios';
-import { motion } from 'framer-motion';
-import { FaSpinner } from 'react-icons/fa';
-import UserContext from '../context/userContext.jsx';
-import { storage } from '../utils/Storage.js';
-function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [passwordStrength, setPasswordStrength] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+import React, { useState, useContext } from "react";
+import axios from "axios";
+import { motion } from "framer-motion";
+import { FaSpinner } from "react-icons/fa";
+import { IoClose } from "react-icons/io5";
+import UserContext from "../context/userContext.jsx";
+import { storage } from "../utils/Storage.js";
+
+function LoginPage({ onClose, onSignupClick }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showForgotLink, setShowForgotLink] = useState(false); // 👈 new state
+  const [showForgotLink, setShowForgotLink] = useState(false);
 
   const { setUser, setToken } = useContext(UserContext);
 
-  const checkPasswordStrength = (pwd) => {
-    if (!pwd) return '';
-    if (pwd.length < 6) return 'Weak';
-    if (pwd.match(/[A-Z]/) && pwd.match(/[0-9]/) && pwd.match(/[^A-Za-z0-9]/)) return 'Strong';
-    return 'Medium';
-  };
-
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
-    setShowForgotLink(false); // Reset on new attempt
+    setError("");
+    setSuccess("");
+    setShowForgotLink(false);
 
     if (!email || !password) {
       setError("Please fill all fields");
@@ -45,12 +39,12 @@ function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/user/login`, userData);
-      console.log("Login response:", res.data);
-
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/user/login`,
+        userData
+      );
       if (res.status === 200) {
         const { user, token, message } = res.data;
-
         if (user && token) {
           setUser(user);
           setToken(token);
@@ -61,7 +55,7 @@ function LoginPage() {
           setLoading(false);
 
           setTimeout(() => {
-            window.location.href = '/otp?role=user';
+            window.location.href = "/";
           }, 1500);
         } else {
           setError("Invalid response: Missing user or token");
@@ -70,33 +64,49 @@ function LoginPage() {
       }
     } catch (error) {
       setLoading(false);
-      const errorMsg = error?.response?.data?.message || "Login failed. Please try again.";
+      const errorMsg =
+        error?.response?.data?.message || "Login failed. Please try again.";
       setError(errorMsg);
 
       if (
-    errorMsg.toLowerCase().includes("password") ||
-    errorMsg.toLowerCase().includes("invalid credentials") ||
-    errorMsg.toLowerCase().includes("incorrect")
-  ) {
-    setShowForgotLink(true); // 👈 Now it'll show even if backend says "invalid credentials"
-  } else {
-    setShowForgotLink(false);
-  }
+        errorMsg.toLowerCase().includes("password") ||
+        errorMsg.toLowerCase().includes("invalid credentials") ||
+        errorMsg.toLowerCase().includes("incorrect")
+      ) {
+        setShowForgotLink(true);
+      } else {
+        setShowForgotLink(false);
+      }
 
       setTimeout(() => {
-        setError('');
+        setError("");
       }, 3000);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-orange-100 to-orange-200 p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Background Overlay */}
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+      ></div>
+
+      {/* Login Modal */}
       <motion.div
-        initial={{ opacity: 0, y: -50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, type: 'spring' }}
-        className="bg-white p-10 rounded-3xl shadow-2xl w-96 border border-orange-300"
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3 }}
+        className="relative bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border border-orange-300 z-10"
       >
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-600 hover:text-red-500 transition"
+        >
+          <IoClose size={24} />
+        </button>
+
         <h2 className="text-3xl font-extrabold mb-8 text-orange-600 text-center tracking-wide">
           Login
         </h2>
@@ -115,28 +125,15 @@ function LoginPage() {
             type="password"
             placeholder="Password"
             value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              setPasswordStrength(checkPasswordStrength(e.target.value));
-            }}
-            className="w-full p-3 mb-2 border rounded-2xl focus:outline-none focus:ring-4 focus:ring-orange-300"
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full p-3 mb-4 border rounded-2xl focus:outline-none focus:ring-4 focus:ring-orange-300"
             disabled={loading}
           />
 
-          {password && (
-            <p className={`text-sm mb-4 ${
-              passwordStrength === 'Strong'
-                ? 'text-green-500'
-                : passwordStrength === 'Medium'
-                ? 'text-yellow-500'
-                : 'text-red-500'
-            }`}>
-              Password Strength: {passwordStrength}
-            </p>
-          )}
-
           {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-          {success && <p className="text-green-500 text-center mb-4">{success}</p>}
+          {success && (
+            <p className="text-green-500 text-center mb-4">{success}</p>
+          )}
 
           {showForgotLink && (
             <p className="text-center mb-4">
@@ -162,8 +159,14 @@ function LoginPage() {
         </form>
 
         <p className="mt-6 text-center text-gray-600">
-          Don't have an account?{' '}
-          <a href="/signup" className="text-orange-500 hover:underline font-semibold">Sign Up</a>
+          Don't have an account?{" "}
+          <button
+            type="button"
+            onClick={onSignupClick}
+            className="text-orange-500 hover:underline font-semibold"
+          >
+            Sign Up
+          </button>
         </p>
       </motion.div>
     </div>

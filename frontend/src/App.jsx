@@ -38,14 +38,49 @@ import Team from '../src/pages/Team.jsx'
 import Helpandsupport from '../src/pages/Helpandsupport.jsx'
 import Termcondition from '../src/pages/Termcondition.jsx'
 import Refundcancellation from '../src/pages/Refundcancellation.jsx'
+import { useState } from "react";
 function App() {
+   const [showLogin, setShowLogin] = useState(false);
+   const [showSignup, setShowSignup] = useState(false);
   return (
     <div>
       <UserProvider>
         <BrowserRouter>
           <Routes>
             {/* Public Routes */}
-            <Route path="/" element={<LandingPage />} />
+          <Route
+          path="/"
+          element={
+            <>
+              <LandingPage
+                onLoginClick={() => setShowLogin(true)} // Login button se popup khulega
+                onSignupClick={() => setShowSignup(true)} // Agar landing pe signup button h
+              />
+
+              {/* Login Popup */}
+              {showLogin && (
+                <Login
+                  onClose={() => setShowLogin(false)}
+                  onSignupClick={() => {
+                    setShowLogin(false);
+                    setShowSignup(true);
+                  }}
+                />
+              )}
+
+              {/* Signup Popup */}
+              {showSignup && (
+                <Signup
+                  onClose={() => setShowSignup(false)}
+                  onLoginClick={() => {
+                    setShowSignup(false);
+                    setShowLogin(true);
+                  }}
+                />
+              )}
+            </>
+          }
+        />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/cart" element={<Cart />} />

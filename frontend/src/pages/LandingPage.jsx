@@ -16,13 +16,13 @@ const fadeUp = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
 };
 
-const LandingPage = () => {
+const LandingPage = ({onLoginClick}) => {
   return (
     <>
       <SmoothScrollProvider>
         {/* Top Navigation */}
         <motion.div initial="hidden" animate="visible" variants={fadeUp}>
-          <TopNav />
+          <TopNav onLoginClick={onLoginClick} />
         </motion.div>
 
         {/* Hero Section */}
