@@ -1,40 +1,79 @@
 import { io } from "socket.io-client";
 
-// ✅ For CHEF: Connect with chefId and join order room
-export const connectChefSocket = (chefId, orderId) => {
-  const socket = io("http://localhost:5000", {
-    query: { chefId },
+let socket = null;
+
+// ✅ Common initializer (used internally)
+const initSocket = (query = {}) => {
+  socket = io("http://localhost:5000", {
+    query,
     transports: ["websocket"],
   });
 
   socket.on("connect", () => {
-    console.log("Chef socket connected:", socket.id);
-    socket.emit("joinRoom", orderId);
-    console.log(`Chef joined room for order: ${orderId}`);
+    console.log("🔌 Socket connected:", socket.id);
   });
 
   socket.on("disconnect", () => {
-    console.log("Chef socket disconnected:", socket.id);
+    console.log("❌ Socket disconnected:", socket.id);
   });
 
   return socket;
 };
 
-// ✅ For USER: Connect as user and join order room
+// ✅ For CHEF: Connect with chefId and join room
+export const connectChefSocket = (chefId, orderId) => {
+  if (!chefId || !orderId) return;
+
+  const s = initSocket({ chefId });
+
+  s.on("connect", () => {
+    s.emit("joinRoom", orderId);
+    console.log(`👨‍🍳 Chef joined room: ${orderId}`);
+  });
+
+  return s;
+};
+
+// ✅ For USER: Connect and join room
 export const connectUserSocket = (orderId) => {
-  const socket = io("http://localhost:5000", {
-    transports: ["websocket"],
+  if (!orderId) return;
+
+  const s = initSocket();
+
+  s.on("connect", () => {
+    s.emit("joinRoom", orderId);
+    console.log(`👤 User joined room: ${orderId}`);
   });
 
-  socket.on("connect", () => {
-    console.log("User socket connected:", socket.id);
-    socket.emit("joinRoom", orderId);
-    console.log(`User joined room for order: ${orderId}`);
-  });
+  return s;
+};
 
-  socket.on("disconnect", () => {
-    console.log("User socket disconnected:", socket.id);
-  });
+// ✅ Emit message
+export const sendMessage = (socket, { orderId, senderId, senderModel, message }) => {
+  if (socket && socket.connected) {
+    socket.emit("sendMessage", {
+      orderId,
+      senderId,
+      senderModel, // 'user' or 'chef'
+      message,
+    });
+  }
+};
 
-  return socket;
+// ✅ Listen for messages
+export const listenForMessages = (socket, callback) => {
+  if (socket) {
+    socket.on("receiveMessage", (data) => {
+      console.log("📩 New message:", data);
+      callback(data);
+    });
+  }
+};
+
+// ✅ Cleanup
+export const disconnectSocket = () => {
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
 };

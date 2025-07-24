@@ -4,6 +4,7 @@ import LandingPage from "./pages/LandingPage.jsx";
 import Login from "./pages/LoginPage.jsx";
 import Signup from "./pages/SignupPage.jsx";
 import Dashboard from "./pages/DashBoard.jsx";
+ // Import OrderChat component
 import ChefApp from "./pages/Chef/ChefApp.jsx";
 import Cart from "./pages/Cart.jsx";
 import Allchef from "./pages/Allchef.jsx";
@@ -22,11 +23,14 @@ import ForgotPassword from "./pages/ForgotPassword.jsx";
 import Checkout from "./pages/Checkout.jsx";
 import OrderNowPage from "./components/OrderNowPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
+
 import MyOrderPage from '../src/pages/MyOrderPage.jsx'
 import DashboardLayout from "./components/Dashcomponents/DashboardLayout.jsx";
 import OrderSummary from "./components/Dashcomponents/OrderSummary.jsx";
 import Charts from "./components/Dashcomponents/Charts.jsx";
+import OrderChat from "./pages/OrderChat.jsx";
 import Tracker from "./components/Dashcomponents/Tracker.jsx";
+
 import SubscriptionPage from "./components/Dashcomponents/SubscriptionPage.jsx";
 import Wallet from "./components/Dashcomponents/Wallet.jsx";
 import ReferAndEarn from "./components/Dashcomponents/ReferAndEarnPage.jsx";
@@ -57,8 +61,10 @@ function App() {
             <Route path="/order-now/:id" element={<OrderNowPage />} />
             <Route path="/meals" element={<AllMeals />} />
             <Route path="/chef-detail/:id" element={<ChefDetail />} />
+            
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/orders" element={<MyOrderPage />} />
+            
             <Route path="/aboutus" element={<Aboutus/>} />
             <Route path="/team" element={<Team/>} />
              <Route path="/help" element={<Helpandsupport/>} />
@@ -75,6 +81,8 @@ function App() {
             >
               <Route index element={<Dashboard />} /> {/* Default page */}
               <Route path="orders" element={<OrderSummary />} />
+
+              <Route path="chat/:orderId" element={<OrderChat isChef={false} />} />
               <Route path="tracker" element={<Tracker />} />
               <Route path="charts" element={<Charts />} />
               <Route path="subscription" element={<SubscriptionPage />} />

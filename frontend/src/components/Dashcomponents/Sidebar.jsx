@@ -19,6 +19,7 @@ const menu = [
   { label: "Refer & Earn", path: "/dashboard/refer", icon: GiftIcon },
   { label: "Support", path: "/dashboard/support", icon: SupportIcon },
   { label: "Settings", path: "/dashboard/settings", icon: CogIcon },
+  { label: "Chat with Chef", path: "/dashboard/chat/:orderId", icon: HomeIcon }, // Reusing HomeIcon for Chat with Chef
 ];
 
 export default function Sidebar() {
