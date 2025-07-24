@@ -5,58 +5,75 @@ import {io} from '../server.js'
 
 export const placeOrder = async (req, res) => {
   try {
-    const {
-      userId,
-      chefId,
-      meals,
-      totalPrice,
-      deliveryAddress,
-      paymentMode,
-      timeSlot
-    } = req.body;
+    let orders = req.body.orders || req.body; // check if wrapped inside "orders" array or single
 
-    // ✅ Required fields validation
-    if (
-      !userId ||
-      !chefId ||
-      !Array.isArray(meals) ||
-      meals.length === 0 ||
-      !totalPrice ||
-      !deliveryAddress
-    ) {
-      return res.status(400).json({
-        message: "Missing required fields",
-        required: ["userId", "chefId", "meals", "totalPrice", "deliveryAddress"]
-      });
+    // Wrap single order in array if not already
+    if (!Array.isArray(orders)) {
+      orders = [orders];
     }
 
-    // ✅ Create and save the order
-    const order = new Order({
-      userId,
-      chefId,
-      meals,
-      totalPrice,
-      deliveryAddress,
-      paymentMode,
-      timeSlot,
-      status: "Placed",
-      paymentStatus: "Pending"
+    const savedOrders = [];
+
+    for (const ord of orders) {
+      const {
+        userId,
+        chefId,
+        meals,
+        totalPrice,
+        deliveryAddress,
+        paymentMode,
+        timeSlot
+      } = ord;
+
+      // ✅ Validation for each order
+      if (
+        !userId ||
+        !chefId ||
+        !Array.isArray(meals) ||
+        meals.length === 0 ||
+        !totalPrice ||
+        !deliveryAddress
+      ) {
+        return res.status(400).json({
+          message: "Missing required fields in one of the orders",
+          required: ["userId", "chefId", "meals", "totalPrice", "deliveryAddress"]
+        });
+      }
+
+      // ✅ Create and save the order
+      const newOrder = new Order({
+        userId,
+        chefId,
+        meals,
+        totalPrice,
+        deliveryAddress,
+        paymentMode,
+        timeSlot,
+        status: "Placed",
+        paymentStatus: "Pending"
+      });
+
+      await newOrder.save();
+
+      // ✅ Emit event to specific chef’s room
+      io.to(`chef:${chefId}`).emit("newOrder", {
+        message: "You have a new order",
+        order: newOrder
+      });
+
+      savedOrders.push(newOrder);
+    }
+
+    res.status(201).json({
+      message: savedOrders.length > 1 ? "Orders placed successfully" : "Order placed successfully",
+      orders: savedOrders
     });
-
-    await order.save();
-
-    // ✅ Emit event to specific chef's room
-    io.to(`chef:${chefId}`).emit("newOrder", {
-      message: "You have a new order",
-      order
-    });
-
-    res.status(201).json({ message: "Order placed successfully", order });
   } catch (err) {
     console.error("Error placing order:", err);
     res.status(500).json({ message: "Error placing order", error: err.message });
   }
 };
+
 
 
 // ✅ Get All Orders (Admin/Support)
