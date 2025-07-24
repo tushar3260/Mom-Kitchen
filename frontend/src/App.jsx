@@ -113,7 +113,11 @@ function App() {
             <Route path="/otp" element={<OTPPage />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
-            <Route path="/order-now/:id" element={<OrderNowPage />} />
+            <Route path="/order-now/:id" element={
+              <UserProtect>
+                <OrderNowPage />  {/* Protected route for OrderNowPage */}
+              </UserProtect>
+            } />
             <Route path="/meals" element={<AllMeals />} />
             <Route path="/chef-detail/:id" element={<ChefDetail />} />
             

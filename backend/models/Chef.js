@@ -9,37 +9,38 @@ const chefSchema = new mongoose.Schema({
     lowercase: true,
     match: [/\S+@\S+\.\S+/, "Invalid email format"]
   },
-  role: { type: String, enum: ['chef'], default: 'chef' },
+  password: { type: String, required: true }, // 👈 signupChef me passwordHash -> hash kiya jata hai isme
   phone: {
     type: String,
     required: true,
     match: [/^[6-9]\d{9}$/, "Invalid Indian phone number"]
   },
-  passwordHash: { type: String, required: true },
-  bio: { type: String, default: "" },
-  cuisine: { type: [String], required: true },
-  kitchenImages: { type: [String], required: true },
+  bio: { type: String },
+  cuisine: [{ type: String }], // 👈 Array of cuisines from req.body
+  photo: { type: String }, // 👈 Single profile photo path
+  kitchenImages: [{ type: String }], // 👈 Multiple image paths (array)
   documents: {
-    aadhaar: { type: String, required: true },
-    pan: { type: String, required: true }
+    aadhaar: { type: String },
+    pan: { type: String }
   },
   bankDetails: {
-    accNo: { type: String, required: true },
-    ifsc: { type: String, required: true },
-    holderName: { type: String, required: true }
+    accNo: { type: String },
+    ifsc: { type: String },
+    holderName: { type: String }
   },
   location: {
-    area: { type: String, required: true },
-    lat: { type: String, required: true },
-    lng: { type: String, required: true }
+    area: { type: String },
+    lat: { type: String },
+    lng: { type: String }
   },
+  isApproved: { type: Boolean, default: false }, // 👈 For admin approval flow
   isVerified: { type: Boolean, default: false },
-  rating: { type: Number, default: 0, min: 0, max: 5 },
-  createdAt: { type: Date, default: Date.now },
+  isOtpVerified: { type: Boolean, default: false },
   resetToken: { type: String },
-  resetTokenExpiry: { type: Date }
-,isOtpVerified: { type: Boolean, default: false }
-
+  resetTokenExpiry: { type: Date },
+  createdAt: { type: Date, default: Date.now },
+  role: { type: String, default: "chef" },
+  rating: { type: Number, default: 0 }
 });
 
 export default mongoose.model("Chef", chefSchema);

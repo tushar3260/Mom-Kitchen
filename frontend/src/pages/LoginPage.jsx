@@ -22,7 +22,7 @@ function LoginPage({ onClose, onSignupClick }) {
     if (onClose) {
       onClose();
     } else {
-      navigate("/"); // direct login route pe ho toh home page pe le jao
+      navigate("/");
     }
   };
 
@@ -64,9 +64,18 @@ function LoginPage({ onClose, onSignupClick }) {
           setSuccess(message || "Login successful! Redirecting...");
           setLoading(false);
 
-          setTimeout(() => {
-            window.location.href = "/";
-          }, 1500);
+         setTimeout(() => {
+  const redirectPath = sessionStorage.getItem("redirectAfterLogin") || "/";
+  sessionStorage.removeItem("redirectAfterLogin");
+
+  if (onClose) {
+    onClose(); // modal close karo
+    navigate(redirectPath); // redirect karo (helpful agar background route bhi change karna hai)
+  } else {
+    navigate(redirectPath); // direct route mode me ho toh redirect karo
+  }
+}, 1000);
+
         } else {
           setError("Invalid response: Missing user or token");
           setLoading(false);
@@ -166,18 +175,18 @@ function LoginPage({ onClose, onSignupClick }) {
         </form>
 
         <p className="mt-6 text-center text-gray-600">
-        Don't have an account?{" "}
-        <button
-          type="button"
-          onClick={() => {
-            if (onSignupClick) onSignupClick(); // Popup mode
-            else navigate("/signup"); // Direct route mode
-          }}
-          className="text-orange-500 hover:underline font-semibold"
-        >
-          Sign Up
-        </button>
-      </p>
+          Don't have an account?{" "}
+          <button
+            type="button"
+            onClick={() => {
+              if (onSignupClick) onSignupClick();
+              else navigate("/signup");
+            }}
+            className="text-orange-500 hover:underline font-semibold"
+          >
+            Sign Up
+          </button>
+        </p>
       </motion.div>
     </div>
   );

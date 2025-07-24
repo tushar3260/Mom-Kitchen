@@ -1,9 +1,14 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../context/userContext.jsx"; // ✅ Make sure this exists
 
 const DiscountSection = () => {
   const [discountedMeals, setDiscountedMeals] = useState([]);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [selectedMeal, setSelectedMeal] = useState(null);
+
+  const { user } = useUser();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -56,7 +61,18 @@ const DiscountSection = () => {
 
   const handleClick = (meal) => {
     const discountedPrice = getDiscountedPrice(meal.price, meal.discount);
-    navigate("/cart", { state: { meal: { ...meal, discountedPrice } } });
+
+    if (!user) {
+      setSelectedMeal({ ...meal, discountedPrice });
+      setShowLoginModal(true);
+    } else {
+      navigate("/cart", { state: { meal: { ...meal, discountedPrice } } });
+    }
+  };
+
+  const handleLoginRedirect = () => {
+    setShowLoginModal(false);
+    navigate("/login");
   };
 
   return (
@@ -75,12 +91,9 @@ const DiscountSection = () => {
                 onClick={() => handleClick(meal)}
                 className="relative bg-white border rounded-xl shadow-md hover:scale-105 transition duration-300 p-2 cursor-pointer"
               >
-                {/* Discount badge */}
                 <div className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow">
                   {meal.discount}% OFF
                 </div>
-
-                {/* Timer badge */}
                 <div className="absolute top-2 right-2 bg-yellow-400 text-black text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
                   {meal.timeLeft}
                 </div>
@@ -100,6 +113,32 @@ const DiscountSection = () => {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* ✅ Login Modal */}
+      {showLoginModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl shadow-lg w-[90%] max-w-sm text-center">
+            <h3 className="text-xl font-semibold mb-3 text-orange-800">Login Required</h3>
+            <p className="text-sm text-gray-600 mb-5">
+              Please login to place your order for <strong>{selectedMeal?.title}</strong>.
+            </p>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => setShowLoginModal(false)}
+                className="px-4 py-2 rounded bg-gray-300 text-gray-700 font-semibold"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleLoginRedirect}
+                className="px-4 py-2 rounded bg-orange-600 text-white font-semibold hover:bg-orange-700"
+              >
+                Login Now
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -1,15 +1,23 @@
-import app from './app.js';
+import app from './app.js'; // ✅ Already has express instance & routes
 import http from 'http';
 import dotenv from 'dotenv';
 import { Server } from 'socket.io';
+import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
+
+// ✅ Serve uploads from 'uploads' folder using the imported app
+import express from "express";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "*", // update for prod
+    origin: "*",
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -19,13 +27,11 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log("🔌 New client connected:", socket.id);
 
-  // Join a chat room based on orderId
   socket.on("joinRoom", (orderId) => {
     socket.join(orderId);
     console.log(`Socket ${socket.id} joined order room: ${orderId}`);
   });
 
-  // Handle incoming messages
   socket.on("sendMessage", async (data) => {
     const { orderId, senderId, senderModel, message } = data;
 
@@ -44,7 +50,6 @@ io.on("connection", (socket) => {
         message,
       });
 
-      // Emit to everyone in the room
       io.to(orderId).emit("receiveMessage", newMsg);
     } catch (err) {
       console.error("❌ Error saving chat message:", err);
