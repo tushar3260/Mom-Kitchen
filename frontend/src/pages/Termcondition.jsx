@@ -1,8 +1,10 @@
 import React from "react";
 
-
+import TopNav from "../components/TopNav";
 const TermsAndConditions = () => {
   return (
+    <>
+    <TopNav />
     <div className="bg-white text-zinc-800 px-6 py-16 sm:px-12 md:px-24 lg:px-40">
      
 
@@ -78,6 +80,7 @@ const TermsAndConditions = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

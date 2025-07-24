@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FaChevronDown, FaChevronRight } from "react-icons/fa";
-
+import TopNav from "../components/TopNav";
 
 const faqs = [
   {
@@ -33,6 +33,8 @@ function HelpSupport() {
   };
 
   return (
+    <>
+    <TopNav />
     <div className="bg-white text-zinc-800 px-6 py-16 sm:px-12 md:px-24 lg:px-40 min-h-screen">
       
 
@@ -90,6 +92,7 @@ function HelpSupport() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 

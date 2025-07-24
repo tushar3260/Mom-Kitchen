@@ -1,35 +1,48 @@
-import React, { useState, useContext } from 'react';
-import axios from 'axios';
-import { motion } from 'framer-motion';
-import { FaSpinner, FaEye, FaEyeSlash } from 'react-icons/fa';
-import UserContext from '../context/userContext.jsx';
-import { storage } from '../utils/Storage.js';
-function SignupPage() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [phone, setPhone] = useState('');
-  const [passwordStrength, setPasswordStrength] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+import React, { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { motion } from "framer-motion";
+import { FaSpinner, FaEye, FaEyeSlash } from "react-icons/fa";
+import { IoClose } from "react-icons/io5";
+import UserContext from "../context/userContext.jsx";
+import { storage } from "../utils/Storage.js";
+
+function SignupPage({ onClose, onLoginClick }) {
+  const navigate = useNavigate(); // React Router hook
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [passwordStrength, setPasswordStrength] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const { setUser, setToken } = useContext(UserContext);  // ✅ Added setToken here
+  const { setUser } = useContext(UserContext);
+
+  const closeHandler = () => {
+    if (onClose) {
+      onClose();
+    } else {
+      navigate("/"); // Direct signup route se home page
+    }
+  };
 
   const checkPasswordStrength = (pwd) => {
-    if (!pwd) return '';
-    if (pwd.length < 6) return 'Weak';
-    if (pwd.match(/[A-Z]/) && pwd.match(/[0-9]/) && pwd.match(/[^A-Za-z0-9]/)) return 'Strong';
-    return 'Medium';
+    if (!pwd) return "";
+    if (pwd.length < 6) return "Weak";
+    if (pwd.match(/[A-Z]/) && pwd.match(/[0-9]/) && pwd.match(/[^A-Za-z0-9]/))
+      return "Strong";
+    return "Medium";
   };
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
     if (!name || !email || !password || !confirmPassword || !phone) {
       setError("Please fill all fields");
@@ -52,46 +65,73 @@ function SignupPage() {
     setLoading(true);
 
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/user/signup`, userData);
-      console.log("Signup Response:", res.data);
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/user/signup`,
+        userData
+      );
 
       if (res.status === 201) {
-        const { user, token } = res.data;
+        const { user } = res.data;
+        if (user) {
+          setUser(user);
 
-        if (user && token) {
-          setUser(user);           // ✅ Context
-          setToken(token);         // ✅ Context
-          storage.setItem("userData", JSON.stringify(
-            { fullName: user.fullName, email: user.email, phone: user.phone ,role: user.role }
-          ));
-          storage.setItem("usertoken", token);
+          await storage.setItem(
+            "userData",
+            JSON.stringify({
+              fullName: user.fullName,
+              email: user.email,
+              phone: user.phone,
+              role: user.role,
+            })
+          );
 
-          setSuccess("Signup successful! Redirecting...");
-          setLoading(false);
+          // Send OTP after signup
+          await axios.post(`${import.meta.env.VITE_API_URL}/otp/send-otp`, {
+            email: user.email,
+            role: "user",
+          });
 
+          setSuccess("Signup successful! Check your email for OTP.");
           setTimeout(() => {
             window.location.href = "/otp?role=user";
           }, 1500);
         } else {
-          setError("Signup failed: Missing user or token");
-          setLoading(false);
+          setError("Signup failed: Missing user data");
         }
       }
     } catch (error) {
       console.error("Signup Error:", error);
-      setError(error?.response?.data?.message || "Signup failed. Please try again.");
+      setError(
+        error?.response?.data?.message || "Signup failed. Please try again."
+      );
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-yellow-100 to-yellow-200 p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Background Overlay */}
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={closeHandler}
+      ></div>
+
+      {/* Signup Modal */}
       <motion.div
-        initial={{ opacity: 0, y: -50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, type: 'spring' }}
-        className="bg-white p-10 rounded-3xl shadow-2xl w-96 border border-yellow-300"
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3 }}
+        className="relative bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border border-yellow-300 z-10"
       >
+        {/* Close Button */}
+        <button
+          onClick={closeHandler}
+          className="absolute top-4 right-4 text-gray-600 hover:text-red-500 transition"
+        >
+          <IoClose size={24} />
+        </button>
+
         <h2 className="text-3xl font-extrabold mb-8 text-yellow-500 text-center tracking-wide">
           Sign Up
         </h2>
@@ -125,7 +165,7 @@ function SignupPage() {
             <button
               type="button"
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-              onClick={() => setShowPassword(prev => !prev)}
+              onClick={() => setShowPassword((prev) => !prev)}
               tabIndex={-1}
             >
               {showPassword ? <FaEyeSlash /> : <FaEye />}
@@ -133,13 +173,15 @@ function SignupPage() {
           </div>
 
           {password && (
-            <p className={`text-sm mb-4 ${
-              passwordStrength === 'Strong'
-                ? 'text-green-500'
-                : passwordStrength === 'Medium'
-                ? 'text-yellow-500'
-                : 'text-red-500'
-            }`}>
+            <p
+              className={`text-sm mb-4 ${
+                passwordStrength === "Strong"
+                  ? "text-green-500"
+                  : passwordStrength === "Medium"
+                  ? "text-yellow-500"
+                  : "text-red-500"
+              }`}
+            >
               Password Strength: {passwordStrength}
             </p>
           )}
@@ -155,7 +197,7 @@ function SignupPage() {
             <button
               type="button"
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-              onClick={() => setShowConfirmPassword(prev => !prev)}
+              onClick={() => setShowConfirmPassword((prev) => !prev)}
               tabIndex={-1}
             >
               {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
@@ -181,16 +223,23 @@ function SignupPage() {
             disabled={loading}
           >
             {loading && <FaSpinner className="animate-spin mr-2" />}
-            {loading ? 'Signing Up...' : 'Sign Up'}
+            {loading ? "Signing Up..." : "Sign Up"}
           </motion.button>
         </form>
 
-        <p className="mt-6 text-center text-gray-600">
-          Already have an account?{' '}
-          <a href="/login" className="text-yellow-500 hover:underline font-semibold">
-            Login
-          </a>
-        </p>
+       <p className="mt-6 text-center text-gray-600">
+        Already have an account?{" "}
+        <button
+          type="button"
+          onClick={() => {
+            if (onLoginClick) onLoginClick(); // Popup mode
+            else navigate("/login"); // Direct route mode
+          }}
+          className="text-yellow-500 hover:underline font-semibold"
+        >
+          Login
+        </button>
+      </p>
       </motion.div>
     </div>
   );

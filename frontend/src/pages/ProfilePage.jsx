@@ -9,7 +9,7 @@ import {
   FaPlus,
   FaSave,
   FaUpload,
-  FaArrowLeft
+  FaArrowLeft,
 } from "react-icons/fa";
 import Loading from "../Loading.jsx";
 import axios from "axios";
@@ -19,17 +19,16 @@ import { storage } from "../utils/Storage.js";
 
 function ProfilePage() {
   const { user, setUser, setToken } = useContext(UserContext);
-
-  const [userToken, setUserToken] = useState(""); // ✅ Async token
+  const [userToken, setUserToken] = useState("");
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
-    fullName: user?.fullName || "",
-    email: user?.email || "",
-    phone: user?.phone || "",
-    avatar: user?.avatar || user?.avtar || "",
-    address: user?.address || [],
+    fullName: "",
+    email: "",
+    phone: "",
+    avtar: "",
+    address: [],
   });
 
   const [newAddress, setNewAddress] = useState({
@@ -39,7 +38,7 @@ function ProfilePage() {
     pincode: "",
   });
 
-  // ✅ Load token from localforage
+  // ✅ Set token
   useEffect(() => {
     const fetchToken = async () => {
       const token = await storage.getItem("usertoken");
@@ -48,7 +47,19 @@ function ProfilePage() {
     fetchToken();
   }, []);
 
-  // Logout
+  // ✅ Sync user data with formData
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        fullName: user.fullName || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        avtar: user.avtar || "",
+        address: user.address || [],
+      });
+    }
+  }, [user]);
+
   const handleLogout = () => {
     storage.clear();
     setUser(null);
@@ -59,23 +70,20 @@ function ProfilePage() {
     }, 800);
   };
 
-  // Input change
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Avatar change
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () =>
-        setFormData({ ...formData, avatar: reader.result });
+        setFormData({ ...formData, avtar: reader.result });
       reader.readAsDataURL(file);
     }
   };
 
-  // Add address
   const handleAddAddress = () => {
     if (!newAddress.tag || !newAddress.street || !newAddress.city || !newAddress.pincode) {
       return toast.error("Please fill all address fields!");
@@ -88,14 +96,12 @@ function ProfilePage() {
     toast.success("Address added!");
   };
 
-  // Delete address
   const handleDeleteAddress = (index) => {
     const updatedAddresses = formData.address.filter((_, i) => i !== index);
     setFormData({ ...formData, address: updatedAddresses });
     toast.success("Address removed!");
   };
 
-  // Save Profile
   const handleUpdate = async () => {
     if (!userToken) return toast.error("User token not found!");
 
@@ -106,7 +112,7 @@ function ProfilePage() {
         {
           fullName: formData.fullName,
           phone: formData.phone,
-          avtar: formData.avatar, // Backend may expect "avtar"
+          avtar: formData.avtar,
           address: formData.address,
         },
         {
@@ -122,7 +128,9 @@ function ProfilePage() {
         setUser(data.user);
         setEditing(false);
         toast.success("Profile updated successfully!");
-      } else toast.error(data.message || "Failed to update profile");
+      } else {
+        toast.error(data.message || "Failed to update profile");
+      }
     } catch (error) {
       console.error("Update Error:", error);
       setLoading(false);
@@ -132,17 +140,16 @@ function ProfilePage() {
 
   return (
     <>
-      <Toaster position="top-center" reverseOrder={false} />
+      <Toaster position="top-center" />
       <div className="absolute top-4 left-4">
         <button
-          
-          onClick={() => 
-            window.history.back()}
+          onClick={() => window.history.back()}
           className="flex items-center gap-2 px-3 py-1 bg-orange-500 text-white rounded-lg shadow hover:bg-orange-400 transition"
         >
           <FaArrowLeft /> Back
         </button>
       </div>
+
       <div className="min-h-screen bg-gradient-to-br from-orange-100 via-white to-orange-50 p-4 sm:p-6 flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -155,7 +162,7 @@ function ProfilePage() {
             <div className="relative">
               <motion.img
                 src={
-                  formData.avatar ||
+                  formData.avtar ||
                   "https://images.unsplash.com/photo-1614281424829-46986c1b2f9c?auto=format&fit=crop&w=300&q=80"
                 }
                 alt="Profile"
@@ -184,7 +191,7 @@ function ProfilePage() {
               />
             ) : (
               <h2 className="text-2xl font-extrabold text-orange-600">
-                {user?.fullName || "Foodie Lover"}
+                {formData.fullName || "Foodie Lover"}
               </h2>
             )}
             <p className="text-gray-500 text-sm mb-3">
@@ -215,7 +222,7 @@ function ProfilePage() {
                   onClick={() => (editing ? handleUpdate() : setEditing(true))}
                   className="text-orange-500 hover:text-orange-600 flex items-center gap-1 text-sm"
                 >
-                  {editing ? <FaSave /> : <FaEdit />}{" "}
+                  {editing ? <FaSave /> : <FaEdit />}
                   {editing ? "Save" : "Edit"}
                 </button>
               </div>
@@ -241,13 +248,13 @@ function ProfilePage() {
               ) : (
                 <>
                   <p className="mb-1">
-                    <strong>Full Name:</strong> {user?.fullName || "N/A"}
+                    <strong>Full Name:</strong> {formData.fullName || "N/A"}
                   </p>
                   <p className="mb-1">
-                    <strong>Email:</strong> {user?.email || "N/A"}
+                    <strong>Email:</strong> {formData.email || "N/A"}
                   </p>
                   <p className="mb-1">
-                    <strong>Phone:</strong> {user?.phone || "N/A"}
+                    <strong>Phone:</strong> {formData.phone || "N/A"}
                   </p>
                 </>
               )}
@@ -328,10 +335,7 @@ function ProfilePage() {
                       placeholder="Pincode"
                       value={newAddress.pincode}
                       onChange={(e) =>
-                        setNewAddress({
-                          ...newAddress,
-                          pincode: e.target.value,
-                        })
+                        setNewAddress({ ...newAddress, pincode: e.target.value })
                       }
                       className="p-2 border rounded"
                     />
@@ -354,7 +358,7 @@ function ProfilePage() {
               <h3 className="text-lg font-bold text-orange-600 mb-3 flex items-center gap-2">
                 <FaHeart /> Favorites
               </h3>
-              {user?.favorites && user.favorites.length > 0 ? (
+              {user?.favorites?.length > 0 ? (
                 <div className="flex flex-wrap gap-3">
                   {user.favorites.map((chefId, i) => (
                     <span
@@ -370,7 +374,7 @@ function ProfilePage() {
               )}
             </motion.div>
           </div>
-          {loading && <Loading message="Updating....." />}
+          {loading && <Loading message="Updating..." />}
         </motion.div>
       </div>
     </>

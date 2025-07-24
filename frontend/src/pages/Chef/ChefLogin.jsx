@@ -1,19 +1,22 @@
 import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { toast, Toaster } from 'react-hot-toast';
-import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { IoClose } from 'react-icons/io5';
+import { useNavigate } from 'react-router-dom';
 import ChefContext from './Context/ChefContext.jsx';
-import Loading from '../../Loading.jsx'; // make sure path is correct
+import Loading from '../../Loading.jsx';
 import { storage } from '../../utils/Storage.js';
-const ChefLogin = () => {
-  const [email, setEmail] = useState('');
-  const [passwordHash, setPasswordHash] = useState(''); // backend expects `passwordHash`
-  const [loading, setLoading] = useState(false);
 
+const ChefLogin = ({ onClose, onSignupClick }) => {
+  const [email, setEmail] = useState('');
+  const [passwordHash, setPasswordHash] = useState('');
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showForgotLink, setShowForgotLink] = useState(false);
 
   const { setChef, setChefToken } = useContext(ChefContext);
+  const navigate = useNavigate();
 
   const shouldShowForgot = (msg = '') => {
     const m = msg.toLowerCase();
@@ -27,7 +30,6 @@ const ChefLogin = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
     setError('');
     setShowForgotLink(false);
 
@@ -43,7 +45,7 @@ const ChefLogin = () => {
     try {
       const res = await axios.post(
         `${import.meta.env.VITE_API_URL}/chefs/login`,
-        { email: email.trim(), passwordHash: passwordHash },
+        { email: email.trim(), passwordHash },
         { withCredentials: true }
       );
 
@@ -54,11 +56,10 @@ const ChefLogin = () => {
         const msg = '❌ Login failed! No token received';
         toast.error(msg);
         setError(msg);
-        setShowForgotLink(true); // something’s off; let them reset
+        setShowForgotLink(true);
         return;
       }
 
-      // Persist
       storage.setItem('chefToken', token);
       storage.setItem('chefData', chef);
       storage.setItem('chefEmail', chef.email);
@@ -68,9 +69,7 @@ const ChefLogin = () => {
 
       toast.success(res.data.message || '✅ Chef logged in successfully!');
       setLoading(false);
-
-      // Redirect to OTP verify
-      window.location.href = '/otp?role=chef';
+      navigate('/chef/chefdashboard');
     } catch (err) {
       const msg = err?.response?.data?.message || '❌ Login failed!';
       toast.error(msg);
@@ -81,14 +80,46 @@ const ChefLogin = () => {
     }
   };
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-[#fff8ee] px-4 py-10">
-      <Toaster position="top-center" />
+  // Default close behavior (when directly from route)
+  const handleClose = () => {
+    if (onClose) {
+      onClose();
+    } else {
+      navigate('/chef'); // Back to landing page
+    }
+  };
 
-      {/* Fullscreen Loading Overlay */}
+  const handleSignup = () => {
+    if (onSignupClick) {
+      onSignupClick();
+    } else {
+      navigate('/chef/signup'); // Go to signup route
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <Toaster position="top-center" />
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={handleClose}
+      ></div>
+
       {loading && <Loading message="Logging in as Chef..." />}
 
-      <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full z-10">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3 }}
+        className="relative bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full border border-orange-300 z-10"
+      >
+        <button
+          onClick={handleClose}
+          className="absolute top-4 right-4 text-gray-600 hover:text-red-500 transition"
+        >
+          <IoClose size={24} />
+        </button>
+
         <h2 className="text-3xl font-bold mb-6 text-[#ff7e00] text-center">
           Chef Login
         </h2>
@@ -100,53 +131,53 @@ const ChefLogin = () => {
             value={email}
             disabled={loading}
             onChange={(e) => setEmail(e.target.value)}
-            required
             className="w-full p-3 rounded-xl border border-gray-300"
           />
-
           <input
             type="password"
             placeholder="Password"
             value={passwordHash}
             disabled={loading}
             onChange={(e) => setPasswordHash(e.target.value)}
-            required
             className="w-full p-3 rounded-xl border border-gray-300"
           />
 
-          {error && (
-            <p className="text-center text-sm text-red-600 -mt-1">{error}</p>
-          )}
-
+          {error && <p className="text-center text-sm text-red-600">{error}</p>}
           {showForgotLink && (
             <p className="text-center text-sm">
-              <Link
-                to="/forgot-password?role=chef"
+              <button
+                onClick={() =>
+                  (window.location.href = '/forgot-password?role=chef')
+                }
                 className="text-[#ff7e00] underline font-medium"
+                type="button"
               >
                 Forgot Password?
-              </Link>
+              </button>
             </p>
           )}
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             type="submit"
+            className="w-full py-3 bg-[#ff7e00] hover:bg-orange-600 text-white rounded-xl shadow-lg"
             disabled={loading}
-            className={`w-full ${
-              loading ? 'bg-gray-400' : 'bg-[#ff7e00] hover:bg-orange-600'
-            } text-white py-3 rounded-xl`}
           >
             {loading ? 'Logging in...' : 'Login as Chef'}
-          </button>
+          </motion.button>
         </form>
 
         <p className="mt-4 text-center">
           Don&apos;t have an account?{' '}
-          <Link to="/chef/signup" className="text-[#ff7e00] underline">
+          <button
+            onClick={handleSignup}
+            className="text-[#ff7e00] underline font-medium"
+          >
             Sign up here
-          </Link>
+          </button>
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 };

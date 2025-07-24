@@ -1,10 +1,12 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-
+import TopNav from "../components/TopNav";
 const AboutUs = () => {
   const navigate = useNavigate();
 
   return (
+    <>
+    <TopNav />
     <div className="bg-white text-zinc-800 px-6 py-16 sm:px-12 md:px-24 lg:px-40">
       <div className="max-w-5xl mx-auto">
         <h1 className="text-4xl sm:text-5xl font-bold mb-6 text-orange-500">
@@ -60,6 +62,7 @@ const AboutUs = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

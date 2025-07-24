@@ -157,7 +157,7 @@ function Herosection() {
           <img
             src="https://user-gen-media-assets.s3.amazonaws.com/gpt4o_images/88042f7f-d6d2-45fa-9a35-4e9052f8ceae.png"
             alt="Happy girl enjoying pizza"
-            className="w-full max-w-[550px] rounded-3xl shadow-2xl object-cover transform hover:scale-105 transition"
+            className="mt-10 w-full max-w-[550px] rounded-3xl shadow-2xl object-cover transform hover:scale-105 transition"
           />
         </motion.div>
       </div>

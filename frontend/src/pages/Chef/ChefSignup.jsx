@@ -1,13 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import axios from "axios";
 import { toast, Toaster } from "react-hot-toast";
-import { Link } from "react-router-dom";
-import {useNavigate } from 'react-router-dom';
+import { motion } from "framer-motion";
+import { IoClose } from "react-icons/io5";
+import { useNavigate } from "react-router-dom";
 import ChefContext from "./Context/ChefContext";
-import { useContext } from "react";
 import Loading from "../../Loading";
 import { storage } from "../../utils/Storage";
-const ChefSignup = () => {
+
+const ChefSignup = ({ onClose, onLoginClick }) => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -20,10 +21,11 @@ const ChefSignup = () => {
     bankDetails: { accNo: "", ifsc: "", holderName: "" },
     location: { area: "", lat: "", lng: "" },
   });
-  const { setChef, setChefToken } = useContext(ChefContext);
 
+  const { setChef, setChefToken } = useContext(ChefContext);
   const [loading, setLoading] = useState(false);
   const [locationFetched, setLocationFetched] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,7 +62,6 @@ const ChefSignup = () => {
       toast.error("Geolocation is not supported by your browser");
       return;
     }
-
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const lat = position.coords.latitude;
@@ -71,7 +72,6 @@ const ChefSignup = () => {
             `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
           );
           const data = await res.json();
-
           const address = data.display_name || "Address not found";
 
           setFormData((prev) => ({
@@ -98,14 +98,12 @@ const ChefSignup = () => {
   const validatePhone = (phone) => /^[6-9]\d{9}$/.test(phone);
 
   const handleSubmit = async (e) => {
-    // const navigate = useNavigate();
     e.preventDefault();
 
     if (!validatePhone(formData.phone)) {
       toast.error("❌ Invalid Indian phone number");
       return;
     }
-
     if (!formData.location.lat || !formData.location.lng) {
       toast.error("❌ Location is required (auto or manual)");
       return;
@@ -118,27 +116,22 @@ const ChefSignup = () => {
         formData,
         { withCredentials: true }
       );
+
       toast.success(res.data.message || "Chef registered successfully!");
       setTimeout(() => {
-        setLoading(true);
-        window.location.href = "/otp?role=chef";
+        navigate("/otp?role=chef");
       }, 800);
 
       const token = res.data.token;
       const chef = res.data.chef;
 
-      if (!token) {
-        toast.error("❌ Login failed! No token received");
-        return;
+      if (token) {
+        storage.setItem("chefToken", token);
+        storage.setItem("chefData", chef);
+        storage.setItem("chefEmail", chef.email);
+        setChef(chef);
+        setChefToken(token);
       }
-
-      storage.setItem("chefToken", token);
-      storage.setItem("chefData", chef);
-      storage.setItem("chefEmail", chef.email);
-      setChef(chef);
-      setChefToken(token);
-      // Store token in storage
-      // Reset form
       setFormData({
         name: "",
         email: "",
@@ -159,15 +152,45 @@ const ChefSignup = () => {
     }
   };
 
+  // Close and Login handlers
+  const handleClose = () => {
+    if (onClose) onClose();
+    else navigate("/chef");
+  };
+  const handleLogin = () => {
+    if (onLoginClick) onLoginClick();
+    else navigate("/chef/login");
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#fff8ee] px-4 py-10">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
       <Toaster position="top-center" reverseOrder={false} />
-      <div className="bg-white p-8 rounded-2xl shadow-lg max-w-3xl w-full">
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={handleClose}
+      ></div>
+
+      {loading && <Loading message="Registering Chef..." />}
+
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3 }}
+        className="relative bg-white p-8 rounded-2xl shadow-2xl max-w-3xl w-full border border-orange-300 z-10 overflow-y-auto max-h-[90vh]"
+      >
+        <button
+          onClick={handleClose}
+          className="absolute top-4 right-4 text-gray-600 hover:text-red-500 transition"
+        >
+          <IoClose size={24} />
+        </button>
+
         <h2 className="text-3xl font-bold mb-6 text-[#ff7e00] text-center">
           Chef Sign Up
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Input fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input
               type="text"
@@ -206,6 +229,7 @@ const ChefSignup = () => {
               className="p-3 rounded-xl border border-gray-300"
             />
           </div>
+
           <textarea
             name="bio"
             placeholder="Short Bio (optional)"
@@ -213,6 +237,7 @@ const ChefSignup = () => {
             onChange={handleChange}
             className="w-full p-3 rounded-xl border border-gray-300"
           />
+
           <input
             type="text"
             name="cuisine"
@@ -242,6 +267,8 @@ const ChefSignup = () => {
               imgbb.com
             </a>
           </small>
+
+          {/* Documents */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input
               type="text"
@@ -262,6 +289,8 @@ const ChefSignup = () => {
               className="p-3 rounded-xl border border-gray-300"
             />
           </div>
+
+          {/* Bank Details */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <input
               type="text"
@@ -291,17 +320,17 @@ const ChefSignup = () => {
               className="p-3 rounded-xl border border-gray-300"
             />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-            <input
-              type="text"
-              name="location.area"
-              placeholder="Area / Locality"
-              value={formData.location.area}
-              onChange={handleChange}
-              required
-              className="p-3 rounded-xl border border-gray-300"
-            />
-          </div>
+
+          {/* Location */}
+          <input
+            type="text"
+            name="location.area"
+            placeholder="Area / Locality"
+            value={formData.location.area}
+            onChange={handleChange}
+            required
+            className="w-full p-3 rounded-xl border border-gray-300"
+          />
           <button
             type="button"
             onClick={detectLocation}
@@ -313,21 +342,31 @@ const ChefSignup = () => {
             📍{" "}
             {locationFetched ? "Location Detected ✅" : "Auto Detect Location"}
           </button>
-          <button
+
+          {/* Submit */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             type="submit"
             disabled={loading}
-            className={`w-full ${
+            className={`w-full py-3 ${
               loading ? "bg-gray-400" : "bg-[#ff7e00] hover:bg-orange-600"
-            } text-white py-3 rounded-xl mt-4`}
+            } text-white rounded-xl mt-4`}
           >
             {loading ? "Registering..." : "Register as Chef"}
-          </button>
-          already have an account?{" "}
-          <Link to="/chef/login" className="text-[#ff7e00] underline">
-            Login here
-          </Link>
+          </motion.button>
         </form>
-      </div>
+
+        <p className="mt-4 text-center">
+          Already have an account?{" "}
+          <button
+            onClick={handleLogin}
+            className="text-[#ff7e00] underline font-semibold"
+          >
+            Login here
+          </button>
+        </p>
+      </motion.div>
     </div>
   );
 };

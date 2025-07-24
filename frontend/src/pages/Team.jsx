@@ -1,5 +1,6 @@
 import React from "react";
-import logo from "../assets/logo.png"; // Make sure your logo is placed in src/assets/logo.png
+import TopNav from "../components/TopNav";
+
 
 const teamMembers = [
   {
@@ -30,12 +31,11 @@ const teamMembers = [
 
 function Team() {
   return (
+    <>
+  <TopNav />
     <div className="bg-white min-h-screen px-6 py-16 sm:px-12 md:px-24 lg:px-32 text-zinc-800">
-      {/* Decorative Logo */}
-      <div className="flex justify-center mb-0">
-        <img src={logo} alt="Tiffin Tales Logo" className="h-28" />
-      </div>
-
+    
+      
       {/* Header */}
       <div className="text-center mb-12">
         <h1 className="text-4xl sm:text-5xl font-bold text-orange-500 mb-2">
@@ -77,6 +77,7 @@ function Team() {
         </p>
       </div>
     </div>
+    </>
   );
 }
 
