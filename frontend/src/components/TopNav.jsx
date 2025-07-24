@@ -52,7 +52,7 @@ useEffect(() => {
     const fetchCartCount = async () => {
       try {
         const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/cart/${userId}`
+          `${import.meta.env.VITE_API_URL}/orders/user/${userId}`
         );
         setCartCount(res.data?.items?.length || 0);
       } catch (err) {

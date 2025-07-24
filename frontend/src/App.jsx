@@ -42,6 +42,7 @@ import Helpandsupport from "../src/pages/Helpandsupport.jsx";
 import Termcondition from "../src/pages/Termcondition.jsx";
 import Refundcancellation from "../src/pages/Refundcancellation.jsx";
 import { useState } from "react";
+import CartProvider from "./context/CartContext.jsx";
 function App() {
   const [showLogin, setShowLogin] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
@@ -107,7 +108,11 @@ function App() {
               }
             />
 
-            <Route path="/cart" element={<Cart />} />
+            <Route path="/cart" element={
+              <CartProvider>
+                <Cart />
+              </CartProvider>
+            } />
             <Route path="/allchef" element={<Allchef />} />
             <Route path="/addlocation" element={<AddLocation />} />
             <Route path="/otp" element={<OTPPage />} />

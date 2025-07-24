@@ -108,20 +108,39 @@ const OrderNowPage = () => {
   }, [meal, quantity]);
 
   /* ------------ Add to Cart ------------ */
-  const handleAddToCart = () => {
-    if (!meal) return;
-    let cart = storage.getItem("cart") || [];
-    const newItem = {
-      mealId: meal._id,
-      title: meal.title,
-      price: meal.price,
-      quantity,
-      photo: meal.photo,
-    };
-    cart.push(newItem);
-    storage.setItem("cart", cart);
-    toast.success("Added to cart 🛒");
+  const handleAddToCart = async () => {
+  if (!meal) return;
+
+   // assume user is stored after login
+  if (!user || !user._id) {
+    toast.error("Please login first!");
+    return;
+  }
+
+  const item = {
+    mealId: meal._id,
+    title: meal.title,
+    price: meal.price,
+    quantity,
+    photo: meal.photo,
   };
+
+  try {
+    const res = await axios.post(`${import.meta.env.VITE_API_URL}/cart/add`, {
+      userId: user._id,
+      item,
+    });
+
+    // Optionally update localStorage or state if needed
+    storage.setItem("cart", res.data.items); // optional
+    toast.success("Added to cart 🛒");
+  } catch (error) {
+    console.error("Add to cart error:", error);
+    toast.error("Something went wrong!");
+  }
+};
+
+
 
   /* ------------ Razorpay SDK Loader ------------ */
   const loadRazorpay = () =>
