@@ -26,7 +26,7 @@ app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
 //cors for security purposes 
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://tiffintales-nine.vercel.app'],
+  origin: ['http://localhost:5173', 'https://tiffintales-nine.vercel.app','https://www.tiffintalesindia.me/'],
   credentials: true
 }));
 
