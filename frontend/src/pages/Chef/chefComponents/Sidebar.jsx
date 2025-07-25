@@ -2,11 +2,10 @@ import React from 'react';
 import {
   FaClipboardList, FaUtensils, FaStar,
   FaDollarSign, FaEnvelope, FaSignOutAlt,
-  FaShoppingCart, FaUser
+  FaShoppingCart
 } from 'react-icons/fa';
 import { NavLink } from 'react-router-dom';
 import { storage } from '../../../utils/Storage';
-
 const menuItems = [
   { label: 'Dashboard', icon: <FaClipboardList />, path: '' },
   { label: 'Orders', icon: <FaShoppingCart />, path: 'orders' },
@@ -14,7 +13,6 @@ const menuItems = [
   { label: 'Reviews', icon: <FaStar />, path: 'reviews' },
   { label: 'Earnings', icon: <FaDollarSign />, path: 'earnings' },
   { label: 'Messages', icon: <FaEnvelope />, path: 'messages' },
-  { label: 'Profile Info', icon: <FaUser />, path: 'profile' }, // ✅ New item added
 ];
 
 const Sidebar = () => {

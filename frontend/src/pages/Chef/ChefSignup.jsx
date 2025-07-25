@@ -20,7 +20,6 @@ const ChefSignup = ({ onClose, onLoginClick }) => {
     documents: { aadhaar: "", pan: "" },
     bankDetails: { accNo: "", ifsc: "", holderName: "" },
     location: { area: "", lat: "", lng: "" },
-    photo: null, // ✅ added
   });
 
   const { setChef, setChefToken } = useContext(ChefContext);
@@ -29,11 +28,8 @@ const ChefSignup = ({ onClose, onLoginClick }) => {
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
-
-    if (name === "photo") {
-      setFormData((prev) => ({ ...prev, photo: files[0] })); // ✅ handle file
-    } else if (name.startsWith("bankDetails.")) {
+    const { name, value } = e.target;
+    if (name.startsWith("bankDetails.")) {
       const key = name.split(".")[1];
       setFormData((prev) => ({
         ...prev,
@@ -115,27 +111,10 @@ const ChefSignup = ({ onClose, onLoginClick }) => {
 
     setLoading(true);
     try {
-      const payload = new FormData();
-
-      for (const key in formData) {
-        if (
-          key === "documents" ||
-          key === "bankDetails" ||
-          key === "location"
-        ) {
-          payload.append(key, JSON.stringify(formData[key]));
-        } else {
-          payload.append(key, formData[key]);
-        }
-      }
-
       const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/chef/signup`,
-        payload,
-        {
-          withCredentials: true,
-          headers: { "Content-Type": "multipart/form-data" },
-        }
+        `${import.meta.env.VITE_API_URL}/chefs/register`,
+        formData,
+        { withCredentials: true }
       );
 
       toast.success(res.data.message || "Chef registered successfully!");
@@ -153,7 +132,6 @@ const ChefSignup = ({ onClose, onLoginClick }) => {
         setChef(chef);
         setChefToken(token);
       }
-
       setFormData({
         name: "",
         email: "",
@@ -165,7 +143,6 @@ const ChefSignup = ({ onClose, onLoginClick }) => {
         documents: { aadhaar: "", pan: "" },
         bankDetails: { accNo: "", ifsc: "", holderName: "" },
         location: { area: "", lat: "", lng: "" },
-        photo: null,
       });
       setLocationFetched(false);
     } catch (err) {
@@ -175,11 +152,11 @@ const ChefSignup = ({ onClose, onLoginClick }) => {
     }
   };
 
+  // Close and Login handlers
   const handleClose = () => {
     if (onClose) onClose();
     else navigate("/chef");
   };
-
   const handleLogin = () => {
     if (onLoginClick) onLoginClick();
     else navigate("/chef/login");
@@ -213,6 +190,7 @@ const ChefSignup = ({ onClose, onLoginClick }) => {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Input fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input
               type="text"
@@ -290,21 +268,7 @@ const ChefSignup = ({ onClose, onLoginClick }) => {
             </a>
           </small>
 
-          {/* ✅ Image Upload */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Upload Your Photo
-            </label>
-            <input
-              type="file"
-              name="photo"
-              accept="image/*"
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-xl"
-              required
-            />
-          </div>
-
+          {/* Documents */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input
               type="text"
@@ -326,6 +290,7 @@ const ChefSignup = ({ onClose, onLoginClick }) => {
             />
           </div>
 
+          {/* Bank Details */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <input
               type="text"
@@ -356,6 +321,7 @@ const ChefSignup = ({ onClose, onLoginClick }) => {
             />
           </div>
 
+          {/* Location */}
           <input
             type="text"
             name="location.area"
@@ -377,6 +343,7 @@ const ChefSignup = ({ onClose, onLoginClick }) => {
             {locationFetched ? "Location Detected ✅" : "Auto Detect Location"}
           </button>
 
+          {/* Submit */}
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
