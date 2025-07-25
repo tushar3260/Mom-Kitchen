@@ -17,7 +17,9 @@ const AllMeals = () => {
   const [isLoginPopupOpen, setIsLoginPopupOpen] = useState(false);
 
   // Filters
-  const [searchQuery, setSearchQuery] = useState(searchParams.get("meal")?.toLowerCase() || "");
+  const [searchQuery, setSearchQuery] = useState(
+    searchParams.get("meal")?.toLowerCase() || ""
+  );
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [vegOnly, setVegOnly] = useState(false);
@@ -47,8 +49,12 @@ const AllMeals = () => {
     const matchMinPrice = minPrice ? meal.price >= Number(minPrice) : true;
     const matchMaxPrice = maxPrice ? meal.price <= Number(maxPrice) : true;
     const matchVeg = vegOnly ? meal.tags?.includes("Veg") : true;
-    const matchDay = selectedDay ? meal.availableDays?.includes(selectedDay) : true;
-    const matchTime = selectedTimeSlot ? meal.timeSlots?.includes(selectedTimeSlot) : true;
+    const matchDay = selectedDay
+      ? meal.availableDays?.includes(selectedDay)
+      : true;
+    const matchTime = selectedTimeSlot
+      ? meal.timeSlots?.includes(selectedTimeSlot)
+      : true;
     const matchDiscount = discountOnly ? meal.discount > 0 : true;
     const matchActive = activeOnly ? meal.isActive : true;
 
@@ -77,7 +83,10 @@ const AllMeals = () => {
     <>
       <TopNav
         onLoginClick={() => {
-          sessionStorage.setItem("redirectAfterLogin", window.location.pathname);
+          sessionStorage.setItem(
+            "redirectAfterLogin",
+            window.location.pathname
+          );
           window.location.href = "/login";
         }}
         onSignupClick={() => {
@@ -123,28 +132,20 @@ const AllMeals = () => {
             onChange={(e) => setMaxPrice(e.target.value)}
             className="px-3 py-1 border border-gray-300 rounded"
           />
-          <label className="flex items-center gap-1">
-            <input
-              type="checkbox"
-              checked={vegOnly}
-              onChange={(e) => setVegOnly(e.target.checked)}
-            />
-            Veg Only
-          </label>
+
           <select
             value={selectedDay}
             onChange={(e) => setSelectedDay(e.target.value)}
             className="px-3 py-1 border border-gray-300 rounded"
           >
             <option value="">All Days</option>
-            {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map(
-              (day) => (
-                <option key={day} value={day}>
-                  {day}
-                </option>
-              )
-            )}
+            {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
+              <option key={day} value={day}>
+                {day}
+              </option>
+            ))}
           </select>
+
           <select
             value={selectedTimeSlot}
             onChange={(e) => setSelectedTimeSlot(e.target.value)}
@@ -210,13 +211,21 @@ const AllMeals = () => {
                     </p>
                     <p className="flex items-center text-xs text-yellow-600 mb-2">
                       <FaStar className="mr-1 text-yellow-400" />
-                      {meal.rating ? `${meal.rating.toFixed(1)} / 5` : "No rating"}
+                      {meal.rating
+                        ? `${meal.rating.toFixed(1)} / 5`
+                        : "No rating"}
                     </p>
                     <div className="flex flex-wrap gap-1 mb-2">
-                      <span className="text-[9px] px-2 py-0.5 bg-green-100 text-green-700 rounded-full">Fresh</span>
-                      <span className="text-[9px] px-2 py-0.5 bg-red-100 text-red-700 rounded-full">Homemade</span>
+                      <span className="text-[9px] px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
+                        Fresh
+                      </span>
+                      <span className="text-[9px] px-2 py-0.5 bg-red-100 text-red-700 rounded-full">
+                        Homemade
+                      </span>
                       {meal.tags?.includes("Veg") && (
-                        <span className="text-[9px] px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full">Veg</span>
+                        <span className="text-[9px] px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full">
+                          Veg
+                        </span>
                       )}
                       {meal.discount > 0 && (
                         <span className="text-[9px] px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded-full">
@@ -260,7 +269,10 @@ const AllMeals = () => {
               </button>
               <button
                 onClick={() => {
-                  sessionStorage.setItem("redirectAfterLogin", window.location.pathname);
+                  sessionStorage.setItem(
+                    "redirectAfterLogin",
+                    window.location.pathname
+                  );
                   navigate("/login");
                 }}
                 className="px-3 py-1.5 bg-orange-600 text-white rounded hover:bg-orange-700 text-sm"

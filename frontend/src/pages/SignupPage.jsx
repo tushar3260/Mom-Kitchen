@@ -52,6 +52,10 @@ function SignupPage({ onClose, onLoginClick }) {
       setError("Please enter a valid email");
       return;
     }
+    if (!/^\d{10}$/.test(phone)) {
+      setError("Phone number must be exactly 10 digits");
+      return;
+    }
     if (password.length < 6) {
       setError("Password must be at least 6 characters long");
       return;
@@ -227,19 +231,19 @@ function SignupPage({ onClose, onLoginClick }) {
           </motion.button>
         </form>
 
-       <p className="mt-6 text-center text-gray-600">
-        Already have an account?{" "}
-        <button
-          type="button"
-          onClick={() => {
-            if (onLoginClick) onLoginClick(); // Popup mode
-            else navigate("/login"); // Direct route mode
-          }}
-          className="text-yellow-500 hover:underline font-semibold"
-        >
-          Login
-        </button>
-      </p>
+        <p className="mt-6 text-center text-gray-600">
+          Already have an account?{" "}
+          <button
+            type="button"
+            onClick={() => {
+              if (onLoginClick) onLoginClick(); // Popup mode
+              else navigate("/login"); // Direct route mode
+            }}
+            className="text-yellow-500 hover:underline font-semibold"
+          >
+            Login
+          </button>
+        </p>
       </motion.div>
     </div>
   );
