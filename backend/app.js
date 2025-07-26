@@ -25,10 +25,23 @@ app.use(express.json({ limit: "10mb" })); // increase JSON body limit to 10MB
 app.use(express.urlencoded({ limit: "10mb", extended: true })); 
 
 //cors for security purposes 
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://tiffintales-nine.vercel.app',
+  'https://www.tiffintalesindia.me'
+];
+
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://tiffintales-nine.vercel.app','https://www.tiffintalesindia.me/'],
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
+
 
 
 
