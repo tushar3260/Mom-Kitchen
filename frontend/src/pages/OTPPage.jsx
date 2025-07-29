@@ -1,178 +1,221 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
+import toast, { Toaster } from 'react-hot-toast';
+import Loading from '../Loading'; 
+import { storage } from '../utils/Storage';
 
 const OTPPage = () => {
-  const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otp, setOtp] = useState(new Array(6).fill(''));
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState('');
-  const [otpSent, setOtpSent] = useState(false);
-  const [timer, setTimer] = useState(60);
   const [attemptsLeft, setAttemptsLeft] = useState(5);
-
+  const [timer, setTimer] = useState(300);
+  const [email, setEmail] = useState('');  // ✅ email state
+  const inputsRef = useRef([]);
   const navigate = useNavigate();
   const location = useLocation();
 
-  const inputsRef = useRef([]);
+  const queryParams = new URLSearchParams(location.search);
+  const role = queryParams.get('role') || 'user';
 
-  // Optional: get email from query param or localstorage
+  // ✅ Fetch email from storage (async)
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const queryEmail = params.get('email');
-    if (queryEmail) {
-      setEmail(queryEmail);
-    } else {
-      // fallback: try localStorage or prompt user
-      const localEmail = window.localStorage.getItem('pendingEmail');
-      if (localEmail) setEmail(localEmail);
-    }
-  }, [location]);
+    const fetchEmail = async () => {
+      try {
+        if (role === 'chef') {
+          const chefEmail = await storage.getItem('chefEmail');
+          setEmail(chefEmail || '');
+        } else if (role === 'admin') {
+          const admin = await storage.getItem('adminData');
+          setEmail(admin?.email || '');
+        } else {
+          const user = await storage.getItem('userData');
+          console.log(user)
+          setEmail(user?.email || '');
+        }
+      } catch (err) {
+        console.error("Error fetching email from storage:", err);
+        setEmail('');
+      }
+    };
+    fetchEmail();
+  }, [role]);
 
-  // Timer logic
-  useEffect(() => {
-    if (otpSent && timer > 0) {
-      const interval = setInterval(() => setTimer((t) => t - 1), 1000);
-      return () => clearInterval(interval);
-    }
-  }, [otpSent, timer]);
+  const loginRedirect =
+    role === 'chef'
+      ? '/chef/login'
+      : role === 'admin'
+      ? '/admin/secure/tales/login'
+      : '/login';
 
-  // Auto focus logic
-  const focusInput = (idx) => {
-    inputsRef.current[idx]?.focus();
-  };
+  const dashboardRedirect =
+    role === 'chef'
+      ? '/chef/chefdashboard'
+      : role === 'admin'
+      ? '/admin/secure/tales/dashboard'
+      : '/';
 
-  // Send OTP handler
-  const sendOtp = useCallback(async () => {
-    setLoading(true);
-    setError('');
+  // ✅ Auto send OTP
+  const autoSendOtp = useCallback(async () => {
+    if (!email) return;
     try {
-      await axios.post('/api/send-otp', { email });
-      setOtpSent(true);
-      setTimer(60);
-      setAttemptsLeft((prev) => prev - 1);
+      setLoading(true);
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_API_URL}/otp/send-otp`,
+        { email, role }
+      );
+      toast.success(data.message || `OTP sent to ${email}`);
+      setTimer(300);
     } catch (err) {
-      setError(err?.response?.data?.message || 'Could not send OTP');
+      toast.error(err.response?.data?.message || 'Error sending OTP.');
     } finally {
       setLoading(false);
     }
-  }, [email]);
+  }, [role, email]);
 
-  // Mount effect: auto send if email is present
+  // ✅ Initial effects
   useEffect(() => {
-    if (email) sendOtp();
-  }, [email, sendOtp]);
-
-  // OTP input handler
-  const handleOtpChange = (e, idx) => {
-    const val = e.target.value.replace(/\D/g, ''); // digits only
-    if (val.length > 1) return;
-    setOtp((prev) => {
-      const copy = [...prev];
-      copy[idx] = val;
-      return copy;
-    });
-    if (val && idx < 5) focusInput(idx + 1);
-  };
-
-  const handleOtpKeyDown = (e, idx) => {
-    if (e.key === 'Backspace' && !otp[idx] && idx > 0) {
-      focusInput(idx - 1);
-    }
-  };
-
-  // Verify OTP handler
-  const verifyOtp = async () => {
-    if (otp.some((d) => d === '')) {
-      setError('Please enter the complete OTP');
+    if (!['user', 'chef', 'admin'].includes(role)) {
+      toast.error('Invalid role provided.');
+      navigate('/');
       return;
     }
-    setLoading(true);
-    setError('');
+    if (email) autoSendOtp();
+
+    const interval = setInterval(() => {
+      setTimer((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [role, email, autoSendOtp, navigate]);
+
+  const handleSendOtp = async () => {
+    if (attemptsLeft <= 0) {
+      toast.error('Max attempts reached. Try again later.');
+      return;
+    }
+
     try {
-      const { data } = await axios.post('/api/verify-otp', {
-        email,
-        otp: otp.join(''),
-      });
-      if (data?.isVerified) {
-        setSuccess(true);
-        setTimeout(() => navigate('/signup?email=' + encodeURIComponent(email)), 1500);
-      } else {
-        setError('Incorrect OTP');
-      }
+      setLoading(true);
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_API_URL}/otp/send-otp`,
+        { email, role }
+      );
+      toast.success(data.message || `OTP resent to ${email}`);
+      setAttemptsLeft((prev) => prev - 1);
+      setTimer(300);
     } catch (err) {
-      setError(err?.response?.data?.message || 'Verification failed');
+      toast.error(err.response?.data?.message || 'Error resending OTP.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleResend = () => {
-    if (timer > 0 || attemptsLeft <= 0) return;
-    sendOtp();
+  const handleChange = (element, index) => {
+    if (!/^[0-9]?$/.test(element.value)) return;
+    const newOtp = [...otp];
+    newOtp[index] = element.value;
+    setOtp(newOtp);
+    if (element.value && index < 5) inputsRef.current[index + 1]?.focus();
+  };
+
+  const handleKeyDown = (e, index) => {
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      inputsRef.current[index - 1]?.focus();
+    }
+  };
+
+  const handleVerify = async () => {
+    const enteredOtp = otp.join('');
+    if (enteredOtp.length < 6) {
+      toast.error('Please enter the full 6-digit OTP.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/otp/verify-otp`, {
+        email,
+        otp: enteredOtp,
+        role,
+      });
+
+      if (res.data.token) {
+        toast.success('OTP verified! Redirecting...');
+        await storage.setItem(`${role}Token`, res.data.token);
+        setTimeout(() => {
+          window.location.href = dashboardRedirect;
+        }, 1500);
+      } else {
+        toast.error(res.data.message || 'Invalid OTP.');
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Verification failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-      <div className="bg-white shadow-lg rounded-lg px-8 py-10 w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-2 text-center text-orange-600">
-          Email Verification
-        </h2>
-        <p className="mb-4 text-center text-gray-600">
-          {email
-            ? `We sent a 6-digit OTP to ${email}`
-            : 'Please enter your email first'}
-        </p>
-        {error && (
-          <p className="mb-3 text-center text-red-500">{error}</p>
-        )}
-        {success && (
-          <p className="mb-3 text-center text-green-600">OTP Verified! Redirecting…</p>
-        )}
+    <div className="min-h-screen bg-[#fff8ee] flex flex-col justify-center items-center p-5 font-sans relative">
+      <Toaster position="top-center" reverseOrder={false} />
+      {loading && <Loading message="Verifying OTP..." />}
 
-        <div className="flex justify-center gap-2 mb-6">
-          {otp.map((digit, idx) => (
-            <input
-              key={idx}
-              ref={(el) => (inputsRef.current[idx] = el)}
-              type="text"
-              pattern="\d*"
-              maxLength={1}
-              value={digit}
-              disabled={loading || success}
-              onChange={(e) => handleOtpChange(e, idx)}
-              onKeyDown={(e) => handleOtpKeyDown(e, idx)}
-              className="w-12 h-12 text-xl text-center border border-orange-400 rounded bg-white focus:outline-none"
-            />
-          ))}
-        </div>
+      <h1 className="text-4xl font-bold text-orange-500 mb-2">
+        {role.charAt(0).toUpperCase() + role.slice(1)} OTP Verification
+      </h1>
 
-        <button
-          className={`w-full py-2 rounded text-white font-bold ${
-            loading ? 'bg-gray-400' : 'bg-green-500 hover:bg-green-600'
-          }`}
-          onClick={verifyOtp}
-          disabled={loading || success}
-        >
-          {loading ? 'Verifying…' : 'Verify OTP'}
-        </button>
+      <p className="text-sm text-gray-600 mb-4">
+        {email ? `An OTP has been sent to ${email}` : 'Email not found. Please login again.'}
+      </p>
 
-        <div className="flex justify-between items-center mt-4">
-          <button
-            className={`text-orange-500 underline text-sm ${
-              (timer > 0 || attemptsLeft <= 0) && 'opacity-60 cursor-not-allowed'
-            }`}
-            disabled={timer > 0 || attemptsLeft <= 0}
-            onClick={handleResend}
-          >
-            {timer > 0 ? `Resend OTP in ${timer}s` : 'Resend OTP'}
-          </button>
-          <span className="text-xs text-gray-400 ml-2">
-            Attempts left: {attemptsLeft}
-          </span>
-        </div>
+      <p className="text-xs text-gray-500 mb-4">
+        Attempts left: <span className="font-semibold">{attemptsLeft}</span> | Timer:{" "}
+        <span className="font-semibold">{formatTime(timer)}</span>
+      </p>
+
+      <div className="flex gap-2 mb-6">
+        {otp.map((digit, idx) => (
+          <input
+            key={idx}
+            ref={(el) => (inputsRef.current[idx] = el)}
+            type="text"
+            maxLength="1"
+            value={digit}
+            onChange={(e) => handleChange(e.target, idx)}
+            onKeyDown={(e) => handleKeyDown(e, idx)}
+            className="w-12 h-12 text-center text-xl font-bold border border-orange-400 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 text-orange-600 bg-white"
+          />
+        ))}
       </div>
+
+      <button
+        onClick={handleVerify}
+        disabled={loading}
+        className={`px-6 py-2 rounded-md font-semibold transition-all duration-200 ${
+          loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600 text-white'
+        }`}
+      >
+        {loading ? 'Verifying...' : 'Verify OTP'}
+      </button>
+
+      <button
+        onClick={handleSendOtp}
+        disabled={loading || timer > 0 || attemptsLeft <= 0}
+        className={`mt-4 px-6 py-2 rounded-md font-semibold transition-all duration-200 ${
+          loading || timer > 0 || attemptsLeft <= 0
+            ? 'bg-gray-300 cursor-not-allowed'
+            : 'bg-orange-500 hover:bg-orange-600 text-white'
+        }`}
+      >
+        {timer > 0 ? `Resend OTP in ${formatTime(timer)}` : 'Resend OTP'}
+      </button>
     </div>
   );
 };
