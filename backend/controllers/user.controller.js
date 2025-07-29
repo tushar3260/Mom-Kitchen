@@ -3,36 +3,78 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 // User SignUp
+import OTP from "../models/otp.model.js";
+
+
 export const UserSignUp = async (req, res) => {
   const { fullName, email, passwordHash, phone, address } = req.body;
+
   if (!fullName || !email || !passwordHash || !phone) {
-    return res.status(400).json({ message: "All fields are required" });
+    return res.status(400).json({ message: "All fields are required." });
   }
 
   try {
+    // 🛑 1. Check for existing user
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(400).json({ message: "User already exists." });
     }
 
+    // 🔐 2. Ensure OTP is verified
+    const otpRecord = await OTP.findOne({ email });
+    if (!otpRecord || !otpRecord.isVerified) {
+      return res.status(401).json({ message: "OTP not verified." });
+    }
+
+    // 🔐 Optional: Check expiry again just to be paranoid
+    if (otpRecord.expiresAt < new Date()) {
+      await OTP.deleteOne({ email });
+      return res.status(400).json({ message: "OTP expired. Please request again." });
+    }
+
+    // ✅ 3. Proceed with signup
     const hashedPassword = await bcrypt.hash(passwordHash, 10);
-    const user = new User({ fullName, email, passwordHash: hashedPassword, phone, address });
+    const user = new User({
+      fullName,
+      email,
+      passwordHash: hashedPassword,
+      phone,
+      address,
+    });
+
     await user.save();
 
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    // 🧹 4. Cleanup OTP record
+    await OTP.deleteOne({ email });
 
+    // 🔑 5. Generate token
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    // 🍪 6. Set token in cookie
     res.cookie('token', token, {
       httpOnly: true,
       sameSite: 'strict',
       secure: process.env.NODE_ENV === 'production',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    res.status(201).json({ message: "User registered", user, token });
+    res.status(201).json({
+      message: "User registered successfully.",
+      user,
+      token,
+    });
+
   } catch (err) {
+    console.error('Signup error:', err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
+
 
 // User Login
 export const UserLogin = async (req, res) => {
